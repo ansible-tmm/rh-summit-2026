@@ -34,7 +34,7 @@
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 22px;
+    font-size: 25px;
     background: var(--bg-content);
     color: var(--text-primary);
     line-height: 1.5;
@@ -48,117 +48,117 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 38px;
-    height: 82px;
+    padding: 0 44px;
+    height: 94px;
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 14px rgba(0,0,0,0.3);
   }
-  .header-left { display: flex; align-items: center; gap: 42px; }
+  .header-left { display: flex; align-items: center; gap: 48px; }
   .logo {
-    display: flex; align-items: center; gap: 12px;
-    font-size: 26px; font-weight: 800; letter-spacing: -0.5px;
+    display: flex; align-items: center; gap: 14px;
+    font-size: 30px; font-weight: 800; letter-spacing: -0.5px;
   }
   .logo-icon {
-    width: 41px; height: 41px; background: var(--critical);
-    border-radius: 9px; display: flex; align-items: center;
-    justify-content: center; font-size: 22px; font-weight: 800;
+    width: 47px; height: 47px; background: var(--critical);
+    border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; font-size: 25px; font-weight: 800;
   }
   .logo-sub {
-    font-size: 14px; font-weight: 500; color: var(--text-light);
+    font-size: 16px; font-weight: 500; color: var(--text-light);
     margin-top: -2px; letter-spacing: 0.5px;
   }
-  .nav { display: flex; gap: 5px; }
+  .nav { display: flex; gap: 6px; }
   .nav a {
-    color: var(--text-light); text-decoration: none; font-size: 18px;
-    font-weight: 500; padding: 10px 19px; border-radius: 7px; transition: all 0.2s;
+    color: var(--text-light); text-decoration: none; font-size: 21px;
+    font-weight: 500; padding: 12px 22px; border-radius: 8px; transition: all 0.2s;
   }
   .nav a:hover { color: #fff; background: rgba(255,255,255,0.08); }
   .nav a.active {
     color: #fff; background: rgba(255,255,255,0.12);
-    box-shadow: inset 0 -2px 0 var(--accent);
+    box-shadow: inset 0 -3px 0 var(--accent);
   }
 
-  .header-right { display: flex; align-items: center; gap: 28px; }
-  .org-name { font-size: 17px; color: var(--text-light); font-weight: 500; }
+  .header-right { display: flex; align-items: center; gap: 32px; }
+  .org-name { font-size: 20px; color: var(--text-light); font-weight: 500; }
   .bell {
-    position: relative; cursor: pointer; font-size: 26px;
-    width: 48px; height: 48px; display: flex; align-items: center;
-    justify-content: center; border-radius: 9px; transition: background 0.2s;
+    position: relative; cursor: pointer; font-size: 30px;
+    width: 55px; height: 55px; display: flex; align-items: center;
+    justify-content: center; border-radius: 10px; transition: background 0.2s;
   }
   .bell:hover { background: rgba(255,255,255,0.08); }
   .bell-badge {
     display: none; position: absolute; top: 4px; right: 4px;
-    background: var(--critical); color: #fff; font-size: 13px;
-    font-weight: 700; min-width: 22px; height: 22px; border-radius: 12px;
+    background: var(--critical); color: #fff; font-size: 15px;
+    font-weight: 700; min-width: 25px; height: 25px; border-radius: 14px;
     align-items: center; justify-content: center; line-height: 1;
-    padding: 0 6px;
+    padding: 0 7px;
   }
   .bell-badge.show { display: flex; animation: badgePop 0.3s ease-out; }
   .avatar {
-    width: 43px; height: 43px; border-radius: 50%;
+    width: 49px; height: 49px; border-radius: 50%;
     background: linear-gradient(135deg, #3b82f6, #8b5cf6);
     display: flex; align-items: center; justify-content: center;
-    font-size: 17px; font-weight: 700; color: #fff;
+    font-size: 20px; font-weight: 700; color: #fff;
   }
 
   /* ── MAIN ── */
-  .main { max-width: 1600px; margin: 0 auto; padding: 34px 38px 72px; }
+  .main { max-width: 1840px; margin: 0 auto; padding: 39px 44px 83px; }
 
   /* ── PAGE TITLE ── */
   .page-title-row {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 28px;
+    margin-bottom: 32px;
   }
-  .page-title { font-size: 34px; font-weight: 700; color: var(--text-primary); }
-  .page-title-meta { font-size: 17px; color: var(--text-secondary); }
+  .page-title { font-size: 39px; font-weight: 700; color: var(--text-primary); }
+  .page-title-meta { font-size: 20px; color: var(--text-secondary); }
 
   /* ── STATS ── */
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 34px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-bottom: 39px; }
   .stat-card {
-    background: var(--bg-card); border-radius: 14px; padding: 26px 31px;
+    background: var(--bg-card); border-radius: 16px; padding: 30px 36px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid var(--border);
     transition: all 0.3s;
   }
   .stat-label {
-    font-size: 16px; font-weight: 600; color: var(--text-secondary);
-    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px;
+    font-size: 18px; font-weight: 600; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 9px;
   }
-  .stat-value { font-size: 46px; font-weight: 800; line-height: 1.1; }
+  .stat-value { font-size: 53px; font-weight: 800; line-height: 1.1; }
   .stat-card.critical-active {
     border-color: var(--critical);
     background: var(--critical-bg);
-    box-shadow: 0 0 24px var(--critical-glow);
+    box-shadow: 0 0 28px var(--critical-glow);
   }
   .stat-card.critical-active .stat-value { color: var(--critical); }
 
   /* ── TABLE ── */
   .table-wrap {
-    background: var(--bg-card); border-radius: 14px;
+    background: var(--bg-card); border-radius: 16px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid var(--border);
     overflow: hidden;
   }
   .table-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 22px 31px; border-bottom: 1px solid var(--border);
+    padding: 25px 36px; border-bottom: 1px solid var(--border);
   }
-  .table-title { font-size: 24px; font-weight: 700; }
+  .table-title { font-size: 28px; font-weight: 700; }
   .table-count {
-    font-size: 17px; color: var(--text-secondary);
-    background: var(--bg-content); padding: 5px 17px;
-    border-radius: 24px; font-weight: 600;
+    font-size: 20px; color: var(--text-secondary);
+    background: var(--bg-content); padding: 6px 20px;
+    border-radius: 28px; font-weight: 600;
   }
 
   table { width: 100%; border-collapse: collapse; }
   thead th {
-    text-align: left; padding: 17px 24px; font-size: 15px;
+    text-align: left; padding: 20px 28px; font-size: 17px;
     font-weight: 700; color: var(--text-secondary);
     text-transform: uppercase; letter-spacing: 0.5px;
     background: #f8f9fb; border-bottom: 2px solid var(--border);
   }
   tbody td {
-    padding: 18px 24px; font-size: 19px; border-bottom: 1px solid #f0f1f4;
+    padding: 21px 28px; font-size: 22px; border-bottom: 1px solid #f0f1f4;
     vertical-align: middle;
   }
   tbody tr { transition: background 0.2s; }
@@ -166,15 +166,15 @@
   tbody tr:last-child td { border-bottom: none; }
 
   .incident-title { font-weight: 600; color: var(--text-primary); }
-  .incident-service { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 17px; color: var(--text-secondary); }
-  .incident-id { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 17px; color: var(--accent); font-weight: 600; }
+  .incident-service { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 20px; color: var(--text-secondary); }
+  .incident-id { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 20px; color: var(--accent); font-weight: 600; }
   .assignee { font-weight: 500; }
-  .time-ago { color: var(--text-secondary); font-size: 18px; }
+  .time-ago { color: var(--text-secondary); font-size: 21px; }
 
   /* ── BADGES ── */
   .badge {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 6px 17px; border-radius: 24px; font-size: 15px;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 20px; border-radius: 28px; font-size: 17px;
     font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
     white-space: nowrap;
   }
@@ -186,13 +186,13 @@
     animation: badgePulse 1.5s ease-in-out infinite;
   }
   .badge-dot {
-    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
   }
   .badge-low .badge-dot { background: var(--low); }
   .badge-critical .badge-dot { background: #fff; }
 
   .status {
-    font-size: 15px; font-weight: 700; text-transform: uppercase;
+    font-size: 17px; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.4px;
   }
   .status-investigating { color: var(--investigating); }
@@ -204,49 +204,49 @@
   .critical-row {
     background: var(--critical-bg) !important;
     animation: rowSlideIn 0.5s ease-out, rowPulse 2s ease-in-out 0.5s infinite;
-    border-left: 5px solid var(--critical);
+    border-left: 6px solid var(--critical);
   }
-  .critical-row td { font-size: 20px; }
-  .critical-row .incident-title { color: var(--critical); font-size: 22px; font-weight: 700; }
-  .critical-row .badge-critical { font-size: 17px; padding: 7px 19px; }
+  .critical-row td { font-size: 23px; }
+  .critical-row .incident-title { color: var(--critical); font-size: 25px; font-weight: 700; }
+  .critical-row .badge-critical { font-size: 20px; padding: 8px 22px; }
 
   /* ── NOTIFICATION TOAST ── */
   .notification-toast {
-    display: none; position: fixed; top: 96px; right: 28px;
-    width: 540px; background: #1a1a2e; color: #fff;
-    border-radius: 14px; padding: 0; z-index: 200;
-    box-shadow: 0 24px 72px rgba(0,0,0,0.4), 0 0 48px var(--critical-glow);
-    border: 2px solid var(--critical);
+    display: none; position: fixed; top: 110px; right: 32px;
+    width: 620px; background: #1a1a2e; color: #fff;
+    border-radius: 16px; padding: 0; z-index: 200;
+    box-shadow: 0 28px 84px rgba(0,0,0,0.4), 0 0 56px var(--critical-glow);
+    border: 3px solid var(--critical);
     overflow: hidden;
     animation: toastSlideIn 0.4s ease-out, toastGlow 2s ease-in-out 0.4s infinite;
   }
   .notification-toast.show { display: block; }
   .toast-header {
-    background: var(--critical); padding: 17px 24px;
-    display: flex; align-items: center; gap: 12px;
+    background: var(--critical); padding: 20px 28px;
+    display: flex; align-items: center; gap: 14px;
   }
-  .toast-header-icon { font-size: 26px; }
-  .toast-header-text { font-size: 19px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-  .toast-body { padding: 24px; }
-  .toast-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; line-height: 1.3; }
-  .toast-desc { font-size: 18px; color: #b0b8c8; line-height: 1.5; margin-bottom: 19px; }
+  .toast-header-icon { font-size: 30px; }
+  .toast-header-text { font-size: 22px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+  .toast-body { padding: 28px; }
+  .toast-title { font-size: 23px; font-weight: 700; margin-bottom: 12px; line-height: 1.3; }
+  .toast-desc { font-size: 21px; color: #b0b8c8; line-height: 1.5; margin-bottom: 22px; }
   .toast-meta {
-    display: flex; gap: 24px; font-size: 14px; color: #6b7a8d;
+    display: flex; gap: 28px; font-size: 16px; color: #6b7a8d;
     font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
-    margin-bottom: 19px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 22px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08);
   }
-  .toast-meta span { display: flex; align-items: center; gap: 7px; }
-  .toast-actions { display: flex; gap: 12px; }
+  .toast-meta span { display: flex; align-items: center; gap: 8px; }
+  .toast-actions { display: flex; gap: 14px; }
   .btn-ack {
     background: var(--critical); color: #fff; border: none;
-    padding: 12px 29px; border-radius: 9px; font-size: 17px;
+    padding: 14px 33px; border-radius: 10px; font-size: 20px;
     font-weight: 700; cursor: pointer; transition: all 0.2s;
     text-transform: uppercase; letter-spacing: 0.5px;
   }
   .btn-ack:hover { background: #b91c1c; }
   .btn-dismiss {
     background: transparent; color: #6b7a8d; border: 1px solid rgba(255,255,255,0.1);
-    padding: 12px 24px; border-radius: 9px; font-size: 17px;
+    padding: 14px 28px; border-radius: 10px; font-size: 20px;
     font-weight: 600; cursor: pointer; transition: all 0.2s;
   }
   .btn-dismiss:hover { color: #fff; border-color: rgba(255,255,255,0.2); }
@@ -262,7 +262,7 @@
   }
   @keyframes badgePulse {
     0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--critical-glow); }
-    50% { opacity: 0.9; box-shadow: 0 0 14px 5px var(--critical-glow); }
+    50% { opacity: 0.9; box-shadow: 0 0 16px 6px var(--critical-glow); }
   }
   @keyframes badgePop {
     0% { transform: scale(0); }
@@ -274,8 +274,8 @@
     to { opacity: 1; transform: translateX(0); }
   }
   @keyframes toastGlow {
-    0%, 100% { box-shadow: 0 24px 72px rgba(0,0,0,0.4), 0 0 36px var(--critical-glow); }
-    50% { box-shadow: 0 24px 72px rgba(0,0,0,0.4), 0 0 72px var(--critical-glow); }
+    0%, 100% { box-shadow: 0 28px 84px rgba(0,0,0,0.4), 0 0 42px var(--critical-glow); }
+    50% { box-shadow: 0 28px 84px rgba(0,0,0,0.4), 0 0 84px var(--critical-glow); }
   }
 </style>
 </head>
@@ -485,8 +485,8 @@
       <span>&#128680; Escalation: Tier 1</span>
     </div>
     <div class="toast-actions">
-      <button class="btn-ack">Acknowledge</button>
-      <button class="btn-dismiss">Dismiss</button>
+      <button class="btn-ack" onclick="location.reload()">Acknowledge</button>
+      <button class="btn-dismiss" onclick="location.reload()">Dismiss</button>
     </div>
   </div>
 </div>
