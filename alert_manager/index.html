@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AlertCommand - Infrastructure Alert Management</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #0f1923;
+    --bg-secondary: #1a2736;
+    --bg-content: #f0f2f5;
+    --bg-card: #ffffff;
+    --text-primary: #1a1a2e;
+    --text-secondary: #5a6678;
+    --text-light: #c8d1dc;
+    --border: #e2e6ec;
+    --accent: #3b82f6;
+    --critical: #dc2626;
+    --critical-bg: #fef2f2;
+    --critical-glow: rgba(220, 38, 38, 0.4);
+    --high: #ea580c;
+    --medium: #ca8a04;
+    --low: #6b7a8d;
+    --low-bg: #eef1f5;
+    --triggered: #dc2626;
+    --acknowledged: #2563eb;
+    --resolved: #16a34a;
+    --investigating: #7c3aed;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 22px;
+    background: var(--bg-content);
+    color: var(--text-primary);
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--bg-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 38px;
+    height: 82px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .header-left { display: flex; align-items: center; gap: 42px; }
+  .logo {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 26px; font-weight: 800; letter-spacing: -0.5px;
+  }
+  .logo-icon {
+    width: 41px; height: 41px; background: var(--critical);
+    border-radius: 9px; display: flex; align-items: center;
+    justify-content: center; font-size: 22px; font-weight: 800;
+  }
+  .logo-sub {
+    font-size: 14px; font-weight: 500; color: var(--text-light);
+    margin-top: -2px; letter-spacing: 0.5px;
+  }
+  .nav { display: flex; gap: 5px; }
+  .nav a {
+    color: var(--text-light); text-decoration: none; font-size: 18px;
+    font-weight: 500; padding: 10px 19px; border-radius: 7px; transition: all 0.2s;
+  }
+  .nav a:hover { color: #fff; background: rgba(255,255,255,0.08); }
+  .nav a.active {
+    color: #fff; background: rgba(255,255,255,0.12);
+    box-shadow: inset 0 -2px 0 var(--accent);
+  }
+
+  .header-right { display: flex; align-items: center; gap: 28px; }
+  .org-name { font-size: 17px; color: var(--text-light); font-weight: 500; }
+  .bell {
+    position: relative; cursor: pointer; font-size: 26px;
+    width: 48px; height: 48px; display: flex; align-items: center;
+    justify-content: center; border-radius: 9px; transition: background 0.2s;
+  }
+  .bell:hover { background: rgba(255,255,255,0.08); }
+  .bell-badge {
+    display: none; position: absolute; top: 4px; right: 4px;
+    background: var(--critical); color: #fff; font-size: 13px;
+    font-weight: 700; min-width: 22px; height: 22px; border-radius: 12px;
+    align-items: center; justify-content: center; line-height: 1;
+    padding: 0 6px;
+  }
+  .bell-badge.show { display: flex; animation: badgePop 0.3s ease-out; }
+  .avatar {
+    width: 43px; height: 43px; border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 700; color: #fff;
+  }
+
+  /* ── MAIN ── */
+  .main { max-width: 1600px; margin: 0 auto; padding: 34px 38px 72px; }
+
+  /* ── PAGE TITLE ── */
+  .page-title-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .page-title { font-size: 34px; font-weight: 700; color: var(--text-primary); }
+  .page-title-meta { font-size: 17px; color: var(--text-secondary); }
+
+  /* ── STATS ── */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 34px; }
+  .stat-card {
+    background: var(--bg-card); border-radius: 14px; padding: 26px 31px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+  .stat-label {
+    font-size: 16px; font-weight: 600; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px;
+  }
+  .stat-value { font-size: 46px; font-weight: 800; line-height: 1.1; }
+  .stat-card.critical-active {
+    border-color: var(--critical);
+    background: var(--critical-bg);
+    box-shadow: 0 0 24px var(--critical-glow);
+  }
+  .stat-card.critical-active .stat-value { color: var(--critical); }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--bg-card); border-radius: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .table-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 31px; border-bottom: 1px solid var(--border);
+  }
+  .table-title { font-size: 24px; font-weight: 700; }
+  .table-count {
+    font-size: 17px; color: var(--text-secondary);
+    background: var(--bg-content); padding: 5px 17px;
+    border-radius: 24px; font-weight: 600;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left; padding: 17px 24px; font-size: 15px;
+    font-weight: 700; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    background: #f8f9fb; border-bottom: 2px solid var(--border);
+  }
+  tbody td {
+    padding: 18px 24px; font-size: 19px; border-bottom: 1px solid #f0f1f4;
+    vertical-align: middle;
+  }
+  tbody tr { transition: background 0.2s; }
+  tbody tr:hover { background: #f8f9fb; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .incident-title { font-weight: 600; color: var(--text-primary); }
+  .incident-service { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 17px; color: var(--text-secondary); }
+  .incident-id { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 17px; color: var(--accent); font-weight: 600; }
+  .assignee { font-weight: 500; }
+  .time-ago { color: var(--text-secondary); font-size: 18px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 6px 17px; border-radius: 24px; font-size: 15px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+    white-space: nowrap;
+  }
+  .badge-low { background: var(--low-bg); color: var(--low); }
+  .badge-medium { background: #fef9ec; color: var(--medium); }
+  .badge-high { background: #fff4ed; color: var(--high); }
+  .badge-critical {
+    background: var(--critical); color: #fff;
+    animation: badgePulse 1.5s ease-in-out infinite;
+  }
+  .badge-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+  .badge-low .badge-dot { background: var(--low); }
+  .badge-critical .badge-dot { background: #fff; }
+
+  .status {
+    font-size: 15px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .status-investigating { color: var(--investigating); }
+  .status-acknowledged { color: var(--acknowledged); }
+  .status-monitoring { color: #0d9488; }
+  .status-triggered { color: var(--triggered); }
+
+  /* ── CRITICAL ROW ── */
+  .critical-row {
+    background: var(--critical-bg) !important;
+    animation: rowSlideIn 0.5s ease-out, rowPulse 2s ease-in-out 0.5s infinite;
+    border-left: 5px solid var(--critical);
+  }
+  .critical-row td { font-size: 20px; }
+  .critical-row .incident-title { color: var(--critical); font-size: 22px; font-weight: 700; }
+  .critical-row .badge-critical { font-size: 17px; padding: 7px 19px; }
+
+  /* ── NOTIFICATION TOAST ── */
+  .notification-toast {
+    display: none; position: fixed; top: 96px; right: 28px;
+    width: 540px; background: #1a1a2e; color: #fff;
+    border-radius: 14px; padding: 0; z-index: 200;
+    box-shadow: 0 24px 72px rgba(0,0,0,0.4), 0 0 48px var(--critical-glow);
+    border: 2px solid var(--critical);
+    overflow: hidden;
+    animation: toastSlideIn 0.4s ease-out, toastGlow 2s ease-in-out 0.4s infinite;
+  }
+  .notification-toast.show { display: block; }
+  .toast-header {
+    background: var(--critical); padding: 17px 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .toast-header-icon { font-size: 26px; }
+  .toast-header-text { font-size: 19px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+  .toast-body { padding: 24px; }
+  .toast-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; line-height: 1.3; }
+  .toast-desc { font-size: 18px; color: #b0b8c8; line-height: 1.5; margin-bottom: 19px; }
+  .toast-meta {
+    display: flex; gap: 24px; font-size: 14px; color: #6b7a8d;
+    font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 19px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .toast-meta span { display: flex; align-items: center; gap: 7px; }
+  .toast-actions { display: flex; gap: 12px; }
+  .btn-ack {
+    background: var(--critical); color: #fff; border: none;
+    padding: 12px 29px; border-radius: 9px; font-size: 17px;
+    font-weight: 700; cursor: pointer; transition: all 0.2s;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .btn-ack:hover { background: #b91c1c; }
+  .btn-dismiss {
+    background: transparent; color: #6b7a8d; border: 1px solid rgba(255,255,255,0.1);
+    padding: 12px 24px; border-radius: 9px; font-size: 17px;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-dismiss:hover { color: #fff; border-color: rgba(255,255,255,0.2); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes rowSlideIn {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes rowPulse {
+    0%, 100% { background: var(--critical-bg); }
+    50% { background: #fde8e8; }
+  }
+  @keyframes badgePulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--critical-glow); }
+    50% { opacity: 0.9; box-shadow: 0 0 14px 5px var(--critical-glow); }
+  }
+  @keyframes badgePop {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+  @keyframes toastSlideIn {
+    from { opacity: 0; transform: translateX(100px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes toastGlow {
+    0%, 100% { box-shadow: 0 24px 72px rgba(0,0,0,0.4), 0 0 36px var(--critical-glow); }
+    50% { box-shadow: 0 24px 72px rgba(0,0,0,0.4), 0 0 72px var(--critical-glow); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo">
+      <div class="logo-icon">AC</div>
+      <div>
+        <div>AlertCommand</div>
+        <div class="logo-sub">Infrastructure Alert Management</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="#" class="active">Dashboard</a>
+      <a href="#">Incidents</a>
+      <a href="#">On-Call</a>
+      <a href="#">Runbooks</a>
+    </nav>
+  </div>
+  <div class="header-right">
+    <span class="org-name">Platform Operations</span>
+    <div class="bell" id="bell">
+      &#128276;
+      <div class="bell-badge" id="bellBadge">1</div>
+    </div>
+    <div class="avatar">SO</div>
+  </div>
+</header>
+
+<!-- ── MAIN CONTENT ── -->
+<main class="main">
+  <div class="page-title-row">
+    <h1 class="page-title">Incident Dashboard</h1>
+    <span class="page-title-meta">Last refreshed: <span id="refreshTime"></span></span>
+  </div>
+
+  <!-- ── STATS ── -->
+  <section class="stats">
+    <div class="stat-card" id="statOpen">
+      <div class="stat-label">Open Incidents</div>
+      <div class="stat-value" id="statOpenVal">12</div>
+    </div>
+    <div class="stat-card" id="statCritical">
+      <div class="stat-label">Critical (P1)</div>
+      <div class="stat-value" id="statCriticalVal">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Mean Time to Ack</div>
+      <div class="stat-value">4m 32s</div>
+    </div>
+    <div class="stat-card" id="statServices">
+      <div class="stat-label">Services Affected</div>
+      <div class="stat-value" id="statServicesVal">0</div>
+    </div>
+  </section>
+
+  <!-- ── INCIDENT TABLE ── -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <span class="table-title">Active Incidents</span>
+      <span class="table-count" id="tableCount">12 incidents</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Severity</th>
+          <th>Incident ID</th>
+          <th>Title</th>
+          <th>Service</th>
+          <th>Assigned To</th>
+          <th>Status</th>
+          <th>Opened</th>
+        </tr>
+      </thead>
+      <tbody id="incidentBody">
+        <tr>
+          <td><span class="badge badge-low"><span class="badge-dot"></span>P4 &middot; Low</span></td>
+          <td><span class="incident-id">INC-2026-04808</span></td>
+          <td><span class="incident-title">SSL certificate renewal reminder &mdash; staging-api-02</span></td>
+          <td><span class="incident-service">staging-api-02</span></td>
+          <td class="assignee">M. Chen</td>
+          <td><span class="status status-acknowledged">Acknowledged</span></td>
+          <td class="time-ago">34 min ago</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-low"><span class="badge-dot"></span>P4 &middot; Low</span></td>
+          <td><span class="incident-id">INC-2026-04807</span></td>
+          <td><span class="incident-title">Disk usage warning at 72% on log-aggregator-node-3</span></td>
+          <td><span class="incident-service">log-aggregator-node-3</span></td>
+          <td class="assignee">J. Patel</td>
+          <td><span class="status status-investigating">Investigating</span></td>
+          <td class="time-ago">1 hr ago</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-low"><span class="badge-dot"></span>P4 &middot; Low</span></td>
+          <td><span class="incident-id">INC-2026-04806</span></td>
+          <td><span class="incident-title">Scheduled maintenance window confirmation &mdash; DB replica east</span></td>
+          <td><span class="incident-service">db-replica-east-02</span></td>
+          <td class="assignee">A. Rodriguez</td>
+          <td><span class="status status-acknowledged">Acknowledged</span></td>
+          <td class="time-ago">1 hr ago</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-low"><span class="badge-dot"></span>P4 &middot; Low</span></td>
+          <td><span class="incident-id">INC-2026-04805</span></td>
+          <td><span class="incident-title">NTP sync drift detected on monitoring-proxy-07</span></td>
+          <td><span class="incident-service">monitoring-proxy-07</span></td>
+          <td class="assignee">S. Okafor</td>
+          <td><span class="status status-monitoring">Monitoring</span></td>
+          <td class="time-ago">2 hrs ago</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-low"><span class="badge-dot"></span>P4 &middot; Low</span></td>
+          <td><span class="incident-id">INC-2026-04804</span></td>
+          <td><span class="incident-title">Deprecated TLS 1.1 connection logged from legacy-client</span></td>
+          <td><span class="incident-service">edge-gateway-west</span></td>
+          <td class="assignee">K. Yamamoto</td>
+          <td><span class="status status-investigating">Investigating</span></td>
+          <td class="time-ago">2 hrs ago</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-low"><span class="badge-dot"></span>P4 &middot; Low</span></td>
+          <td><span class="incident-id">INC-2026-04803</span></td>
+          <td><span class="incident-title">DNS TTL misconfiguration on internal-wiki.corp</span></td>
+          <td><span class="incident-service">dns-resolver-01</span></td>
+          <td class="assignee">R. Novak</td>
+          <td><span class="status status-acknowledged">Acknowledged</span></td>
+          <td class="time-ago">3 hrs ago</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-low"><span class="badge-dot"></span>P4 &middot; Low</span></td>
+          <td><span class="incident-id">INC-2026-04802</span></td>
+          <td><span class="incident-title">Log rotation failed on batch-processor-04</span></td>
+          <td><span class="incident-service">batch-processor-04</span></td>
+          <td class="assignee">D. Kim</td>
+          <td><span class="status status-investigating">Investigating</span></td>
+          <td class="time-ago">3 hrs ago</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-low"><span class="badge-dot"></span>P4 &middot; Low</span></td>
+          <td><span class="incident-id">INC-2026-04801</span></td>
+          <td><span class="incident-title">Unused firewall rule flagged for cleanup</span></td>
+          <td><span class="incident-service">fw-mgmt-central</span></td>
+          <td class="assignee">L. Andersen</td>
+          <td><span class="status status-monitoring">Monitoring</span></td>
+          <td class="time-ago">4 hrs ago</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-low"><span class="badge-dot"></span>P4 &middot; Low</span></td>
+          <td><span class="incident-id">INC-2026-04800</span></td>
+          <td><span class="incident-title">SNMP polling timeout on switch-rack14-sw02</span></td>
+          <td><span class="incident-service">switch-rack14-sw02</span></td>
+          <td class="assignee">T. Gupta</td>
+          <td><span class="status status-acknowledged">Acknowledged</span></td>
+          <td class="time-ago">5 hrs ago</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-low"><span class="badge-dot"></span>P4 &middot; Low</span></td>
+          <td><span class="incident-id">INC-2026-04799</span></td>
+          <td><span class="incident-title">Backup job completed with warnings &mdash; archive-node-east</span></td>
+          <td><span class="incident-service">archive-node-east</span></td>
+          <td class="assignee">M. Chen</td>
+          <td><span class="status status-monitoring">Monitoring</span></td>
+          <td class="time-ago">5 hrs ago</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-low"><span class="badge-dot"></span>P4 &middot; Low</span></td>
+          <td><span class="incident-id">INC-2026-04798</span></td>
+          <td><span class="incident-title">Memory utilization elevated (68%) on staging-worker-pool</span></td>
+          <td><span class="incident-service">staging-worker-pool</span></td>
+          <td class="assignee">J. Patel</td>
+          <td><span class="status status-investigating">Investigating</span></td>
+          <td class="time-ago">6 hrs ago</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-low"><span class="badge-dot"></span>P4 &middot; Low</span></td>
+          <td><span class="incident-id">INC-2026-04797</span></td>
+          <td><span class="incident-title">API rate limit threshold approaching for partner-integration</span></td>
+          <td><span class="incident-service">api-gateway-prod</span></td>
+          <td class="assignee">S. Okafor</td>
+          <td><span class="status status-monitoring">Monitoring</span></td>
+          <td class="time-ago">7 hrs ago</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- ── NOTIFICATION TOAST ── -->
+<div class="notification-toast" id="toast">
+  <div class="toast-header">
+    <span class="toast-header-icon">&#9888;&#65039;</span>
+    <span class="toast-header-text">Critical Alert &mdash; Immediate Action Required</span>
+  </div>
+  <div class="toast-body">
+    <div class="toast-title">Production Server Capacity Critical &mdash; Primary Cluster Exhausted</div>
+    <div class="toast-desc">
+      Production server capacity at <strong>98%</strong> &mdash; primary compute cluster
+      <strong>us-east-1</strong> has exhausted available resources. Immediate action required.
+      Risk of cascading service failures across dependent workloads.
+    </div>
+    <div class="toast-meta">
+      <span>&#128337; Triggered just now</span>
+      <span>&#127919; prod-cluster-us-east-1</span>
+      <span>&#128680; Escalation: Tier 1</span>
+    </div>
+    <div class="toast-actions">
+      <button class="btn-ack">Acknowledge</button>
+      <button class="btn-dismiss">Dismiss</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('refreshTime').textContent =
+    new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+  let keyBuffer = '';
+  let triggered = false;
+  const TRIGGER = 'sev1';
+
+  document.addEventListener('keydown', function(e) {
+    if (triggered) return;
+    keyBuffer += e.key.toLowerCase();
+    if (keyBuffer.length > 10) keyBuffer = keyBuffer.slice(-10);
+    if (keyBuffer.includes(TRIGGER)) {
+      triggered = true;
+      fireCriticalAlert();
+    }
+  });
+
+  function fireCriticalAlert() {
+    const tbody = document.getElementById('incidentBody');
+    const critRow = document.createElement('tr');
+    critRow.className = 'critical-row';
+    critRow.innerHTML = `
+      <td><span class="badge badge-critical"><span class="badge-dot"></span>P1 &middot; Critical</span></td>
+      <td><span class="incident-id" style="color: var(--critical);">INC-2026-04821</span></td>
+      <td><span class="incident-title">Production Server Capacity Critical &mdash; Primary Cluster Exhausted</span></td>
+      <td><span class="incident-service">prod-cluster-us-east-1</span></td>
+      <td class="assignee" style="color: var(--critical); font-weight: 700;">Unassigned</td>
+      <td><span class="status status-triggered">&#9679; Triggered</span></td>
+      <td class="time-ago" style="color: var(--critical); font-weight: 600;">Just now</td>
+    `;
+    tbody.insertBefore(critRow, tbody.firstChild);
+
+    document.getElementById('toast').classList.add('show');
+
+    const statOpen = document.getElementById('statOpenVal');
+    const statCritical = document.getElementById('statCriticalVal');
+    const statServices = document.getElementById('statServicesVal');
+    const statCriticalCard = document.getElementById('statCritical');
+
+    animateNumber(statOpen, 12, 13);
+    animateNumber(statCritical, 0, 1);
+    animateNumber(statServices, 0, 3);
+    statCriticalCard.classList.add('critical-active');
+
+    document.getElementById('tableCount').textContent = '13 incidents';
+    document.getElementById('bellBadge').classList.add('show');
+
+    let flashState = false;
+    setInterval(function() {
+      document.title = flashState
+        ? 'AlertCommand - Infrastructure Alert Management'
+        : '\u26A0\uFE0F CRITICAL ALERT - AlertCommand';
+      flashState = !flashState;
+    }, 1000);
+
+    playAlertSound();
+  }
+
+  function animateNumber(el, from, to) {
+    const duration = 400;
+    const start = performance.now();
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      el.textContent = Math.round(from + (to - from) * progress);
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function playAlertSound() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.15, 0.3].forEach(function(offset) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'square';
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.08, ctx.currentTime + offset);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + 0.12);
+        osc.start(ctx.currentTime + offset);
+        osc.stop(ctx.currentTime + offset + 0.12);
+      });
+    } catch(e) {}
+  }
+</script>
+</body>
+</html>
