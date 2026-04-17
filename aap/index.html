@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ansible Automation Platform</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700;800&family=Red+Hat+Mono:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --masthead-bg: #151515;
+    --sidebar-bg: #212427;
+    --sidebar-hover: #2c2f33;
+    --sidebar-active: rgba(115,188,247,0.18);
+    --sidebar-text: #c7c7c7;
+    --sidebar-text-active: #fff;
+    --content-bg: #f0f0f0;
+    --card-bg: #ffffff;
+    --card-border: #d2d2d2;
+    --text-primary: #151515;
+    --text-secondary: #6a6e73;
+    --text-link: #0066cc;
+    --rh-red: #ee0000;
+    --pf-green: #3e8635;
+    --pf-blue: #0066cc;
+    --pf-cyan: #009596;
+    --pf-red: #c9190b;
+    --pf-orange: #f0ab00;
+    --pf-purple: #6753ac;
+    --pf-gold: #f0ab00;
+    --font-body: 'Red Hat Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'Red Hat Mono', 'SF Mono', 'Fira Code', monospace;
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-size: 20px;
+    background: var(--content-bg);
+    color: var(--text-primary);
+    line-height: 1.5;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    background: var(--masthead-bg);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px 0 0;
+    height: 76px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+  .masthead-left { display: flex; align-items: center; gap: 0; }
+  .masthead-hamburger {
+    width: 60px; height: 76px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: #e0e0e0; transition: background 0.15s; flex-shrink: 0;
+  }
+  .masthead-hamburger:hover { background: rgba(255,255,255,0.08); }
+  .masthead-hamburger svg { width: 22px; height: 22px; }
+  .rh-logo {
+    display: flex; align-items: center; gap: 14px;
+    text-decoration: none; color: #fff; padding: 0 4px;
+  }
+  .rh-logo-hat {
+    width: 46px; height: 46px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .rh-logo-hat svg { width: 42px; height: 42px; }
+  .rh-logo-text { line-height: 1.25; }
+  .rh-logo-text-brand {
+    display: block; font-size: 17px; font-weight: 700; color: #fff;
+    letter-spacing: 0.2px;
+  }
+  .rh-logo-text-product {
+    display: block; font-size: 16px; font-weight: 400; color: #e0e0e0;
+    letter-spacing: 0.1px;
+  }
+  .masthead-right { display: flex; align-items: center; gap: 0; }
+  .masthead-icon {
+    width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; cursor: pointer; color: #d2d2d2; transition: background 0.15s;
+  }
+  .masthead-icon:hover { background: rgba(255,255,255,0.1); }
+  .masthead-icon svg { width: 20px; height: 20px; fill: currentColor; }
+  .masthead-icon.active-icon { background: rgba(255,255,255,0.12); }
+  .masthead-user {
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    padding: 8px 14px; border-radius: 6px; transition: background 0.15s; margin-left: 4px;
+  }
+  .masthead-user:hover { background: rgba(255,255,255,0.1); }
+  .masthead-user svg { width: 22px; height: 22px; fill: #d2d2d2; }
+  .masthead-username { font-size: 16px; font-weight: 500; color: #e0e0e0; }
+
+  /* ── LAYOUT ── */
+  .app-layout { display: flex; flex: 1; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 280px; min-width: 280px; background: var(--sidebar-bg);
+    color: var(--sidebar-text); overflow-y: auto; padding: 12px 0;
+    border-right: 1px solid #383838;
+  }
+  .sidebar-section { margin-bottom: 4px; }
+  .sidebar-section-title {
+    font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+    color: #8a8d90; padding: 16px 20px 6px; user-select: none;
+  }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 20px 11px 32px; font-size: 17px; font-weight: 500;
+    color: var(--sidebar-text); cursor: pointer; transition: all 0.12s;
+    border-left: 3px solid transparent; text-decoration: none;
+  }
+  .sidebar-item:hover { background: var(--sidebar-hover); color: #fff; }
+  .sidebar-item.active {
+    background: var(--sidebar-active); color: var(--sidebar-text-active);
+    border-left-color: var(--pf-blue);
+  }
+  .sidebar-item svg {
+    width: 20px; height: 20px; flex-shrink: 0; opacity: 0.7;
+  }
+  .sidebar-item.active svg { opacity: 1; }
+  .sidebar-divider { height: 1px; background: #383838; margin: 8px 16px; }
+
+  /* ── CONTENT ── */
+  .content { flex: 1; overflow-y: auto; min-height: 0; }
+  .content-page { display: none; }
+  .content-page.active { display: block; }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    background: var(--card-bg); border-bottom: 1px solid var(--card-border);
+    padding: 28px 36px 24px;
+  }
+  .page-header h1 {
+    font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1.2;
+  }
+  .page-header-sub { font-size: 17px; color: var(--text-secondary); margin-top: 4px; }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 36px; background: var(--card-bg);
+    border-bottom: 1px solid var(--card-border);
+  }
+  .toolbar-left { display: flex; align-items: center; gap: 12px; }
+  .toolbar-search {
+    padding: 10px 16px; font-size: 16px; border: 1px solid var(--card-border);
+    border-radius: 6px; width: 320px; font-family: var(--font-body);
+    background: var(--card-bg); color: var(--text-primary);
+  }
+  .toolbar-search::placeholder { color: var(--text-secondary); }
+  .toolbar-btn {
+    padding: 10px 20px; font-size: 16px; font-weight: 600; border-radius: 6px;
+    cursor: pointer; font-family: var(--font-body); transition: all 0.12s;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .toolbar-btn-primary {
+    background: var(--pf-blue); color: #fff; border: none;
+  }
+  .toolbar-btn-primary:hover { background: #004d99; }
+  .toolbar-btn-secondary {
+    background: var(--card-bg); color: var(--text-primary);
+    border: 1px solid var(--card-border);
+  }
+  .toolbar-btn-secondary:hover { background: #e7e7e7; }
+  .toolbar-count { font-size: 16px; color: var(--text-secondary); font-weight: 500; }
+
+  /* ── TABLE ── */
+  .pf-table {
+    width: 100%; border-collapse: collapse;
+    background: var(--card-bg);
+  }
+  .pf-table thead th {
+    text-align: left; padding: 14px 24px; font-size: 16px;
+    font-weight: 700; color: var(--text-primary);
+    background: #f5f5f5; border-bottom: 1px solid var(--card-border);
+    white-space: nowrap;
+  }
+  .pf-table tbody td {
+    padding: 16px 24px; font-size: 18px; border-bottom: 1px solid #ececec;
+    vertical-align: middle;
+  }
+  .pf-table tbody tr { transition: background 0.1s; cursor: default; }
+  .pf-table tbody tr:hover { background: #f9f9f9; }
+  .pf-table tbody tr:last-child td { border-bottom: none; }
+
+  .table-name {
+    font-weight: 600; color: var(--text-link); cursor: pointer;
+    text-decoration: none;
+  }
+  .table-name:hover { text-decoration: underline; }
+  .table-secondary { color: var(--text-secondary); font-size: 16px; }
+  .table-mono { font-family: var(--font-mono); font-size: 16px; color: var(--text-secondary); }
+
+  /* ── STATUS BADGES ── */
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 4px 14px; border-radius: 20px; font-size: 15px;
+    font-weight: 600; white-space: nowrap;
+  }
+  .status-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+  .status-successful { background: #e8f5e3; color: var(--pf-green); }
+  .status-successful .status-dot { background: var(--pf-green); }
+  .status-failed { background: #fce8e6; color: var(--pf-red); }
+  .status-failed .status-dot { background: var(--pf-red); }
+  .status-running { background: #e3f2fd; color: var(--pf-blue); }
+  .status-running .status-dot { background: var(--pf-blue); animation: pulse 1.5s infinite; }
+  .status-pending { background: #f5f5f5; color: var(--text-secondary); }
+  .status-pending .status-dot { background: var(--text-secondary); }
+  .status-enabled { background: #e8f5e3; color: var(--pf-green); }
+  .status-enabled .status-dot { background: var(--pf-green); animation: pulse 2s infinite; }
+  .status-disabled { background: #f5f5f5; color: var(--text-secondary); }
+  .status-disabled .status-dot { background: var(--text-secondary); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── LAUNCH BUTTON ── */
+  .btn-launch {
+    padding: 8px 18px; font-size: 15px; font-weight: 600; border-radius: 6px;
+    cursor: pointer; font-family: var(--font-body); transition: all 0.12s;
+    background: var(--pf-blue); color: #fff; border: none;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-launch:hover { background: #004d99; transform: translateY(-1px); }
+  .btn-launch:active { transform: translateY(0); }
+
+  /* ── JOB OUTPUT VIEW ── */
+  .job-header {
+    background: var(--card-bg); border-bottom: 1px solid var(--card-border);
+    padding: 24px 36px;
+  }
+  .job-header-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .job-header h1 { font-size: 28px; font-weight: 700; }
+  .job-header-id { font-size: 16px; color: var(--text-secondary); font-weight: 500; }
+  .job-meta {
+    display: flex; gap: 32px; flex-wrap: wrap;
+  }
+  .job-meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .job-meta-label { font-size: 14px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+  .job-meta-value { font-size: 17px; font-weight: 500; color: var(--text-primary); }
+  .job-meta-value a { color: var(--text-link); text-decoration: none; }
+
+  .job-output-container {
+    margin: 24px 36px; background: #1e1e1e; border-radius: 8px;
+    border: 1px solid #383838; overflow: hidden;
+  }
+  .job-output-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 20px; background: #2d2d2d; border-bottom: 1px solid #383838;
+  }
+  .job-output-toolbar-title { font-size: 15px; font-weight: 600; color: #c7c7c7; }
+  .job-output {
+    padding: 20px; font-family: var(--font-mono); font-size: 16px;
+    line-height: 1.7; color: #d4d4d4; min-height: 500px; max-height: 700px;
+    overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;
+  }
+  .job-output .play-header { color: #dcdcaa; font-weight: 700; }
+  .job-output .task-header { color: #dcdcaa; font-weight: 600; }
+  .job-output .ok { color: var(--pf-green); }
+  .job-output .changed { color: var(--pf-gold); }
+  .job-output .failed { color: var(--pf-red); }
+  .job-output .recap-host { color: #569cd6; font-weight: 600; }
+  .job-output .recap-ok { color: var(--pf-green); }
+  .job-output .recap-changed { color: var(--pf-gold); }
+  .job-output .recap-unreachable { color: var(--pf-red); }
+
+  /* ── BACK BUTTON ── */
+  .btn-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; font-size: 15px; font-weight: 600; border-radius: 6px;
+    cursor: pointer; font-family: var(--font-body); transition: all 0.12s;
+    background: transparent; color: var(--text-link); border: 1px solid var(--card-border);
+    margin-bottom: 8px;
+  }
+  .btn-back:hover { background: #e7e7e7; }
+
+  /* ── EDA ── */
+  .eda-events-container {
+    margin: 24px 36px; background: var(--card-bg);
+    border-radius: 8px; border: 1px solid var(--card-border); overflow: hidden;
+  }
+  .eda-events-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px; border-bottom: 1px solid var(--card-border);
+    background: #f5f5f5;
+  }
+  .eda-events-title { font-size: 20px; font-weight: 700; }
+  .eda-event-row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 24px; border-bottom: 1px solid #ececec;
+    font-size: 16px; transition: background 0.1s;
+  }
+  .eda-event-row:last-child { border-bottom: none; }
+  .eda-event-row:hover { background: #f9f9f9; }
+  .eda-event-time { font-family: var(--font-mono); font-size: 15px; color: var(--text-secondary); min-width: 90px; }
+  .eda-event-type {
+    padding: 3px 10px; border-radius: 4px; font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .eda-event-type.webhook { background: #e3f2fd; color: var(--pf-blue); }
+  .eda-event-type.alert { background: #fce8e6; color: var(--pf-red); }
+  .eda-event-type.schedule { background: #f3e8fd; color: var(--pf-purple); }
+  .eda-event-desc { flex: 1; color: var(--text-primary); }
+  .eda-event-action { font-size: 15px; color: var(--pf-green); font-weight: 600; }
+
+  /* ── DASHBOARD ── */
+  .dashboard-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+    padding: 24px 36px;
+  }
+  .dash-card {
+    background: var(--card-bg); border-radius: 8px; padding: 24px;
+    border: 1px solid var(--card-border);
+  }
+  .dash-card-label {
+    font-size: 15px; font-weight: 600; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+  }
+  .dash-card-value { font-size: 44px; font-weight: 800; line-height: 1.1; }
+  .dash-card-sub { font-size: 15px; color: var(--text-secondary); margin-top: 4px; }
+  .dash-card-value.green { color: var(--pf-green); }
+  .dash-card-value.blue { color: var(--pf-blue); }
+  .dash-card-value.red { color: var(--pf-red); }
+
+  .recent-jobs-section {
+    margin: 0 36px 36px; background: var(--card-bg);
+    border-radius: 8px; border: 1px solid var(--card-border); overflow: hidden;
+  }
+  .recent-jobs-header {
+    padding: 20px 24px; border-bottom: 1px solid var(--card-border);
+    font-size: 22px; font-weight: 700;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .job-progress {
+    height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden;
+    margin-top: 16px;
+  }
+  .job-progress-bar {
+    height: 100%; background: var(--pf-blue); border-radius: 2px;
+    transition: width 0.5s ease; width: 0%;
+  }
+  .job-progress-bar.complete { background: var(--pf-green); }
+
+  /* ── SPINNER ── */
+  .spinner {
+    display: inline-block; width: 18px; height: 18px;
+    border: 3px solid rgba(0,102,204,0.2);
+    border-top-color: var(--pf-blue); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── SCROLLBAR ── */
+  .job-output::-webkit-scrollbar { width: 10px; }
+  .job-output::-webkit-scrollbar-track { background: #1e1e1e; }
+  .job-output::-webkit-scrollbar-thumb { background: #555; border-radius: 5px; }
+
+  /* ── FOOTER HINT ── */
+  .demo-hint {
+    position: fixed; bottom: 16px; right: 16px;
+    background: rgba(21,21,21,0.85); color: #8a8d90;
+    padding: 8px 16px; border-radius: 6px; font-size: 13px;
+    font-family: var(--font-mono); z-index: 999;
+    backdrop-filter: blur(8px); border: 1px solid #383838;
+  }
+  .demo-hint kbd {
+    background: #383838; color: #c7c7c7; padding: 2px 6px;
+    border-radius: 3px; font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── MASTHEAD ── -->
+<header class="masthead">
+  <div class="masthead-left">
+    <div class="masthead-hamburger" title="Global navigation">
+      <svg viewBox="0 0 448 512" fill="currentColor"><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg>
+    </div>
+    <a href="#" class="rh-logo" onclick="showPage('dashboard'); return false;">
+      <div class="rh-logo-hat">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 145">
+          <path d="M157.77,62.61a14,14,0,0,1,.31,3.42c0,14.88-18.1,17.46-30.61,17.46C78.83,83.49,42.53,53.26,42.53,44a6.43,6.43,0,0,1,.22-1.94l-3.66,9.06a18.45,18.45,0,0,0-1.51,7.33c0,18.11,41,45.48,87.74,45.48,20.69,0,36.43-7.76,36.43-21.77,0-1.08,0-1.94-1.73-10.13Z" fill="#EE0000"/>
+          <path d="M127.47,83.49c12.51,0,30.61-2.58,30.61-17.46a14,14,0,0,0-.31-3.42l-7.45-32.36c-1.72-7.12-3.23-10.35-15.73-16.6C124.89,8.69,103.76.5,97.51.5,91.69.5,90,8,83.06,8c-6.68,0-11.64-5.6-17.89-5.6-6,0-9.91,4.09-12.93,12.5,0,0-8.41,23.72-9.49,27.16A6.43,6.43,0,0,0,42.53,44c0,9.22,36.3,39.45,84.94,39.45M160,72.07c1.73,8.19,1.73,9.05,1.73,10.13,0,14-15.74,21.77-36.43,21.77C78.54,104,37.58,76.6,37.58,58.49a18.45,18.45,0,0,1,1.51-7.33C22.27,52,.5,55,.5,74.22c0,31.48,74.59,70.28,133.65,70.28,45.28,0,56.7-20.48,56.7-36.65,0-12.72-11-27.16-30.83-35.78" fill="#EE0000"/>
+        </svg>
+      </div>
+      <div class="rh-logo-text">
+        <span class="rh-logo-text-brand">Red Hat</span>
+        <span class="rh-logo-text-product">Ansible Automation Platform</span>
+      </div>
+    </a>
+  </div>
+  <div class="masthead-right">
+    <div class="masthead-icon" title="Refresh">
+      <svg viewBox="0 0 512 512"><path d="M463.5 224H472c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1C73.2 122 55.6 150.7 44.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5c7.7-21.8 20.2-42.3 37.8-59.8C202.3 83.4 296.1 83.8 355.2 143l-42.6 42.6c-6.9 6.9-8.9 17.2-5.2 26.2S320.3 224 330 224h133.5zm-19.3 64H311c-9.7 0-18.5 5.8-22.2 14.8s-1.7 19.3 5.2 26.2l41.6 41.6c-59.2 59.2-152.9 59.6-212.4.1-17.6-17.6-30.1-38-37.8-59.8-5.9-16.7-23.7-25.4-40.5-19.5S19.7 315 25.6 331.6c10.8 30.7 28.4 59.4 52.8 83.8 87.2 87.2 228.3 87.5 315.8 1l41.4 41.4c6.9 6.9 17.2 8.9 26.2 5.2s14.8-12.5 14.8-22.2V312c0-13.3-10.7-24-24-24h-8.5z"/></svg>
+    </div>
+    <div class="masthead-icon" title="Dark mode">
+      <svg viewBox="0 0 384 512"><path d="M223.5 32C100 32 0 132.3 0 256s100 224 223.5 224c60.6 0 115.5-24.2 155.8-63.4 5-4.9 6.3-12.5 3.1-18.7s-10.1-9.7-17-8.5c-9.8 1.7-19.8 2.6-30.1 2.6-96.9 0-175.5-78.8-175.5-176 0-65.8 36-123.1 89.3-153.3 6.1-3.5 9.2-10.5 7.7-17.3s-7.3-11.9-14.3-12.5c-6.3-.5-12.6-.8-19-.8z"/></svg>
+    </div>
+    <div class="masthead-icon active-icon" title="Notifications">
+      <svg viewBox="0 0 448 512"><path d="M224 0c-17.7 0-32 14.3-32 32V51.2C119 66 64 130.6 64 208v18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416H416c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8V208c0-77.4-55-142-128-156.8V32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3H224 160c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7 33.3-6.7 45.3-18.7z"/></svg>
+    </div>
+    <div class="masthead-icon" title="Help">
+      <svg viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM169.8 165.3c7.9-22.3 29.1-37.3 52.8-37.3h58.3c34.9 0 63.1 28.3 63.1 63.1 0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24V250.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1 0-8.4-6.8-15.1-15.1-15.1H222.6c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1-64 0z"/></svg>
+    </div>
+    <div class="masthead-user">
+      <svg viewBox="0 0 448 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/></svg>
+      <span class="masthead-username">admin</span>
+    </div>
+  </div>
+</header>
+
+<div class="app-layout">
+  <!-- ── SIDEBAR ── -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Overview</div>
+      <a class="sidebar-item active" data-page="dashboard" onclick="showPage('dashboard')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+        Dashboard
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Automation Execution</div>
+      <a class="sidebar-item" data-page="templates" onclick="showPage('templates')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h6v6h6v10H6z"/></svg>
+        Templates
+      </a>
+      <a class="sidebar-item" data-page="projects" onclick="showPage('projects')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+        Projects
+      </a>
+      <a class="sidebar-item" data-page="inventories" onclick="showPage('inventories')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 20h20v-4H2v4zm2-3h2v2H4v-2zM2 4v4h20V4H2zm4 3H4V5h2v2zm-4 7h20v-4H2v4zm2-3h2v2H4v-2z"/></svg>
+        Inventories
+      </a>
+      <a class="sidebar-item" data-page="hosts" onclick="showPage('hosts')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg>
+        Hosts
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Automation Decisions</div>
+      <a class="sidebar-item" data-page="eda-activations" onclick="showPage('eda-activations')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8H7z"/></svg>
+        Rulebook Activations
+      </a>
+      <a class="sidebar-item" data-page="eda-ruleaudit" onclick="showPage('eda-ruleaudit')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H6v-2h6v2zm4-4H6v-2h10v2zm0-4H6V7h10v2z"/></svg>
+        Rule Audit
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Access Management</div>
+      <a class="sidebar-item" onclick="return false;">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        Users
+      </a>
+      <a class="sidebar-item" onclick="return false;">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+        Organizations
+      </a>
+    </div>
+  </nav>
+
+  <!-- ── CONTENT ── -->
+  <main class="content">
+
+    <!-- ══ DASHBOARD PAGE ══ -->
+    <div class="content-page active" id="page-dashboard">
+      <div class="page-header">
+        <h1>Dashboard</h1>
+        <div class="page-header-sub">Overview of automation activity</div>
+      </div>
+      <div class="dashboard-grid">
+        <div class="dash-card">
+          <div class="dash-card-label">Job Templates</div>
+          <div class="dash-card-value">6</div>
+          <div class="dash-card-sub">Across 2 projects</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-label">Recent Jobs (24h)</div>
+          <div class="dash-card-value green" id="dashJobCount">0</div>
+          <div class="dash-card-sub">All successful</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-label">Managed Hosts</div>
+          <div class="dash-card-value blue">12</div>
+          <div class="dash-card-sub">Across 3 inventories</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-label">EDA Activations</div>
+          <div class="dash-card-value" style="color:var(--pf-green);">2</div>
+          <div class="dash-card-sub">2 running</div>
+        </div>
+      </div>
+      <div class="recent-jobs-section">
+        <div class="recent-jobs-header">Recent Job Runs</div>
+        <table class="pf-table">
+          <thead>
+            <tr><th>ID</th><th>Name</th><th>Status</th><th>Type</th><th>Started</th><th>Finished</th></tr>
+          </thead>
+          <tbody id="dashRecentJobs">
+            <tr>
+              <td class="table-mono">24</td>
+              <td><span class="table-name">Patch RHEL Servers</span></td>
+              <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+              <td class="table-secondary">Playbook run</td>
+              <td class="table-secondary">Today 09:15 AM</td>
+              <td class="table-secondary">Today 09:17 AM</td>
+            </tr>
+            <tr>
+              <td class="table-mono">23</td>
+              <td><span class="table-name">Network Backup Configuration</span></td>
+              <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+              <td class="table-secondary">Playbook run</td>
+              <td class="table-secondary">Today 08:00 AM</td>
+              <td class="table-secondary">Today 08:02 AM</td>
+            </tr>
+            <tr>
+              <td class="table-mono">22</td>
+              <td><span class="table-name">Deploy Web Application</span></td>
+              <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+              <td class="table-secondary">Playbook run</td>
+              <td class="table-secondary">Yesterday 4:30 PM</td>
+              <td class="table-secondary">Yesterday 4:33 PM</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ TEMPLATES PAGE ══ -->
+    <div class="content-page" id="page-templates">
+      <div class="page-header">
+        <h1>Templates</h1>
+      </div>
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input type="text" class="toolbar-search" placeholder="Filter by name">
+          <span class="toolbar-count">6 items</span>
+        </div>
+        <div>
+          <button class="toolbar-btn toolbar-btn-primary">+ Add template</button>
+        </div>
+      </div>
+      <table class="pf-table">
+        <thead>
+          <tr><th>Name</th><th>Type</th><th>Last Run Status</th><th>Organization</th><th>Last Run</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <span class="table-name">Patch RHEL Servers</span><br>
+              <span class="table-secondary">Security patching for production RHEL fleet</span>
+            </td>
+            <td class="table-secondary">Job template</td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">Default</td>
+            <td class="table-secondary">Today 09:17 AM</td>
+            <td><button class="btn-launch" onclick="launchJob('patch')">&#9654; Launch</button></td>
+          </tr>
+          <tr>
+            <td>
+              <span class="table-name">Deploy Web Application</span><br>
+              <span class="table-secondary">Deploy latest release to web server fleet</span>
+            </td>
+            <td class="table-secondary">Job template</td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">Default</td>
+            <td class="table-secondary">Yesterday 4:33 PM</td>
+            <td><button class="btn-launch" onclick="launchJob('deploy')">&#9654; Launch</button></td>
+          </tr>
+          <tr>
+            <td>
+              <span class="table-name">Network Backup Configuration</span><br>
+              <span class="table-secondary">Backup running-config from all network devices</span>
+            </td>
+            <td class="table-secondary">Job template</td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">Default</td>
+            <td class="table-secondary">Today 08:02 AM</td>
+            <td><button class="btn-launch" onclick="launchJob('netbackup')">&#9654; Launch</button></td>
+          </tr>
+          <tr>
+            <td>
+              <span class="table-name">Certificate Rotation</span><br>
+              <span class="table-secondary">Rotate TLS certificates across all endpoints</span>
+            </td>
+            <td class="table-secondary">Job template</td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">Default</td>
+            <td class="table-secondary">Apr 15 2:00 PM</td>
+            <td><button class="btn-launch" onclick="launchJob('certrotate')">&#9654; Launch</button></td>
+          </tr>
+          <tr>
+            <td>
+              <span class="table-name">Compliance Audit Scan</span><br>
+              <span class="table-secondary">Run CIS benchmark compliance checks</span>
+            </td>
+            <td class="table-secondary">Job template</td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">Default</td>
+            <td class="table-secondary">Apr 14 11:00 AM</td>
+            <td><button class="btn-launch" onclick="launchJob('compliance')">&#9654; Launch</button></td>
+          </tr>
+          <tr>
+            <td>
+              <span class="table-name">Auto-Remediation &mdash; Service Recovery</span><br>
+              <span class="table-secondary">Automated service restart and health check workflow</span>
+            </td>
+            <td class="table-secondary">Workflow template</td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">Default</td>
+            <td class="table-secondary">Apr 14 9:45 AM</td>
+            <td><button class="btn-launch" onclick="launchJob('remediation')">&#9654; Launch</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ JOB OUTPUT PAGE ══ -->
+    <div class="content-page" id="page-job-output">
+      <div class="job-header">
+        <button class="btn-back" onclick="showPage('templates')">&#8592; Back to Templates</button>
+        <div class="job-header-top">
+          <div>
+            <h1 id="jobOutputTitle">Patch RHEL Servers</h1>
+            <span class="job-header-id" id="jobOutputId">Job #25 &mdash; Playbook run</span>
+          </div>
+          <div id="jobOutputStatus">
+            <span class="status-badge status-running"><span class="spinner"></span>Running</span>
+          </div>
+        </div>
+        <div class="job-meta">
+          <div class="job-meta-item">
+            <span class="job-meta-label">Inventory</span>
+            <span class="job-meta-value" id="jobMetaInventory"><a href="#">Production RHEL</a></span>
+          </div>
+          <div class="job-meta-item">
+            <span class="job-meta-label">Project</span>
+            <span class="job-meta-value" id="jobMetaProject"><a href="#">Linux Automation</a></span>
+          </div>
+          <div class="job-meta-item">
+            <span class="job-meta-label">Execution Environment</span>
+            <span class="job-meta-value">Default execution environment</span>
+          </div>
+          <div class="job-meta-item">
+            <span class="job-meta-label">Launched by</span>
+            <span class="job-meta-value">admin</span>
+          </div>
+        </div>
+        <div class="job-progress" id="jobProgress">
+          <div class="job-progress-bar" id="jobProgressBar"></div>
+        </div>
+      </div>
+      <div class="job-output-container">
+        <div class="job-output-toolbar">
+          <span class="job-output-toolbar-title">Standard Out</span>
+        </div>
+        <div class="job-output" id="jobOutput"></div>
+      </div>
+    </div>
+
+    <!-- ══ PROJECTS PAGE ══ -->
+    <div class="content-page" id="page-projects">
+      <div class="page-header"><h1>Projects</h1></div>
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input type="text" class="toolbar-search" placeholder="Filter by name">
+          <span class="toolbar-count">2 items</span>
+        </div>
+        <button class="toolbar-btn toolbar-btn-primary">+ Add project</button>
+      </div>
+      <table class="pf-table">
+        <thead><tr><th>Name</th><th>Status</th><th>Type</th><th>Revision</th><th>Organization</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="table-name">Linux Automation</span><br><span class="table-secondary">github.com/acme-corp/linux-automation</span></td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">Git</td>
+            <td class="table-mono">a3f7c2d</td>
+            <td class="table-secondary">Default</td>
+          </tr>
+          <tr>
+            <td><span class="table-name">Network Ops</span><br><span class="table-secondary">github.com/acme-corp/network-ops</span></td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">Git</td>
+            <td class="table-mono">e1b9f84</td>
+            <td class="table-secondary">Default</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ INVENTORIES PAGE ══ -->
+    <div class="content-page" id="page-inventories">
+      <div class="page-header"><h1>Inventories</h1></div>
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input type="text" class="toolbar-search" placeholder="Filter by name">
+          <span class="toolbar-count">3 items</span>
+        </div>
+        <button class="toolbar-btn toolbar-btn-primary">+ Add inventory</button>
+      </div>
+      <table class="pf-table">
+        <thead><tr><th>Name</th><th>Type</th><th>Organization</th><th>Total Hosts</th><th>Groups</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="table-name">Production RHEL</span><br><span class="table-secondary">Production RHEL server fleet</span></td>
+            <td class="table-secondary">Inventory</td>
+            <td class="table-secondary">Default</td>
+            <td>5</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td><span class="table-name">Web Servers</span><br><span class="table-secondary">Application web server pool</span></td>
+            <td class="table-secondary">Inventory</td>
+            <td class="table-secondary">Default</td>
+            <td>3</td>
+            <td>1</td>
+          </tr>
+          <tr>
+            <td><span class="table-name">Network Devices</span><br><span class="table-secondary">Switches and routers</span></td>
+            <td class="table-secondary">Inventory</td>
+            <td class="table-secondary">Default</td>
+            <td>4</td>
+            <td>2</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ HOSTS PAGE ══ -->
+    <div class="content-page" id="page-hosts">
+      <div class="page-header"><h1>Hosts</h1></div>
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input type="text" class="toolbar-search" placeholder="Filter by name">
+          <span class="toolbar-count">12 items</span>
+        </div>
+        <button class="toolbar-btn toolbar-btn-primary">+ Add host</button>
+      </div>
+      <table class="pf-table">
+        <thead><tr><th>Name</th><th>Inventory</th><th>Last Job Status</th><th>Last Job</th></tr></thead>
+        <tbody>
+          <tr><td><span class="table-name">rhel-web-01.prod.acme.com</span></td><td class="table-secondary">Production RHEL</td><td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td><td class="table-secondary">Patch RHEL Servers</td></tr>
+          <tr><td><span class="table-name">rhel-web-02.prod.acme.com</span></td><td class="table-secondary">Production RHEL</td><td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td><td class="table-secondary">Patch RHEL Servers</td></tr>
+          <tr><td><span class="table-name">rhel-db-01.prod.acme.com</span></td><td class="table-secondary">Production RHEL</td><td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td><td class="table-secondary">Patch RHEL Servers</td></tr>
+          <tr><td><span class="table-name">rhel-app-01.prod.acme.com</span></td><td class="table-secondary">Production RHEL</td><td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td><td class="table-secondary">Patch RHEL Servers</td></tr>
+          <tr><td><span class="table-name">rhel-app-02.prod.acme.com</span></td><td class="table-secondary">Production RHEL</td><td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td><td class="table-secondary">Compliance Audit Scan</td></tr>
+          <tr><td><span class="table-name">web-prod-01.acme.com</span></td><td class="table-secondary">Web Servers</td><td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td><td class="table-secondary">Deploy Web Application</td></tr>
+          <tr><td><span class="table-name">web-prod-02.acme.com</span></td><td class="table-secondary">Web Servers</td><td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td><td class="table-secondary">Deploy Web Application</td></tr>
+          <tr><td><span class="table-name">web-staging-01.acme.com</span></td><td class="table-secondary">Web Servers</td><td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td><td class="table-secondary">Deploy Web Application</td></tr>
+          <tr><td><span class="table-name">core-sw-01.net.acme.com</span></td><td class="table-secondary">Network Devices</td><td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td><td class="table-secondary">Network Backup Configuration</td></tr>
+          <tr><td><span class="table-name">core-sw-02.net.acme.com</span></td><td class="table-secondary">Network Devices</td><td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td><td class="table-secondary">Network Backup Configuration</td></tr>
+          <tr><td><span class="table-name">dist-rtr-01.net.acme.com</span></td><td class="table-secondary">Network Devices</td><td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td><td class="table-secondary">Network Backup Configuration</td></tr>
+          <tr><td><span class="table-name">edge-fw-01.net.acme.com</span></td><td class="table-secondary">Network Devices</td><td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td><td class="table-secondary">Network Backup Configuration</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ EDA ACTIVATIONS PAGE ══ -->
+    <div class="content-page" id="page-eda-activations">
+      <div class="page-header">
+        <h1>Rulebook Activations</h1>
+        <div class="page-header-sub">Event-Driven Ansible</div>
+      </div>
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input type="text" class="toolbar-search" placeholder="Filter by name">
+          <span class="toolbar-count">2 items</span>
+        </div>
+        <button class="toolbar-btn toolbar-btn-primary">+ Add rulebook activation</button>
+      </div>
+      <table class="pf-table">
+        <thead>
+          <tr><th>Name</th><th>Status</th><th>Rulebook</th><th>Decision Environment</th><th>Fire Count</th><th>Restart Count</th></tr>
+        </thead>
+        <tbody>
+          <tr style="cursor:pointer;" onclick="showPage('eda-detail-webhook')">
+            <td>
+              <span class="table-name">ServiceNow Incident Handler</span><br>
+              <span class="table-secondary">Listens for ServiceNow webhook events</span>
+            </td>
+            <td><span class="status-badge status-enabled"><span class="status-dot"></span>Running</span></td>
+            <td class="table-secondary">servicenow-incidents.yml</td>
+            <td class="table-secondary">Default decision environment</td>
+            <td id="edaFireCount1">14</td>
+            <td>0</td>
+          </tr>
+          <tr style="cursor:pointer;" onclick="showPage('eda-detail-alertmanager')">
+            <td>
+              <span class="table-name">Infrastructure Auto-Remediation</span><br>
+              <span class="table-secondary">Monitors Alertmanager for critical alerts</span>
+            </td>
+            <td><span class="status-badge status-enabled"><span class="status-dot"></span>Running</span></td>
+            <td class="table-secondary">alertmanager-remediation.yml</td>
+            <td class="table-secondary">Default decision environment</td>
+            <td id="edaFireCount2">7</td>
+            <td>0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ EDA DETAIL - WEBHOOK ══ -->
+    <div class="content-page" id="page-eda-detail-webhook">
+      <div class="page-header">
+        <button class="btn-back" onclick="showPage('eda-activations')">&#8592; Back to Rulebook Activations</button>
+        <h1>ServiceNow Incident Handler</h1>
+        <div class="page-header-sub">Rulebook Activation &mdash; <span class="status-badge status-enabled" style="font-size:14px;"><span class="status-dot"></span>Running</span></div>
+      </div>
+      <div class="job-meta" style="padding: 20px 36px; background: var(--card-bg); border-bottom: 1px solid var(--card-border);">
+        <div class="job-meta-item">
+          <span class="job-meta-label">Rulebook</span>
+          <span class="job-meta-value">servicenow-incidents.yml</span>
+        </div>
+        <div class="job-meta-item">
+          <span class="job-meta-label">Decision Environment</span>
+          <span class="job-meta-value">Default decision environment</span>
+        </div>
+        <div class="job-meta-item">
+          <span class="job-meta-label">Fire Count</span>
+          <span class="job-meta-value" id="edaDetailFire1">14</span>
+        </div>
+        <div class="job-meta-item">
+          <span class="job-meta-label">Started</span>
+          <span class="job-meta-value">Apr 10 08:00 AM</span>
+        </div>
+      </div>
+      <div class="eda-events-container">
+        <div class="eda-events-header">
+          <span class="eda-events-title">Recent Events</span>
+          <span class="toolbar-count" id="edaEventCount1">14 events</span>
+        </div>
+        <div id="edaEvents1">
+          <div class="eda-event-row"><span class="eda-event-time">10:42 AM</span><span class="eda-event-type webhook">Webhook</span><span class="eda-event-desc">INC0012847 &mdash; Disk usage critical on db-replica-east-02</span><span class="eda-event-action">&#10003; Launched: Auto-Remediation</span></div>
+          <div class="eda-event-row"><span class="eda-event-time">10:15 AM</span><span class="eda-event-type webhook">Webhook</span><span class="eda-event-desc">INC0012846 &mdash; SSL certificate expiring in 7 days (api-gateway)</span><span class="eda-event-action">&#10003; Launched: Certificate Rotation</span></div>
+          <div class="eda-event-row"><span class="eda-event-time">09:58 AM</span><span class="eda-event-type webhook">Webhook</span><span class="eda-event-desc">INC0012845 &mdash; High memory utilization on rhel-app-01</span><span class="eda-event-action">&#10003; Launched: Auto-Remediation</span></div>
+          <div class="eda-event-row"><span class="eda-event-time">09:30 AM</span><span class="eda-event-type webhook">Webhook</span><span class="eda-event-desc">INC0012844 &mdash; Service health check failed (payment-service)</span><span class="eda-event-action">&#10003; Launched: Auto-Remediation</span></div>
+          <div class="eda-event-row"><span class="eda-event-time">08:45 AM</span><span class="eda-event-type webhook">Webhook</span><span class="eda-event-desc">INC0012843 &mdash; Network latency spike detected (us-east-1)</span><span class="eda-event-action">&#10003; Launched: Network Backup Configuration</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ EDA DETAIL - ALERTMANAGER ══ -->
+    <div class="content-page" id="page-eda-detail-alertmanager">
+      <div class="page-header">
+        <button class="btn-back" onclick="showPage('eda-activations')">&#8592; Back to Rulebook Activations</button>
+        <h1>Infrastructure Auto-Remediation</h1>
+        <div class="page-header-sub">Rulebook Activation &mdash; <span class="status-badge status-enabled" style="font-size:14px;"><span class="status-dot"></span>Running</span></div>
+      </div>
+      <div class="job-meta" style="padding: 20px 36px; background: var(--card-bg); border-bottom: 1px solid var(--card-border);">
+        <div class="job-meta-item">
+          <span class="job-meta-label">Rulebook</span>
+          <span class="job-meta-value">alertmanager-remediation.yml</span>
+        </div>
+        <div class="job-meta-item">
+          <span class="job-meta-label">Decision Environment</span>
+          <span class="job-meta-value">Default decision environment</span>
+        </div>
+        <div class="job-meta-item">
+          <span class="job-meta-label">Fire Count</span>
+          <span class="job-meta-value" id="edaDetailFire2">7</span>
+        </div>
+        <div class="job-meta-item">
+          <span class="job-meta-label">Started</span>
+          <span class="job-meta-value">Apr 10 08:00 AM</span>
+        </div>
+      </div>
+      <div class="eda-events-container">
+        <div class="eda-events-header">
+          <span class="eda-events-title">Recent Events</span>
+          <span class="toolbar-count" id="edaEventCount2">7 events</span>
+        </div>
+        <div id="edaEvents2">
+          <div class="eda-event-row"><span class="eda-event-time">09:22 AM</span><span class="eda-event-type alert">Alert</span><span class="eda-event-desc">HighCPUUsage &mdash; rhel-web-01.prod.acme.com (CPU &gt; 90% for 5m)</span><span class="eda-event-action">&#10003; Launched: Auto-Remediation</span></div>
+          <div class="eda-event-row"><span class="eda-event-time">08:47 AM</span><span class="eda-event-type alert">Alert</span><span class="eda-event-desc">ServiceDown &mdash; httpd on rhel-app-01.prod.acme.com</span><span class="eda-event-action">&#10003; Launched: Auto-Remediation</span></div>
+          <div class="eda-event-row"><span class="eda-event-time">07:15 AM</span><span class="eda-event-type alert">Alert</span><span class="eda-event-desc">DiskSpaceLow &mdash; /var at 92% on rhel-db-01.prod.acme.com</span><span class="eda-event-action">&#10003; Launched: Auto-Remediation</span></div>
+          <div class="eda-event-row"><span class="eda-event-time">Yesterday</span><span class="eda-event-type alert">Alert</span><span class="eda-event-desc">HighMemory &mdash; rhel-app-02.prod.acme.com (Memory &gt; 85%)</span><span class="eda-event-action">&#10003; Launched: Auto-Remediation</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ EDA RULE AUDIT PAGE ══ -->
+    <div class="content-page" id="page-eda-ruleaudit">
+      <div class="page-header">
+        <h1>Rule Audit</h1>
+        <div class="page-header-sub">Event-Driven Ansible &mdash; History of rule matches and actions</div>
+      </div>
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input type="text" class="toolbar-search" placeholder="Filter by name">
+          <span class="toolbar-count" id="ruleAuditCount">21 items</span>
+        </div>
+      </div>
+      <table class="pf-table">
+        <thead>
+          <tr><th>Name</th><th>Status</th><th>Rulebook Activation</th><th>Fired At</th></tr>
+        </thead>
+        <tbody id="ruleAuditBody">
+          <tr>
+            <td><span class="table-name">Respond to ServiceNow incident</span></td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">ServiceNow Incident Handler</td>
+            <td class="table-secondary">Today 10:42 AM</td>
+          </tr>
+          <tr>
+            <td><span class="table-name">Respond to ServiceNow incident</span></td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">ServiceNow Incident Handler</td>
+            <td class="table-secondary">Today 10:15 AM</td>
+          </tr>
+          <tr>
+            <td><span class="table-name">Remediate critical alert</span></td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">Infrastructure Auto-Remediation</td>
+            <td class="table-secondary">Today 09:22 AM</td>
+          </tr>
+          <tr>
+            <td><span class="table-name">Respond to ServiceNow incident</span></td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">ServiceNow Incident Handler</td>
+            <td class="table-secondary">Today 09:58 AM</td>
+          </tr>
+          <tr>
+            <td><span class="table-name">Remediate critical alert</span></td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">Infrastructure Auto-Remediation</td>
+            <td class="table-secondary">Today 08:47 AM</td>
+          </tr>
+          <tr>
+            <td><span class="table-name">Respond to ServiceNow incident</span></td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">ServiceNow Incident Handler</td>
+            <td class="table-secondary">Today 08:45 AM</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── DEMO HINT ── -->
+<div class="demo-hint" id="demoHint">
+  Demo: Click <kbd>Launch</kbd> on any template
+</div>
+
+<script>
+var jobCounter = 25;
+var currentJobTimer = null;
+
+var jobScripts = {
+  patch: {
+    title: 'Patch RHEL Servers',
+    id: null,
+    inventory: 'Production RHEL',
+    project: 'Linux Automation',
+    lines: [
+      { text: '', delay: 200 },
+      { text: 'PLAY [Patch RHEL Servers] ******************************************************', cls: 'play-header', delay: 400 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Gathering Facts] *********************************************************', cls: 'task-header', delay: 600 },
+      { text: 'ok: [rhel-web-01.prod.acme.com]', cls: 'ok', delay: 300 },
+      { text: 'ok: [rhel-web-02.prod.acme.com]', cls: 'ok', delay: 200 },
+      { text: 'ok: [rhel-db-01.prod.acme.com]', cls: 'ok', delay: 250 },
+      { text: 'ok: [rhel-app-01.prod.acme.com]', cls: 'ok', delay: 200 },
+      { text: 'ok: [rhel-app-02.prod.acme.com]', cls: 'ok', delay: 300 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Check current kernel version] ********************************************', cls: 'task-header', delay: 500 },
+      { text: 'ok: [rhel-web-01.prod.acme.com]', cls: 'ok', delay: 250 },
+      { text: 'ok: [rhel-web-02.prod.acme.com]', cls: 'ok', delay: 200 },
+      { text: 'ok: [rhel-db-01.prod.acme.com]', cls: 'ok', delay: 200 },
+      { text: 'ok: [rhel-app-01.prod.acme.com]', cls: 'ok', delay: 250 },
+      { text: 'ok: [rhel-app-02.prod.acme.com]', cls: 'ok', delay: 200 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Apply security patches via dnf] ******************************************', cls: 'task-header', delay: 800 },
+      { text: 'changed: [rhel-web-01.prod.acme.com]', cls: 'changed', delay: 1200 },
+      { text: 'changed: [rhel-web-02.prod.acme.com]', cls: 'changed', delay: 900 },
+      { text: 'changed: [rhel-db-01.prod.acme.com]', cls: 'changed', delay: 1100 },
+      { text: 'changed: [rhel-app-01.prod.acme.com]', cls: 'changed', delay: 800 },
+      { text: 'changed: [rhel-app-02.prod.acme.com]', cls: 'changed', delay: 1000 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Verify services are running post-patch] **********************************', cls: 'task-header', delay: 500 },
+      { text: 'ok: [rhel-web-01.prod.acme.com]', cls: 'ok', delay: 300 },
+      { text: 'ok: [rhel-web-02.prod.acme.com]', cls: 'ok', delay: 200 },
+      { text: 'ok: [rhel-db-01.prod.acme.com]', cls: 'ok', delay: 250 },
+      { text: 'ok: [rhel-app-01.prod.acme.com]', cls: 'ok', delay: 200 },
+      { text: 'ok: [rhel-app-02.prod.acme.com]', cls: 'ok', delay: 250 },
+      { text: '', delay: 300 },
+      { text: 'PLAY RECAP *********************************************************************', cls: 'play-header', delay: 400 },
+      { text: 'rhel-web-01.prod.acme.com  : ok=4    changed=1    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+      { text: 'rhel-web-02.prod.acme.com  : ok=4    changed=1    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+      { text: 'rhel-db-01.prod.acme.com   : ok=4    changed=1    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+      { text: 'rhel-app-01.prod.acme.com  : ok=4    changed=1    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+      { text: 'rhel-app-02.prod.acme.com  : ok=4    changed=1    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+    ]
+  },
+  deploy: {
+    title: 'Deploy Web Application',
+    id: null,
+    inventory: 'Web Servers',
+    project: 'Linux Automation',
+    lines: [
+      { text: '', delay: 200 },
+      { text: 'PLAY [Deploy Web Application] **************************************************', cls: 'play-header', delay: 400 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Gathering Facts] *********************************************************', cls: 'task-header', delay: 600 },
+      { text: 'ok: [web-prod-01.acme.com]', cls: 'ok', delay: 300 },
+      { text: 'ok: [web-prod-02.acme.com]', cls: 'ok', delay: 250 },
+      { text: 'ok: [web-staging-01.acme.com]', cls: 'ok', delay: 200 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Pull latest container image] *********************************************', cls: 'task-header', delay: 500 },
+      { text: 'changed: [web-prod-01.acme.com]', cls: 'changed', delay: 1500 },
+      { text: 'changed: [web-prod-02.acme.com]', cls: 'changed', delay: 1200 },
+      { text: 'changed: [web-staging-01.acme.com]', cls: 'changed', delay: 1000 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Stop existing application containers] ************************************', cls: 'task-header', delay: 400 },
+      { text: 'changed: [web-prod-01.acme.com]', cls: 'changed', delay: 400 },
+      { text: 'changed: [web-prod-02.acme.com]', cls: 'changed', delay: 300 },
+      { text: 'changed: [web-staging-01.acme.com]', cls: 'changed', delay: 350 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Start new application containers] ****************************************', cls: 'task-header', delay: 400 },
+      { text: 'changed: [web-prod-01.acme.com]', cls: 'changed', delay: 800 },
+      { text: 'changed: [web-prod-02.acme.com]', cls: 'changed', delay: 700 },
+      { text: 'changed: [web-staging-01.acme.com]', cls: 'changed', delay: 600 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Run health check] ********************************************************', cls: 'task-header', delay: 500 },
+      { text: 'ok: [web-prod-01.acme.com]', cls: 'ok', delay: 600 },
+      { text: 'ok: [web-prod-02.acme.com]', cls: 'ok', delay: 500 },
+      { text: 'ok: [web-staging-01.acme.com]', cls: 'ok', delay: 400 },
+      { text: '', delay: 300 },
+      { text: 'PLAY RECAP *********************************************************************', cls: 'play-header', delay: 400 },
+      { text: 'web-prod-01.acme.com       : ok=5    changed=3    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+      { text: 'web-prod-02.acme.com       : ok=5    changed=3    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+      { text: 'web-staging-01.acme.com    : ok=5    changed=3    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+    ]
+  },
+  netbackup: {
+    title: 'Network Backup Configuration',
+    id: null,
+    inventory: 'Network Devices',
+    project: 'Network Ops',
+    lines: [
+      { text: '', delay: 200 },
+      { text: 'PLAY [Backup Network Device Configurations] ************************************', cls: 'play-header', delay: 400 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Gathering Facts] *********************************************************', cls: 'task-header', delay: 500 },
+      { text: 'ok: [core-sw-01.net.acme.com]', cls: 'ok', delay: 400 },
+      { text: 'ok: [core-sw-02.net.acme.com]', cls: 'ok', delay: 350 },
+      { text: 'ok: [dist-rtr-01.net.acme.com]', cls: 'ok', delay: 300 },
+      { text: 'ok: [edge-fw-01.net.acme.com]', cls: 'ok', delay: 350 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Backup running configuration] ********************************************', cls: 'task-header', delay: 600 },
+      { text: 'changed: [core-sw-01.net.acme.com]', cls: 'changed', delay: 800 },
+      { text: 'changed: [core-sw-02.net.acme.com]', cls: 'changed', delay: 700 },
+      { text: 'changed: [dist-rtr-01.net.acme.com]', cls: 'changed', delay: 900 },
+      { text: 'changed: [edge-fw-01.net.acme.com]', cls: 'changed', delay: 600 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Store backup to git repository] ******************************************', cls: 'task-header', delay: 500 },
+      { text: 'changed: [core-sw-01.net.acme.com]', cls: 'changed', delay: 500 },
+      { text: 'changed: [core-sw-02.net.acme.com]', cls: 'changed', delay: 400 },
+      { text: 'changed: [dist-rtr-01.net.acme.com]', cls: 'changed', delay: 500 },
+      { text: 'changed: [edge-fw-01.net.acme.com]', cls: 'changed', delay: 400 },
+      { text: '', delay: 300 },
+      { text: 'PLAY RECAP *********************************************************************', cls: 'play-header', delay: 400 },
+      { text: 'core-sw-01.net.acme.com    : ok=3    changed=2    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+      { text: 'core-sw-02.net.acme.com    : ok=3    changed=2    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+      { text: 'dist-rtr-01.net.acme.com   : ok=3    changed=2    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+      { text: 'edge-fw-01.net.acme.com    : ok=3    changed=2    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+    ]
+  },
+  certrotate: {
+    title: 'Certificate Rotation',
+    id: null,
+    inventory: 'Production RHEL',
+    project: 'Linux Automation',
+    lines: [
+      { text: '', delay: 200 },
+      { text: 'PLAY [Rotate TLS Certificates] *************************************************', cls: 'play-header', delay: 400 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Gathering Facts] *********************************************************', cls: 'task-header', delay: 500 },
+      { text: 'ok: [rhel-web-01.prod.acme.com]', cls: 'ok', delay: 300 },
+      { text: 'ok: [rhel-web-02.prod.acme.com]', cls: 'ok', delay: 250 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Generate new certificate signing request] ********************************', cls: 'task-header', delay: 600 },
+      { text: 'changed: [rhel-web-01.prod.acme.com]', cls: 'changed', delay: 1000 },
+      { text: 'changed: [rhel-web-02.prod.acme.com]', cls: 'changed', delay: 900 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Deploy signed certificate] ***********************************************', cls: 'task-header', delay: 500 },
+      { text: 'changed: [rhel-web-01.prod.acme.com]', cls: 'changed', delay: 700 },
+      { text: 'changed: [rhel-web-02.prod.acme.com]', cls: 'changed', delay: 600 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Reload nginx] ************************************************************', cls: 'task-header', delay: 400 },
+      { text: 'changed: [rhel-web-01.prod.acme.com]', cls: 'changed', delay: 400 },
+      { text: 'changed: [rhel-web-02.prod.acme.com]', cls: 'changed', delay: 350 },
+      { text: '', delay: 300 },
+      { text: 'PLAY RECAP *********************************************************************', cls: 'play-header', delay: 400 },
+      { text: 'rhel-web-01.prod.acme.com  : ok=4    changed=3    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+      { text: 'rhel-web-02.prod.acme.com  : ok=4    changed=3    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+    ]
+  },
+  compliance: {
+    title: 'Compliance Audit Scan',
+    id: null,
+    inventory: 'Production RHEL',
+    project: 'Linux Automation',
+    lines: [
+      { text: '', delay: 200 },
+      { text: 'PLAY [CIS Benchmark Compliance Scan] *******************************************', cls: 'play-header', delay: 400 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Gathering Facts] *********************************************************', cls: 'task-header', delay: 600 },
+      { text: 'ok: [rhel-web-01.prod.acme.com]', cls: 'ok', delay: 300 },
+      { text: 'ok: [rhel-db-01.prod.acme.com]', cls: 'ok', delay: 250 },
+      { text: 'ok: [rhel-app-01.prod.acme.com]', cls: 'ok', delay: 200 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Run OpenSCAP compliance scan] ********************************************', cls: 'task-header', delay: 800 },
+      { text: 'ok: [rhel-web-01.prod.acme.com]', cls: 'ok', delay: 2000 },
+      { text: 'ok: [rhel-db-01.prod.acme.com]', cls: 'ok', delay: 1800 },
+      { text: 'ok: [rhel-app-01.prod.acme.com]', cls: 'ok', delay: 1500 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Generate compliance report] **********************************************', cls: 'task-header', delay: 500 },
+      { text: 'changed: [rhel-web-01.prod.acme.com]', cls: 'changed', delay: 400 },
+      { text: 'changed: [rhel-db-01.prod.acme.com]', cls: 'changed', delay: 350 },
+      { text: 'changed: [rhel-app-01.prod.acme.com]', cls: 'changed', delay: 300 },
+      { text: '', delay: 300 },
+      { text: 'PLAY RECAP *********************************************************************', cls: 'play-header', delay: 400 },
+      { text: 'rhel-web-01.prod.acme.com  : ok=3    changed=1    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+      { text: 'rhel-db-01.prod.acme.com   : ok=3    changed=1    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+      { text: 'rhel-app-01.prod.acme.com  : ok=3    changed=1    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+    ]
+  },
+  remediation: {
+    title: 'Auto-Remediation \u2014 Service Recovery',
+    id: null,
+    inventory: 'Production RHEL',
+    project: 'Linux Automation',
+    lines: [
+      { text: '', delay: 200 },
+      { text: 'PLAY [Auto-Remediation: Service Recovery] **************************************', cls: 'play-header', delay: 400 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Gathering Facts] *********************************************************', cls: 'task-header', delay: 600 },
+      { text: 'ok: [rhel-app-01.prod.acme.com]', cls: 'ok', delay: 300 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Check service status] ****************************************************', cls: 'task-header', delay: 500 },
+      { text: 'ok: [rhel-app-01.prod.acme.com]', cls: 'ok', delay: 600 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Attempt service restart] *************************************************', cls: 'task-header', delay: 400 },
+      { text: 'changed: [rhel-app-01.prod.acme.com]', cls: 'changed', delay: 1200 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Validate service is healthy] *********************************************', cls: 'task-header', delay: 500 },
+      { text: 'ok: [rhel-app-01.prod.acme.com]', cls: 'ok', delay: 800 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Send notification to ServiceNow] *****************************************', cls: 'task-header', delay: 400 },
+      { text: 'ok: [rhel-app-01.prod.acme.com]', cls: 'ok', delay: 500 },
+      { text: '', delay: 300 },
+      { text: 'PLAY RECAP *********************************************************************', cls: 'play-header', delay: 400 },
+      { text: 'rhel-app-01.prod.acme.com  : ok=5    changed=1    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+    ]
+  }
+};
+
+function showPage(pageId) {
+  document.querySelectorAll('.content-page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.sidebar-item').forEach(function(s) { s.classList.remove('active'); });
+
+  var page = document.getElementById('page-' + pageId);
+  if (page) page.classList.add('active');
+
+  var navItem = document.querySelector('.sidebar-item[data-page="' + pageId + '"]');
+  if (navItem) navItem.classList.add('active');
+
+  if (currentJobTimer) {
+    clearTimeout(currentJobTimer);
+    currentJobTimer = null;
+  }
+}
+
+function launchJob(scriptKey) {
+  var script = jobScripts[scriptKey];
+  if (!script) return;
+
+  jobCounter++;
+  script.id = jobCounter;
+
+  showPage('job-output');
+
+  document.getElementById('jobOutputTitle').textContent = script.title;
+  document.getElementById('jobOutputId').innerHTML = 'Job #' + script.id + ' &mdash; Playbook run';
+  document.getElementById('jobMetaInventory').innerHTML = '<a href="#">' + script.inventory + '</a>';
+  document.getElementById('jobMetaProject').innerHTML = '<a href="#">' + script.project + '</a>';
+  document.getElementById('jobOutputStatus').innerHTML =
+    '<span class="status-badge status-running"><span class="spinner"></span>Running</span>';
+
+  var progressBar = document.getElementById('jobProgressBar');
+  progressBar.style.width = '0%';
+  progressBar.classList.remove('complete');
+
+  var output = document.getElementById('jobOutput');
+  output.innerHTML = '';
+
+  var lines = script.lines;
+  var totalLines = lines.length;
+  var currentLine = 0;
+  var cumulativeDelay = 0;
+
+  function renderLine(index) {
+    if (index >= totalLines) {
+      setTimeout(function() {
+        document.getElementById('jobOutputStatus').innerHTML =
+          '<span class="status-badge status-successful"><span class="status-dot"></span>Successful</span>';
+        progressBar.style.width = '100%';
+        progressBar.classList.add('complete');
+      }, 500);
+      return;
+    }
+
+    var line = lines[index];
+    cumulativeDelay += line.delay;
+
+    currentJobTimer = setTimeout(function() {
+      var span = document.createElement('span');
+      if (line.cls) span.className = line.cls;
+      span.textContent = line.text;
+      output.appendChild(span);
+      output.appendChild(document.createTextNode('\n'));
+      output.scrollTop = output.scrollHeight;
+
+      progressBar.style.width = Math.round(((index + 1) / totalLines) * 95) + '%';
+
+      renderLine(index + 1);
+    }, line.delay);
+  }
+
+  renderLine(0);
+}
+
+</script>
+</body>
+</html>

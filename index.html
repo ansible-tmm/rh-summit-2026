@@ -2,10 +2,47 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=alert_manager/">
-<title>Redirecting…</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RH Summit 2026 Demos</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700;800&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Red Hat Display', -apple-system, sans-serif;
+    background: #151515; color: #fff; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .container { text-align: center; max-width: 700px; padding: 40px; }
+  h1 { font-size: 42px; font-weight: 800; margin-bottom: 8px; }
+  .sub { font-size: 20px; color: #8a8d90; margin-bottom: 48px; }
+  .cards { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+  .card {
+    background: #212427; border: 1px solid #383838; border-radius: 12px;
+    padding: 32px; width: 300px; text-decoration: none; color: #fff;
+    transition: all 0.2s; display: block;
+  }
+  .card:hover { border-color: #0066cc; transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,102,204,0.15); }
+  .card-icon { font-size: 40px; margin-bottom: 16px; }
+  .card h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .card p { font-size: 16px; color: #8a8d90; line-height: 1.5; }
+</style>
 </head>
 <body>
-<p>Redirecting to <a href="alert_manager/">Alert Manager</a>…</p>
+<div class="container">
+  <h1>Summit 2026</h1>
+  <div class="sub">Main Stage Demo Environments</div>
+  <div class="cards">
+    <a href="aap/" class="card">
+      <div class="card-icon">&#9881;&#65039;</div>
+      <h2>Ansible Automation Platform</h2>
+      <p>Job templates, EDA rulebook activations, and automation workflows</p>
+    </a>
+    <a href="alert_manager/" class="card">
+      <div class="card-icon">&#128680;</div>
+      <h2>AlertCommand</h2>
+      <p>Infrastructure alert management and incident dashboard</p>
+    </a>
+  </div>
+</div>
 </body>
 </html>
