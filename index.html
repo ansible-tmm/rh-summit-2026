@@ -25,6 +25,15 @@
   .card-icon { font-size: 40px; margin-bottom: 16px; }
   .card h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
   .card p { font-size: 16px; color: #8a8d90; line-height: 1.5; }
+  .card-keys {
+    margin-top: 16px; padding-top: 14px; border-top: 1px solid #383838;
+    font-size: 13px; color: #6a6e73; line-height: 1.7; text-align: left;
+  }
+  .card-keys kbd {
+    background: #383838; color: #c7c7c7; padding: 2px 7px;
+    border-radius: 4px; font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px; letter-spacing: 0.3px;
+  }
 </style>
 </head>
 <body>
@@ -36,11 +45,19 @@
       <div class="card-icon">&#9881;&#65039;</div>
       <h2>Ansible Automation Platform</h2>
       <p>Job templates, EDA rulebook activations, and automation workflows</p>
+      <div class="card-keys">
+        <kbd>eda</kbd> &mdash; fire EDA sequence (7 events + 7 jobs)
+      </div>
     </a>
     <a href="alert_manager/" class="card">
       <div class="card-icon">&#128680;</div>
       <h2>AlertCommand</h2>
       <p>Infrastructure alert management and incident dashboard</p>
+      <div class="card-keys">
+        <kbd>sev1</kbd> &mdash; single critical alert<br>
+        <kbd>shit</kbd> &mdash; 7 cascading critical alerts<br>
+        <kbd>fix</kbd> &mdash; resolve all alerts
+      </div>
     </a>
   </div>
 </div>
