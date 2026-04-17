@@ -31,7 +31,7 @@ Type these keywords anywhere on the page (no input field needed). Each trigger f
 
 | Keyword | What it does |
 |---|---|
-| `eda` | EDA fire count on "Infrastructure Auto-Remediation" climbs from 10→17, 7 alert events appear in the detail view, and 7 Auto-Remediation jobs appear on the Jobs page (Running → Successful) |
+| `eda` | EDA fire count on "Infrastructure Auto-Remediation" climbs from 0→7, 7 alert events appear in the detail view, and 7 Auto-Remediation jobs appear on the Jobs page (Running → Successful) |
 
 Additionally, clicking **Launch** on any job template in the Templates page plays a fake ansible-playbook output sequence.
 
