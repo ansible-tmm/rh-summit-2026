@@ -368,6 +368,12 @@
     animation: spin 0.8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes edaSlideIn {
+    from { opacity: 0; transform: translateY(-16px); background: rgba(201,25,11,0.08); }
+    to { opacity: 1; transform: translateY(0); background: transparent; }
+  }
+  .eda-new-row { animation: edaSlideIn 0.4s ease-out; }
+  .fire-flash { color: var(--pf-red) !important; font-weight: 800 !important; transition: color 0.5s; }
 
   /* ── SCROLLBAR ── */
   .job-output::-webkit-scrollbar { width: 10px; }
@@ -447,6 +453,10 @@
       <a class="sidebar-item" data-page="templates" onclick="showPage('templates')">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h6v6h6v10H6z"/></svg>
         Templates
+      </a>
+      <a class="sidebar-item" data-page="jobs" onclick="showPage('jobs')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+        Jobs
       </a>
       <a class="sidebar-item" data-page="projects" onclick="showPage('projects')">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
@@ -690,6 +700,50 @@
       </div>
     </div>
 
+    <!-- ══ JOBS PAGE ══ -->
+    <div class="content-page" id="page-jobs">
+      <div class="page-header">
+        <h1>Jobs</h1>
+      </div>
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input type="text" class="toolbar-search" placeholder="Filter by name">
+          <span class="toolbar-count" id="jobsCount">3 items</span>
+        </div>
+      </div>
+      <table class="pf-table">
+        <thead>
+          <tr><th>ID</th><th>Name</th><th>Status</th><th>Type</th><th>Started</th><th>Finished</th></tr>
+        </thead>
+        <tbody id="jobsTableBody">
+          <tr>
+            <td class="table-mono">24</td>
+            <td><span class="table-name">Patch RHEL Servers</span></td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">Playbook run</td>
+            <td class="table-secondary">Today 09:15 AM</td>
+            <td class="table-secondary">Today 09:17 AM</td>
+          </tr>
+          <tr>
+            <td class="table-mono">23</td>
+            <td><span class="table-name">Network Backup Configuration</span></td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">Playbook run</td>
+            <td class="table-secondary">Today 08:00 AM</td>
+            <td class="table-secondary">Today 08:02 AM</td>
+          </tr>
+          <tr>
+            <td class="table-mono">22</td>
+            <td><span class="table-name">Deploy Web Application</span></td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">Playbook run</td>
+            <td class="table-secondary">Yesterday 4:30 PM</td>
+            <td class="table-secondary">Yesterday 4:33 PM</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
     <!-- ══ PROJECTS PAGE ══ -->
     <div class="content-page" id="page-projects">
       <div class="page-header"><h1>Projects</h1></div>
@@ -825,7 +879,7 @@
             <td><span class="status-badge status-enabled"><span class="status-dot"></span>Running</span></td>
             <td class="table-secondary">alertmanager-remediation.yml</td>
             <td class="table-secondary">Default decision environment</td>
-            <td id="edaFireCount2">7</td>
+            <td id="edaFireCount2">10</td>
             <td>0</td>
           </tr>
         </tbody>
@@ -890,7 +944,7 @@
         </div>
         <div class="job-meta-item">
           <span class="job-meta-label">Fire Count</span>
-          <span class="job-meta-value" id="edaDetailFire2">7</span>
+          <span class="job-meta-value" id="edaDetailFire2">10</span>
         </div>
         <div class="job-meta-item">
           <span class="job-meta-label">Started</span>
@@ -900,7 +954,7 @@
       <div class="eda-events-container">
         <div class="eda-events-header">
           <span class="eda-events-title">Recent Events</span>
-          <span class="toolbar-count" id="edaEventCount2">7 events</span>
+          <span class="toolbar-count" id="edaEventCount2">10 events</span>
         </div>
         <div id="edaEvents2">
           <div class="eda-event-row"><span class="eda-event-time">09:22 AM</span><span class="eda-event-type alert">Alert</span><span class="eda-event-desc">HighCPUUsage &mdash; rhel-web-01.prod.acme.com (CPU &gt; 90% for 5m)</span><span class="eda-event-action">&#10003; Launched: Auto-Remediation</span></div>
@@ -973,7 +1027,7 @@
 
 <!-- ── DEMO HINT ── -->
 <div class="demo-hint" id="demoHint">
-  Demo: Click <kbd>Launch</kbd> on any template
+  Type <kbd>eda</kbd> to trigger EDA sequence &middot; Click <kbd>Launch</kbd> on any template
 </div>
 
 <script>
@@ -1263,6 +1317,101 @@ function launchJob(scriptKey) {
   }
 
   renderLine(0);
+}
+
+var edaTriggered = false;
+var edaKeyBuffer = '';
+
+document.addEventListener('keydown', function(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  edaKeyBuffer += e.key.toLowerCase();
+  if (edaKeyBuffer.length > 20) edaKeyBuffer = edaKeyBuffer.slice(-20);
+
+  if (!edaTriggered && edaKeyBuffer.includes('eda')) {
+    edaTriggered = true;
+    edaKeyBuffer = '';
+    fireEdaSequence();
+  }
+});
+
+var edaAlerts = [
+  { service: 'payment-service-prod', desc: 'HighLatency \u2014 payment-service-prod (latency > 500ms for 5m)' },
+  { service: 'db-primary-us-east-1', desc: 'ConnectionPoolExhausted \u2014 db-primary-us-east-1 (0 available)' },
+  { service: 'rabbitmq-cluster-01', desc: 'QueueBacklog \u2014 rabbitmq-cluster-01 (50k+ messages pending)' },
+  { service: 'api-gateway-prod', desc: 'High5xxRate \u2014 api-gateway-prod (error rate > 25%)' },
+  { service: 'k8s-worker-node-03', desc: 'MemoryPressure \u2014 k8s-worker-node-03 (OOMKill events)' },
+  { service: 'redis-cluster-prod', desc: 'LowCacheHitRate \u2014 redis-cluster-prod (hit rate < 40%)' },
+  { service: 'cdn-origin-us-east', desc: 'OriginHealthCheck \u2014 cdn-origin-us-east (failures detected)' }
+];
+
+function fireEdaSequence() {
+  var fireCountEl = document.getElementById('edaFireCount2');
+  var detailFireEl = document.getElementById('edaDetailFire2');
+  var eventCountEl = document.getElementById('edaEventCount2');
+  var eventsContainer = document.getElementById('edaEvents2');
+  var jobsBody = document.getElementById('jobsTableBody');
+  var jobsCountEl = document.getElementById('jobsCount');
+  var dashJobCount = document.getElementById('dashJobCount');
+
+  var baseFireCount = parseInt(fireCountEl.textContent);
+  var jobsItemCount = jobsBody ? jobsBody.children.length : 0;
+  var now = new Date();
+
+  edaAlerts.forEach(function(alert, i) {
+    setTimeout(function() {
+      baseFireCount++;
+      fireCountEl.textContent = baseFireCount;
+      if (detailFireEl) detailFireEl.textContent = baseFireCount;
+      if (eventCountEl) eventCountEl.textContent = baseFireCount + ' events';
+
+      fireCountEl.classList.add('fire-flash');
+      setTimeout(function() { fireCountEl.classList.remove('fire-flash'); }, 400);
+
+      var mm = now.getMinutes() + i;
+      var hh = now.getHours();
+      if (mm >= 60) { hh++; mm -= 60; }
+      var timeStr = ((hh % 12) || 12) + ':' + (mm < 10 ? '0' : '') + mm + (hh >= 12 ? ' PM' : ' AM');
+
+      var eventRow = document.createElement('div');
+      eventRow.className = 'eda-event-row eda-new-row';
+      eventRow.innerHTML =
+        '<span class="eda-event-time">' + timeStr + '</span>' +
+        '<span class="eda-event-type alert">Alert</span>' +
+        '<span class="eda-event-desc">' + alert.desc + '</span>' +
+        '<span class="eda-event-action">&#10003; Launched: Auto-Remediation</span>';
+      if (eventsContainer) eventsContainer.insertBefore(eventRow, eventsContainer.firstChild);
+
+      jobCounter++;
+      jobsItemCount++;
+      var jobRow = document.createElement('tr');
+      jobRow.className = 'eda-new-row';
+      jobRow.id = 'eda-job-' + i;
+      jobRow.innerHTML =
+        '<td class="table-mono">' + jobCounter + '</td>' +
+        '<td><span class="table-name">Auto-Remediation \u2014 ' + alert.service + '</span></td>' +
+        '<td><span class="status-badge status-running"><span class="spinner"></span>Running</span></td>' +
+        '<td class="table-secondary">Playbook run</td>' +
+        '<td class="table-secondary">Just now</td>' +
+        '<td class="table-secondary">\u2014</td>';
+      if (jobsBody) jobsBody.insertBefore(jobRow, jobsBody.firstChild);
+      if (jobsCountEl) jobsCountEl.textContent = jobsItemCount + ' items';
+
+      setTimeout(function() {
+        var statusCell = jobRow.querySelector('td:nth-child(3)');
+        if (statusCell) {
+          statusCell.innerHTML = '<span class="status-badge status-successful"><span class="status-dot"></span>Successful</span>';
+        }
+        var finishedCell = jobRow.querySelector('td:nth-child(6)');
+        if (finishedCell) finishedCell.textContent = 'Just now';
+
+        if (dashJobCount) {
+          var dc = parseInt(dashJobCount.textContent) || 0;
+          dashJobCount.textContent = dc + 1;
+        }
+      }, 3000 + i * 500);
+
+    }, i * 800);
+  });
 }
 
 </script>

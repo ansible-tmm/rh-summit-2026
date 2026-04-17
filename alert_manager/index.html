@@ -495,78 +495,175 @@
   document.getElementById('refreshTime').textContent =
     new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-  let keyBuffer = '';
-  let triggered = false;
-  const TRIGGER = 'sev1';
+  var keyBuffer = '';
+  var sev1Triggered = false;
+  var shitTriggered = false;
+  var fixTriggered = false;
+  var openCount = 12;
+  var criticalCount = 0;
+  var titleFlashInterval = null;
 
   document.addEventListener('keydown', function(e) {
-    if (triggered) return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     keyBuffer += e.key.toLowerCase();
-    if (keyBuffer.length > 10) keyBuffer = keyBuffer.slice(-10);
-    if (keyBuffer.includes(TRIGGER)) {
-      triggered = true;
+    if (keyBuffer.length > 20) keyBuffer = keyBuffer.slice(-20);
+
+    if (!sev1Triggered && keyBuffer.includes('sev1')) {
+      sev1Triggered = true;
+      keyBuffer = '';
       fireCriticalAlert();
+    }
+    if (!shitTriggered && keyBuffer.includes('shit')) {
+      shitTriggered = true;
+      keyBuffer = '';
+      fireMultipleAlerts();
+    }
+    if (!fixTriggered && keyBuffer.includes('fix')) {
+      fixTriggered = true;
+      keyBuffer = '';
+      fixAllAlerts();
     }
   });
 
-  function fireCriticalAlert() {
-    const tbody = document.getElementById('incidentBody');
-    const critRow = document.createElement('tr');
-    critRow.className = 'critical-row';
-    critRow.innerHTML = `
-      <td><span class="badge badge-critical"><span class="badge-dot"></span>P1 &middot; Critical</span></td>
-      <td><span class="incident-id" style="color: var(--critical);">INC-2026-04821</span></td>
-      <td><span class="incident-title">Production Server Capacity Critical &mdash; Primary Cluster Exhausted</span></td>
-      <td><span class="incident-service">prod-cluster-us-east-1</span></td>
-      <td class="assignee" style="color: var(--critical); font-weight: 700;">Unassigned</td>
-      <td><span class="status status-triggered">&#9679; Triggered</span></td>
-      <td class="time-ago" style="color: var(--critical); font-weight: 600;">Just now</td>
-    `;
-    tbody.insertBefore(critRow, tbody.firstChild);
-
-    document.getElementById('toast').classList.add('show');
-
-    const statOpen = document.getElementById('statOpenVal');
-    const statCritical = document.getElementById('statCriticalVal');
-    const statServices = document.getElementById('statServicesVal');
-    const statCriticalCard = document.getElementById('statCritical');
-
-    animateNumber(statOpen, 12, 13);
-    animateNumber(statCritical, 0, 1);
-    animateNumber(statServices, 0, 3);
-    statCriticalCard.classList.add('critical-active');
-
-    document.getElementById('tableCount').textContent = '13 incidents';
-    document.getElementById('bellBadge').classList.add('show');
-
-    let flashState = false;
-    setInterval(function() {
+  function startTitleFlash() {
+    if (titleFlashInterval) return;
+    var flashState = false;
+    titleFlashInterval = setInterval(function() {
       document.title = flashState
         ? 'AlertCommand - Infrastructure Alert Management'
         : '\u26A0\uFE0F CRITICAL ALERT - AlertCommand';
       flashState = !flashState;
     }, 1000);
+  }
 
+  function stopTitleFlash() {
+    if (titleFlashInterval) {
+      clearInterval(titleFlashInterval);
+      titleFlashInterval = null;
+      document.title = 'AlertCommand - Infrastructure Alert Management';
+    }
+  }
+
+  function updateStats() {
+    document.getElementById('statOpenVal').textContent = openCount;
+    document.getElementById('statCriticalVal').textContent = criticalCount;
+    document.getElementById('statServicesVal').textContent = criticalCount;
+    document.getElementById('tableCount').textContent = openCount + ' incidents';
+    if (criticalCount > 0) {
+      document.getElementById('statCritical').classList.add('critical-active');
+      document.getElementById('bellBadge').textContent = criticalCount;
+      document.getElementById('bellBadge').classList.add('show');
+    } else {
+      document.getElementById('statCritical').classList.remove('critical-active');
+      document.getElementById('bellBadge').classList.remove('show');
+    }
+  }
+
+  function fireCriticalAlert() {
+    var tbody = document.getElementById('incidentBody');
+    var critRow = document.createElement('tr');
+    critRow.className = 'critical-row';
+    critRow.setAttribute('data-critical', 'true');
+    critRow.innerHTML =
+      '<td><span class="badge badge-critical"><span class="badge-dot"></span>P1 &middot; Critical</span></td>' +
+      '<td><span class="incident-id" style="color: var(--critical);">INC-2026-04821</span></td>' +
+      '<td><span class="incident-title">Production Server Capacity Critical &mdash; Primary Cluster Exhausted</span></td>' +
+      '<td><span class="incident-service">prod-cluster-us-east-1</span></td>' +
+      '<td class="assignee" style="color: var(--critical); font-weight: 700;">Unassigned</td>' +
+      '<td><span class="status status-triggered">&#9679; Triggered</span></td>' +
+      '<td class="time-ago" style="color: var(--critical); font-weight: 600;">Just now</td>';
+    tbody.insertBefore(critRow, tbody.firstChild);
+
+    document.getElementById('toast').classList.add('show');
+
+    openCount++;
+    criticalCount++;
+    updateStats();
+    startTitleFlash();
     playAlertSound();
   }
 
-  function animateNumber(el, from, to) {
-    const duration = 400;
-    const start = performance.now();
-    function tick(now) {
-      const progress = Math.min((now - start) / duration, 1);
-      el.textContent = Math.round(from + (to - from) * progress);
-      if (progress < 1) requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
+  var multiAlerts = [
+    { id: 'INC-2026-04822', title: 'Payment processing latency exceeding SLA &mdash; transactions failing', service: 'payment-service-prod' },
+    { id: 'INC-2026-04823', title: 'Database connection pool exhausted &mdash; primary cluster', service: 'db-primary-us-east-1' },
+    { id: 'INC-2026-04824', title: 'Message queue backlog critical &mdash; 50k+ messages pending', service: 'rabbitmq-cluster-01' },
+    { id: 'INC-2026-04825', title: 'API gateway 5xx error rate exceeding 25%', service: 'api-gateway-prod' },
+    { id: 'INC-2026-04826', title: 'Container node memory pressure &mdash; OOMKill events', service: 'k8s-worker-node-03' },
+    { id: 'INC-2026-04827', title: 'Cache hit rate dropped below 40% &mdash; origin overloaded', service: 'redis-cluster-prod' },
+    { id: 'INC-2026-04828', title: 'CDN origin health check failures &mdash; edge nodes failing over', service: 'cdn-origin-us-east' }
+  ];
+
+  function fireMultipleAlerts() {
+    var tbody = document.getElementById('incidentBody');
+
+    multiAlerts.forEach(function(alert, i) {
+      setTimeout(function() {
+        var row = document.createElement('tr');
+        row.className = 'critical-row';
+        row.setAttribute('data-critical', 'true');
+        row.innerHTML =
+          '<td><span class="badge badge-critical"><span class="badge-dot"></span>P1 &middot; Critical</span></td>' +
+          '<td><span class="incident-id" style="color: var(--critical);">' + alert.id + '</span></td>' +
+          '<td><span class="incident-title">' + alert.title + '</span></td>' +
+          '<td><span class="incident-service">' + alert.service + '</span></td>' +
+          '<td class="assignee" style="color: var(--critical); font-weight: 700;">Unassigned</td>' +
+          '<td><span class="status status-triggered">&#9679; Triggered</span></td>' +
+          '<td class="time-ago" style="color: var(--critical); font-weight: 600;">Just now</td>';
+        tbody.insertBefore(row, tbody.firstChild);
+
+        openCount++;
+        criticalCount++;
+        updateStats();
+        playAlertSound();
+      }, i * 750);
+    });
+
+    startTitleFlash();
+  }
+
+  function fixAllAlerts() {
+    var rows = Array.from(document.querySelectorAll('tr[data-critical="true"]'));
+
+    rows.forEach(function(row, i) {
+      setTimeout(function() {
+        row.classList.remove('critical-row');
+        row.style.animation = 'none';
+        row.style.background = '#f0fdf4';
+        row.style.borderLeft = '6px solid var(--resolved)';
+
+        var badge = row.querySelector('.badge');
+        if (badge) {
+          badge.className = 'badge';
+          badge.style.cssText = 'display:inline-flex;align-items:center;gap:8px;padding:7px 20px;border-radius:28px;font-size:17px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap;background:#dcfce7;color:#16a34a;animation:none;';
+          badge.innerHTML = '<span class="badge-dot" style="background:#16a34a;"></span>Resolved';
+        }
+
+        var status = row.querySelector('.status');
+        if (status) {
+          status.style.color = '#16a34a';
+          status.innerHTML = '&#10003; Resolved';
+        }
+
+        var time = row.querySelector('.time-ago');
+        if (time) {
+          time.style.color = '#16a34a';
+          time.style.fontWeight = '600';
+          time.textContent = 'Just now';
+        }
+
+        criticalCount = Math.max(0, criticalCount - 1);
+        updateStats();
+        if (criticalCount === 0) stopTitleFlash();
+      }, i * 500);
+    });
   }
 
   function playAlertSound() {
     try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
       [0, 0.15, 0.3].forEach(function(offset) {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.type = 'square';
