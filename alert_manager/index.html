@@ -1012,11 +1012,21 @@
           badge.innerHTML = '<span class="badge-dot" style="background:#16a34a;"></span>Resolved';
         }
 
+        var idCell = row.querySelector('.incident-id');
+        if (idCell) {
+          idCell.style.color = '#16a34a';
+        }
+
+        var title = row.querySelector('.incident-title');
+        if (title) {
+          title.style.color = '#16a34a';
+        }
+
         var assignee = row.querySelector('.assignee');
         if (assignee) {
           assignee.style.color = '#16a34a';
           assignee.style.fontWeight = '700';
-          assignee.textContent = 'AAP — Auto-Remediation';
+          assignee.textContent = 'AAP \u2014 Auto-Remediation';
         }
 
         var status = row.querySelector('.status');
