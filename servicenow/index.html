@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Incidents — ServiceNow</title>
+  <style>
+    :root {
+      --nav-bg: #1b2a3d;
+      --sn-green: #62d84e;
+      --link-blue: #0066cc;
+      --bg-page: #ffffff;
+      --border: #e4e7eb;
+      --text: #1a1a1a;
+      --text-muted: #5c5c5c;
+      --p1: #ff4040;
+      --p2: #ff8c00;
+      --p3: #ffd700;
+      --p4: #8e8e8e;
+      --state-new: #0066cc;
+      --state-progress: #0b6e4f;
+      --state-assigned: #7c3aed;
+      --state-resolved: #5c5c5c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f7fa;
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Top navigation */
+    .top-nav {
+      background: var(--nav-bg);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 20px;
+      height: 52px;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.02em;
+    }
+
+    .sn-logo {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--sn-green) 0%, #4bc43a 100%);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 14px;
+      color: #1b2a3d;
+    }
+
+    .nav-icon-btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.85);
+      padding: 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-icon-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .global-search-wrap {
+      flex: 1;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .global-search {
+      width: 100%;
+      height: 36px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 0 12px 0 36px;
+      font-size: 13px;
+    }
+
+    .global-search::placeholder {
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .global-search:focus {
+      outline: none;
+      border-color: var(--sn-green);
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .search-inner {
+      position: relative;
+    }
+
+    .search-inner svg {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.5;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4a90d9, #2d6a9e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      margin-left: 8px;
+      cursor: pointer;
+    }
+
+    /* Critical banner */
+    .issue-banner {
+      position: fixed;
+      top: 52px;
+      left: 0;
+      right: 0;
+      z-index: 150;
+      background: linear-gradient(90deg, #8b1a1a 0%, #c62828 50%, #8b1a1a 100%);
+      color: #fff;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(198, 40, 40, 0.35);
+      transform: translateY(-100%);
+      opacity: 0;
+      transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+    }
+
+    .issue-banner.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .issue-banner svg {
+      flex-shrink: 0;
+    }
+
+    /* Main content */
+    .main-wrap {
+      padding: 24px 32px 48px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .page-header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .count-badge {
+      background: #e8ecf1;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-input {
+      flex: 1;
+      min-width: 200px;
+      max-width: 320px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0 12px;
+      font-size: 13px;
+    }
+
+    .btn {
+      height: 36px;
+      padding: 0 16px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--sn-green);
+      color: #0d1f14;
+      border-color: #52c442;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.05);
+    }
+
+    .btn-ghost {
+      background: #fff;
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    .btn-ghost:hover {
+      background: #f8f9fb;
+    }
+
+    .table-card {
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    table.incident-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .incident-table thead {
+      background: #f8f9fb;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .incident-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .incident-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f2f5;
+      vertical-align: middle;
+    }
+
+    .incident-table tbody tr {
+      transition: background 0.15s ease;
+    }
+
+    .incident-table tbody tr:hover {
+      background: #f6f8fb;
+    }
+
+    .incident-table tbody tr.critical-row {
+      background: rgba(255, 64, 64, 0.08);
+      animation: rowSlideIn 0.55s ease-out;
+      cursor: pointer;
+    }
+
+    .incident-table tbody tr.critical-row:hover {
+      background: rgba(255, 64, 64, 0.12);
+    }
+
+    .incident-table tbody tr.critical-row td:first-child {
+      box-shadow: inset 4px 0 0 0 var(--p1);
+    }
+
+    @keyframes rowSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse-border {
+      0%, 100% { box-shadow: inset 4px 0 0 0 var(--p1); }
+      50% { box-shadow: inset 4px 0 0 0 #ff8080; }
+    }
+
+    .critical-row td:first-child {
+      animation: pulse-border 2s ease-in-out infinite;
+    }
+
+    .num-link {
+      color: var(--link-blue);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .num-link:hover {
+      text-decoration: underline;
+    }
+
+    .priority-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: #1a1a1a;
+    }
+
+    .priority-p1 {
+      background: var(--p1);
+      color: #fff;
+    }
+
+    .priority-p1.pulse {
+      animation: badgePulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes badgePulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 64, 64, 0.5); }
+      50% { box-shadow: 0 0 0 6px rgba(255, 64, 64, 0); }
+    }
+
+    .priority-p2 { background: var(--p2); color: #fff; }
+    .priority-p3 { background: var(--p3); color: #3d3d00; }
+    .priority-p4 { background: #e8e8e8; color: #4a4a4a; }
+
+    .state-text {
+      font-weight: 600;
+    }
+
+    .state-new { color: var(--state-new); }
+    .state-in-progress { color: var(--state-progress); }
+    .state-assigned { color: var(--state-assigned); }
+    .state-resolved { color: var(--state-resolved); }
+
+    /* Overlay */
+    .overlay-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(27, 42, 61, 0.45);
+      z-index: 300;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+
+    .overlay-backdrop.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .overlay-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(920px, 100vw);
+      background: #fafbfc;
+      z-index: 301;
+      box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12);
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .overlay-backdrop.open .overlay-panel {
+      transform: translateX(0);
+    }
+
+    .detail-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 28px 40px;
+    }
+
+    .detail-header-bar {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+      flex-shrink: 0;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--link-blue);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .back-btn:hover {
+      text-decoration: underline;
+    }
+
+    .detail-inc-num {
+      font-size: 13px;
+      color: var(--link-blue);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .detail-title {
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1.35;
+      margin: 0 0 16px;
+      color: var(--text);
+    }
+
+    .detail-badges {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge-state {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #e3f2fd;
+      color: var(--state-new);
+    }
+
+    .badge-p1-large {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--p1);
+      color: #fff;
+    }
+
+    .form-section {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .form-section h3 {
+      margin: 0 0 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px 32px;
+    }
+
+    @media (max-width: 720px) {
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .field-value {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px 12px;
+      font-size: 14px;
+      background: #fff;
+      min-height: 40px;
+      color: var(--text);
+    }
+
+    /* AI panel */
+    .ai-panel {
+      background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fc 100%);
+      border: 1px solid #b8d4f0;
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-top: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ai-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--sn-green), var(--link-blue));
+    }
+
+    .ai-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .ai-panel-header strong {
+      font-size: 15px;
+      color: #0d47a1;
+    }
+
+    .ai-sparkle {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #7c4dff, #536dfe);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .ai-panel ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #1a237e;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    /* Automation timeline */
+    .automation-section h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .timeline {
+      margin-top: 8px;
+    }
+
+    .timeline-step {
+      display: flex;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid #eef0f3;
+    }
+
+    .timeline-step:last-child {
+      border-bottom: none;
+    }
+
+    .step-marker {
+      flex-shrink: 0;
+      width: 28px;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    .step-body {
+      flex: 1;
+    }
+
+    .step-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .step-status {
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .status-complete { color: #0b6e4f; }
+    .status-failed { color: #c62828; }
+    .status-ready { color: #1565c0; }
+
+    .step-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .step-time {
+      font-size: 11px;
+      color: #888;
+    }
+
+    .btn-aap {
+      margin-top: 8px;
+      background: var(--sn-green);
+      color: #0d1f14;
+      border: 1px solid #52c442;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .btn-aap:hover {
+      filter: brightness(1.05);
+    }
+
+    /* Activity journal */
+    .journal-entry {
+      padding: 12px 0;
+      border-bottom: 1px solid #eef0f3;
+      font-size: 13px;
+    }
+
+    .journal-entry:last-child {
+      border-bottom: none;
+    }
+
+    .journal-meta {
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    .journal-text {
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    /* Terminal */
+    .terminal-block {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      padding: 16px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin-top: 12px;
+      white-space: pre;
+    }
+
+    .terminal-block .play {
+      color: #569cd6;
+    }
+
+    .terminal-block .task {
+      color: #ce9178;
+    }
+
+    .terminal-block .ok {
+      color: #6a9955;
+    }
+  </style>
+</head>
+<body>
+  <header class="top-nav" role="navigation">
+    <button type="button" class="nav-icon-btn" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+    </button>
+    <div class="nav-brand">
+      <span class="sn-logo" aria-hidden="true">S</span>
+      <span>ServiceNow</span>
+    </div>
+    <div class="global-search-wrap">
+      <div class="search-inner">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="search" class="global-search" placeholder="Search" aria-label="Global search" />
+      </div>
+    </div>
+    <div class="nav-right">
+      <button type="button" class="nav-icon-btn" aria-label="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+      </button>
+      <span class="avatar" title="User">JD</span>
+    </div>
+  </header>
+
+  <div id="issueBanner" class="issue-banner" role="alert" aria-live="polite">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+    <span>New P1 Incident: Production database cluster unreachable</span>
+  </div>
+
+  <main class="main-wrap">
+    <div class="page-header">
+      <h1>Incidents</h1>
+      <span id="recordCount" class="count-badge">8 records</span>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" class="toolbar-input" placeholder="Filter incidents..." aria-label="Filter incidents" />
+      <button type="button" class="btn btn-primary">New</button>
+      <button type="button" class="btn btn-ghost">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
+        Column config
+      </button>
+    </div>
+
+    <div class="table-card">
+      <table class="incident-table" aria-label="Incidents list">
+        <thead>
+          <tr>
+            <th>Number</th>
+            <th>Short Description</th>
+            <th>Priority</th>
+            <th>State</th>
+            <th>Assignment Group</th>
+            <th>Updated</th>
+          </tr>
+        </thead>
+        <tbody id="incidentBody">
+          <tr>
+            <td><a href="#" class="num-link" onclick="return false;">INC0049120</a></td>
+            <td>Email notification delays for APAC region</td>
+            <td><span class="priority-badge priority-p3">P3</span></td>
+            <td><span class="state-text state-in-progress">In Progress</span></td>
+            <td>Messaging Team</td>
+            <td>2h ago</td>
+          </tr>
+          <tr>
+            <td><a href="#" class="num-link" onclick="return false;">INC0049119</a></td>
+            <td>VPN gateway intermittent timeout — London office</td>
+            <td><span class="priority-badge priority-p3">P3</span></td>
+            <td><span class="state-text state-in-progress">In Progress</span></td>
+            <td>Network Ops</td>
+            <td>3h ago</td>
+          </tr>
+          <tr>
+            <td><a href="#" class="num-link" onclick="return false;">INC0049118</a></td>
+            <td>Slow report generation in BI dashboard</td>
+            <td><span class="priority-badge priority-p4">P4</span></td>
+            <td><span class="state-text state-new">New</span></td>
+            <td>Data Engineering</td>
+            <td>4h ago</td>
+          </tr>
+          <tr>
+            <td><a href="#" class="num-link" onclick="return false;">INC0049117</a></td>
+            <td>Printer queue stuck on Floor 3 — Building A</td>
+            <td><span class="priority-badge priority-p4">P4</span></td>
+            <td><span class="state-text state-in-progress">In Progress</span></td>
+            <td>Desktop Support</td>
+            <td>5h ago</td>
+          </tr>
+          <tr>
+            <td><a href="#" class="num-link" onclick="return false;">INC0049116</a></td>
+            <td>SSL certificate warning on staging-api</td>
+            <td><span class="priority-badge priority-p3">P3</span></td>
+            <td><span class="state-text state-assigned">Assigned</span></td>
+            <td>Security Ops</td>
+            <td>6h ago</td>
+          </tr>
+          <tr>
+            <td><a href="#" class="num-link" onclick="return false;">INC0049115</a></td>
+            <td>Disk usage at 78% on log-collector-02</td>
+            <td><span class="priority-badge priority-p4">P4</span></td>
+            <td><span class="state-text state-in-progress">In Progress</span></td>
+            <td>Platform Engineering</td>
+            <td>8h ago</td>
+          </tr>
+          <tr>
+            <td><a href="#" class="num-link" onclick="return false;">INC0049114</a></td>
+            <td>LDAP sync delay for new employee accounts</td>
+            <td><span class="priority-badge priority-p3">P3</span></td>
+            <td><span class="state-text state-resolved">Resolved</span></td>
+            <td>Identity &amp; Access</td>
+            <td>10h ago</td>
+          </tr>
+          <tr>
+            <td><a href="#" class="num-link" onclick="return false;">INC0049113</a></td>
+            <td>Scheduled maintenance reminder — DB patching</td>
+            <td><span class="priority-badge priority-p4">P4</span></td>
+            <td><span class="state-text state-resolved">Resolved</span></td>
+            <td>DBA Team</td>
+            <td>12h ago</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <div id="overlayBackdrop" class="overlay-backdrop" aria-hidden="true">
+    <div class="overlay-panel" role="dialog" aria-modal="true" aria-labelledby="detailTitle" onclick="event.stopPropagation()">
+      <div class="detail-header-bar">
+        <button type="button" class="back-btn" id="closeDetailBtn" aria-label="Back to list">
+          ← Back to List
+        </button>
+        <div class="detail-inc-num">INC0049127</div>
+        <h2 id="detailTitle" class="detail-title">Production database cluster unreachable — primary failover required</h2>
+        <div class="detail-badges">
+          <span class="badge-state">New</span>
+          <span class="badge-p1-large">P1 Critical</span>
+        </div>
+      </div>
+      <div class="detail-scroll">
+        <div class="form-section">
+          <h3>Incident details</h3>
+          <div class="field-grid">
+            <div class="field">
+              <label for="f-priority">Priority</label>
+              <div id="f-priority" class="field-value">1 - Critical</div>
+            </div>
+            <div class="field">
+              <label for="f-ci">Configuration Item</label>
+              <div id="f-ci" class="field-value">db-primary-cluster-01</div>
+            </div>
+            <div class="field">
+              <label for="f-impact">Impact</label>
+              <div id="f-impact" class="field-value">1 - High</div>
+            </div>
+            <div class="field">
+              <label for="f-ag">Assignment Group</label>
+              <div id="f-ag" class="field-value">Platform Engineering</div>
+            </div>
+            <div class="field">
+              <label for="f-urgency">Urgency</label>
+              <div id="f-urgency" class="field-value">1 - High</div>
+            </div>
+            <div class="field">
+              <label for="f-assigned">Assigned to</label>
+              <div id="f-assigned" class="field-value">(Unassigned)</div>
+            </div>
+            <div class="field">
+              <label for="f-cat">Category</label>
+              <div id="f-cat" class="field-value">Database</div>
+            </div>
+            <div class="field">
+              <label for="f-openedby">Opened by</label>
+              <div id="f-openedby" class="field-value">Monitoring System</div>
+            </div>
+            <div class="field">
+              <label for="f-sub">Subcategory</label>
+              <div id="f-sub" class="field-value">Cluster Failover</div>
+            </div>
+            <div class="field">
+              <label for="f-opened">Opened</label>
+              <div id="f-opened" class="field-value"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ai-panel">
+          <div class="ai-panel-header">
+            <div class="ai-sparkle" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6L12 2z"/></svg>
+            </div>
+            <strong>Now Assist — AI Recommendations</strong>
+          </div>
+          <ul>
+            <li>3 similar incidents found in the last 90 days</li>
+            <li>Last resolution: Automated failover via Ansible Automation Platform (Mean time to resolve: 4m 12s)</li>
+            <li>Recommended action: Execute database failover playbook</li>
+          </ul>
+        </div>
+
+        <div class="form-section automation-section">
+          <h3>Automation Activity — Ansible Automation Platform (MCP)</h3>
+          <div class="timeline">
+            <div class="timeline-step">
+              <div class="step-marker">✓</div>
+              <div class="step-body">
+                <div class="step-title">
+                  Step 1: Diagnostic Collection
+                  <span class="step-status status-complete">Complete</span>
+                </div>
+                <div class="step-desc">Collected cluster health, replication lag, and connection pool stats via AAP</div>
+                <div class="step-time" id="stepTime1"></div>
+              </div>
+            </div>
+            <div class="timeline-step">
+              <div class="step-marker">✗</div>
+              <div class="step-body">
+                <div class="step-title">
+                  Step 2: Primary Reconnection Attempt
+                  <span class="step-status status-failed">Failed</span>
+                </div>
+                <div class="step-desc">Attempted to restore primary node connectivity — connection refused after 30s timeout</div>
+                <div class="step-time" id="stepTime2"></div>
+              </div>
+            </div>
+            <div class="timeline-step">
+              <div class="step-marker">●</div>
+              <div class="step-body">
+                <div class="step-title">
+                  Step 3: Database Failover
+                  <span class="step-status status-ready">Ready</span>
+                </div>
+                <div class="step-desc">Promote replica db-replica-02 to primary, reconfigure connection strings, verify data integrity</div>
+                <button type="button" class="btn-aap">Execute Failover via AAP →</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 20px;">
+            <strong style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;">Playbook Output</strong>
+            <div class="terminal-block" id="playbookTerminal">PLAY [Database Cluster Diagnostics] ********************************
+
+TASK [Check primary node connectivity] *****************************
+ok: [db-primary-cluster-01] => {"status": "unreachable", "last_seen": "6m ago"}
+
+TASK [Measure replication lag] *************************************
+ok: [db-replica-02] => {"lag_seconds": 0.3, "status": "in_sync"}
+
+TASK [Verify connection pool health] *******************************
+changed: [db-primary-cluster-01] => {"active": 0, "max": 200, "errors": 847}
+
+TASK [Assess failover readiness] ***********************************
+ok: [db-replica-02] => {"ready": true, "data_loss_risk": "none"}
+
+PLAY RECAP *********************************************************
+db-primary-cluster-01   : ok=3    changed=1    unreachable=0    failed=0
+db-replica-02           : ok=2    changed=0    unreachable=0    failed=0</div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Activity — Work notes</h3>
+          <div class="journal-entry">
+            <div class="journal-meta" id="jn1"></div>
+            <div class="journal-text">Incident auto-created by monitoring integration</div>
+          </div>
+          <div class="journal-entry">
+            <div class="journal-meta" id="jn2"></div>
+            <div class="journal-text">AAP diagnostic playbook completed — cluster health report attached</div>
+          </div>
+          <div class="journal-entry">
+            <div class="journal-meta" id="jn3"></div>
+            <div class="journal-text">Primary reconnection failed — failover recommended</div>
+          </div>
+          <div class="journal-entry">
+            <div class="journal-meta" id="jn4"></div>
+            <div class="journal-text">Now Assist: 3 historical matches — failover playbook suggested (awaiting approval)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var keyBuffer = '';
+    var issue1Triggered = false;
+
+    function formatTs(d) {
+      var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
+      return pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + '/' + d.getFullYear() + ', ' +
+        pad(d.getHours() % 12 || 12) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) +
+        ' ' + (d.getHours() >= 12 ? 'PM' : 'AM');
+    }
+
+    function setDetailTimestamps() {
+      var now = new Date();
+      document.getElementById('f-opened').textContent = formatTs(now);
+      var t1 = new Date(now.getTime() - 4 * 60 * 1000);
+      var t2 = new Date(now.getTime() - 2 * 60 * 1000);
+      document.getElementById('stepTime1').textContent = formatTs(t1);
+      document.getElementById('stepTime2').textContent = formatTs(t2);
+      var jBase = new Date(now.getTime() - 5 * 60 * 1000);
+      document.getElementById('jn1').textContent = 'System · ' + formatTs(new Date(jBase.getTime()));
+      document.getElementById('jn2').textContent = 'AAP Integration · ' + formatTs(new Date(jBase.getTime() + 2 * 60 * 1000));
+      document.getElementById('jn3').textContent = 'AAP Integration · ' + formatTs(new Date(jBase.getTime() + 3 * 60 * 1000));
+      document.getElementById('jn4').textContent = 'Now Assist · ' + formatTs(new Date(jBase.getTime() + 4 * 60 * 1000));
+    }
+
+    function openP1Detail() {
+      setDetailTimestamps();
+      var backdrop = document.getElementById('overlayBackdrop');
+      backdrop.classList.add('open');
+      backdrop.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeP1Detail() {
+      var backdrop = document.getElementById('overlayBackdrop');
+      backdrop.classList.remove('open');
+      backdrop.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    function fireIssue() {
+      var banner = document.getElementById('issueBanner');
+      banner.classList.add('visible');
+
+      var tbody = document.getElementById('incidentBody');
+      var tr = document.createElement('tr');
+      tr.className = 'critical-row';
+      tr.setAttribute('data-p1-detail', 'true');
+      tr.innerHTML =
+        '<td><a href="#" class="num-link">INC0049127</a></td>' +
+        '<td>Production database cluster unreachable — primary failover required</td>' +
+        '<td><span class="priority-badge priority-p1 pulse">P1</span></td>' +
+        '<td><span class="state-text state-new">New</span></td>' +
+        '<td>Unassigned</td>' +
+        '<td>Just now</td>';
+      tbody.insertBefore(tr, tbody.firstChild);
+
+      document.getElementById('recordCount').textContent = '9 records';
+
+      tr.addEventListener('click', function (e) {
+        if (e.target.tagName === 'A') e.preventDefault();
+        openP1Detail();
+      });
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      keyBuffer += e.key.toLowerCase();
+      if (keyBuffer.length > 30) keyBuffer = keyBuffer.slice(-30);
+      if (!issue1Triggered && keyBuffer.includes('issue1')) {
+        issue1Triggered = true;
+        keyBuffer = '';
+        fireIssue();
+      }
+    });
+
+    document.getElementById('overlayBackdrop').addEventListener('click', closeP1Detail);
+    document.getElementById('closeDetailBtn').addEventListener('click', closeP1Detail);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && document.getElementById('overlayBackdrop').classList.contains('open')) {
+        closeP1Detail();
+      }
+    });
+  </script>
+</body>
+</html>

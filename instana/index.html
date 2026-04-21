@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IBM Instana — Application Perspective</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --shell: #161616;
+      --rail: #262626;
+      --content: #f4f4f4;
+      --text-primary: #161616;
+      --text-secondary: #525252;
+      --text-inverse: #f4f4f4;
+      --interactive: #0f62fe;
+      --border-subtle: #e0e0e0;
+      --status-healthy: #42be65;
+      --status-warning: #f1c21b;
+      --status-critical: #da1e28;
+      --toast-bg: #262626;
+      --terminal-bg: #161616;
+      --terminal-green: #42be65;
+      --terminal-dim: #8d8d8d;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.45;
+      color: var(--text-primary);
+      background: var(--content);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Top header */
+    .header {
+      background: var(--shell);
+      color: var(--text-inverse);
+      height: 48px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 24px;
+      flex-shrink: 0;
+      border-bottom: 1px solid #393939;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .header-brand .ibm { font-size: 18px; }
+    .header-brand .product { font-size: 14px; font-weight: 500; opacity: 0.92; }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #c6c6c6;
+      flex: 1;
+    }
+
+    .breadcrumb span.sep { color: #6f6f6f; }
+
+    .time-range {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      padding: 6px 12px;
+      background: #393939;
+      border: 1px solid #525252;
+      border-radius: 2px;
+      cursor: default;
+    }
+
+    .time-range svg { flex-shrink: 0; opacity: 0.85; }
+
+    .body-row {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Left rail */
+    .rail {
+      width: 56px;
+      background: var(--rail);
+      border-right: 1px solid #393939;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .rail-item {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      color: #c6c6c6;
+      border-radius: 2px;
+      cursor: pointer;
+      font-size: 9px;
+      text-align: center;
+      line-height: 1.1;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .rail-item:hover { background: #393939; color: #fff; }
+    .rail-item.active { background: #393939; color: var(--interactive); }
+    .rail-item svg { width: 20px; height: 20px; }
+
+    /* Main content */
+    .main {
+      flex: 1;
+      padding: 20px 24px 32px;
+      overflow: auto;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .page-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 2px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    .map-card { padding: 16px 20px 24px; margin-bottom: 20px; }
+
+    .map-card h2 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .map-card h2 .badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      background: #e0e0e0;
+      color: var(--text-secondary);
+      border-radius: 2px;
+    }
+
+    .map-wrap {
+      width: 100%;
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+    }
+
+    .service-map {
+      max-width: 920px;
+      width: 100%;
+      height: 340px;
+    }
+
+    .map-edge {
+      stroke: #8d8d8d;
+      stroke-width: 1.5;
+      fill: none;
+      opacity: 0.85;
+    }
+
+    .map-edge.issue { stroke: #a8a8a8; }
+
+    .service-node circle.node-bg {
+      fill: #fff;
+      stroke: var(--status-healthy);
+      stroke-width: 2.5;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.08));
+    }
+
+    .service-node.healthy circle.node-bg {
+      animation: pulse-healthy 2.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-healthy {
+      0%, 100% { stroke-opacity: 1; }
+      50% { stroke-opacity: 0.65; }
+    }
+
+    .service-node.critical circle.node-bg {
+      stroke: var(--status-critical);
+      fill: #fff5f5;
+      animation: pulse-critical 1.2s ease-in-out infinite;
+      filter: drop-shadow(0 0 12px rgba(218, 30, 40, 0.65));
+    }
+
+    @keyframes pulse-critical {
+      0%, 100% { stroke-width: 2.5; }
+      50% { stroke-width: 3.5; }
+    }
+
+    .service-node.warning circle.node-bg {
+      stroke: var(--status-warning);
+      fill: #fdf6e3;
+      animation: none;
+      filter: drop-shadow(0 0 8px rgba(241, 194, 27, 0.45));
+    }
+
+    .service-node text.label {
+      font-family: "IBM Plex Sans", sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      fill: var(--text-primary);
+      text-anchor: middle;
+    }
+
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 1100px) {
+      .metrics-row { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .metric-card {
+      padding: 16px 18px;
+      border-left: 3px solid var(--interactive);
+      transition: border-color 0.25s, background 0.25s;
+    }
+
+    .metric-card.critical-state {
+      border-left-color: var(--status-critical);
+      background: #fff5f5;
+    }
+
+    .metric-card .metric-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+
+    .metric-card .metric-value {
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .metric-card .metric-value.red { color: var(--status-critical); }
+
+    .events-card { padding: 0; overflow: hidden; }
+
+    .events-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 13px;
+      font-weight: 600;
+      background: #fafafa;
+    }
+
+    .event-row {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .event-row:last-child { border-bottom: none; }
+
+    .event-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 2px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .event-icon.info { background: var(--interactive); }
+    .event-icon.critical { background: var(--status-critical); cursor: pointer; }
+    .event-row.critical-row { background: #fff5f5; cursor: pointer; }
+    .event-row.critical-row:hover { background: #ffecec; }
+
+    .event-meta { color: var(--text-secondary); font-size: 12px; margin-top: 4px; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 64px;
+      right: 24px;
+      width: 380px;
+      max-width: calc(100vw - 48px);
+      background: var(--toast-bg);
+      color: #f4f4f4;
+      border-radius: 2px;
+      border-left: 4px solid var(--status-critical);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+      padding: 14px 16px;
+      z-index: 1000;
+      transform: translateX(120%);
+      opacity: 0;
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+      cursor: pointer;
+    }
+
+    .toast.visible {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .toast h3 {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #ff8a8a;
+      margin-bottom: 8px;
+    }
+
+    .toast p { font-size: 13px; line-height: 1.45; margin-bottom: 6px; color: #e0e0e0; }
+    .toast .toast-ts { font-size: 11px; color: #8d8d8d; margin-top: 8px; }
+
+    /* Overlay */
+    .overlay-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(22, 22, 22, 0.55);
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s;
+    }
+
+    .overlay-backdrop.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .overlay-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: min(640px, 100vw);
+      height: 100%;
+      background: #fff;
+      z-index: 2001;
+      box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .overlay-backdrop.open + .overlay-panel,
+    .overlay-panel.open {
+      transform: translateX(0);
+    }
+
+    .overlay-header {
+      background: var(--shell);
+      color: #fff;
+      padding: 16px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .overlay-header h1 {
+      font-size: 16px;
+      font-weight: 600;
+      flex: 1;
+      line-height: 1.35;
+    }
+
+    .severity-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 4px 8px;
+      background: var(--status-critical);
+      color: #fff;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .overlay-ts { font-size: 12px; color: #c6c6c6; margin-top: 6px; }
+
+    .btn-close {
+      background: transparent;
+      border: 1px solid #525252;
+      color: #fff;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .btn-close:hover { background: #393939; }
+
+    .overlay-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .section {
+      margin-bottom: 24px;
+    }
+
+    .section h2 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 8px;
+    }
+
+    .impact-chain {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .impact-node {
+      padding: 6px 10px;
+      background: #f4f4f4;
+      border: 1px solid var(--border-subtle);
+      border-radius: 2px;
+      font-weight: 500;
+    }
+
+    .impact-node.critical { border-color: var(--status-critical); background: #fff5f5; }
+    .impact-node.warning { border-color: var(--status-warning); background: #fdf6e3; }
+
+    .impact-arrow { color: var(--text-secondary); font-size: 14px; }
+
+    .impact-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 560px) {
+      .impact-metrics { grid-template-columns: 1fr; }
+    }
+
+    .impact-metric {
+      padding: 10px 12px;
+      background: #fafafa;
+      border: 1px solid var(--border-subtle);
+      border-radius: 2px;
+    }
+
+    .impact-metric .k { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+    .impact-metric .v { font-size: 18px; font-weight: 600; margin-top: 4px; }
+
+    .timeline {
+      border-left: 2px solid var(--border-subtle);
+      margin-left: 8px;
+      padding-left: 16px;
+    }
+
+    .timeline-entry {
+      position: relative;
+      padding-bottom: 16px;
+      font-size: 13px;
+    }
+
+    .timeline-entry::before {
+      content: "";
+      position: absolute;
+      left: -21px;
+      top: 4px;
+      width: 8px;
+      height: 8px;
+      background: var(--interactive);
+      border-radius: 50%;
+      border: 2px solid #fff;
+    }
+
+    .timeline-entry strong { display: block; margin-bottom: 4px; }
+    .timeline-entry .ts { font-size: 11px; color: var(--text-secondary); }
+
+    .mcp-box {
+      border: 1px solid var(--border-subtle);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .mcp-box-header {
+      background: #262626;
+      color: #f4f4f4;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .mcp-step {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border-subtle);
+      background: #fafafa;
+    }
+
+    .mcp-step:first-of-type { border-top: none; }
+
+    .mcp-step h4 {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 2px;
+      background: #defbe6;
+      color: #0e6027;
+    }
+
+    .status-pill.ready {
+      background: #d0e2ff;
+      color: #0043ce;
+    }
+
+    .mcp-step p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+    .btn-rollback {
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--status-healthy);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .btn-rollback:hover { filter: brightness(1.05); }
+
+    .terminal {
+      background: var(--terminal-bg);
+      color: #e0e0e0;
+      font-family: ui-monospace, "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      padding: 14px 16px;
+      border-radius: 2px;
+      overflow-x: auto;
+      margin-top: 12px;
+      border: 1px solid #393939;
+    }
+
+    .terminal .g { color: var(--terminal-green); }
+    .terminal .d { color: var(--terminal-dim); }
+    .terminal .y { color: var(--status-warning); }
+
+    .overlay-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      gap: 12px;
+      flex-shrink: 0;
+      background: #fafafa;
+    }
+
+    .btn-back {
+      background: #fff;
+      border: 1px solid var(--interactive);
+      color: var(--interactive);
+      padding: 8px 16px;
+      font-size: 13px;
+      font-family: inherit;
+      border-radius: 2px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .btn-back:hover { background: #e5f0ff; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="header">
+      <div class="header-brand">
+        <span class="ibm">IBM</span>
+        <span class="product">Instana</span>
+      </div>
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <span>Observability</span>
+        <span class="sep">/</span>
+        <span>Applications</span>
+        <span class="sep">/</span>
+        <span style="color:#f4f4f4">shop-demo</span>
+      </nav>
+      <div class="time-range" title="Time range">
+        <svg width="14" height="14" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M16 2a14 14 0 1014 14A14.016 14.016 0 0016 2zm0 26a12 12 0 1112-12 12.014 12.014 0 01-12 12z"/><path d="M15 8h2v9h-2zM8 15h9v2H8z"/></svg>
+        <span>Last 30 minutes</span>
+      </div>
+    </header>
+
+    <div class="body-row">
+      <aside class="rail" aria-label="Primary navigation">
+        <div class="rail-item" title="Infrastructure">
+          <svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 2L4 8v8c0 5.55 3.84 10.74 12 14 8.16-3.26 12-8.45 12-14V8L16 2zm0 4.13L24.8 9.5 16 14.88 7.2 9.5 16 6.13zM6 11.73l8 5.2V26.9c-4.56-2.2-8-5.63-8-9.9v-5.27zm20 5.27c0 4.27-3.44 7.7-8 9.9V16.93l8-5.2v5.27z"/></svg>
+          <span>Infra</span>
+        </div>
+        <div class="rail-item active" title="Applications">
+          <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M8 4h8v8H8V4zm16 0h8v8h-8V4zM8 20h8v8H8v-8zm16 0h8v8h-8v-8z"/></svg>
+          <span>Apps</span>
+        </div>
+        <div class="rail-item" title="Events">
+          <svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 2a14 14 0 00-14 14h4a10 10 0 0110-10V2zm0 4a10 10 0 00-10 10h4a6 6 0 016-6V6zm-6 14a6 6 0 006 6v-4a2 2 0 01-2-2h-4z"/></svg>
+          <span>Events</span>
+        </div>
+        <div class="rail-item" title="Analytics">
+          <svg viewBox="0 0 32 32" fill="currentColor"><path d="M4 28h24v2H4zm0-4h4v-8H4zm8 0h4V8h-4zm8 0h4V4h-4z"/></svg>
+          <span>Analytics</span>
+        </div>
+        <div class="rail-item" title="Settings" style="margin-top:auto">
+          <svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 10a6 6 0 100 12 6 6 0 000-12zm0-8l-1.05 2.15L12 5.3l-.85 3.15L8 9.5l1.5 2.5L8 14.5l3.15.85L12 18.7l2.95-1.55L16 20l1.05-2.15L20 18.7l.85-3.15L24 14.5l-1.5-2.5L24 9.5l-3.15-.85L20 5.3l-2.95 1.55L16 2z"/></svg>
+          <span>Settings</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <h1 class="page-title">Application Perspective</h1>
+        <p class="page-sub">Real-time service topology and health for <strong>shop-demo</strong> · All environments</p>
+
+        <section class="card map-card">
+          <h2>Service dependency map <span class="badge">Live</span></h2>
+          <div class="map-wrap">
+            <svg class="service-map" viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" aria-label="Service dependency map">
+              <!-- Edges (lines first; connect circle perimeters) -->
+              <path class="map-edge" d="M440 68 L440 95" />
+              <path class="map-edge" d="M410 155 L248 195" />
+              <path class="map-edge" d="M440 155 L440 185" />
+              <path class="map-edge" d="M470 155 L632 195" />
+              <path class="map-edge" d="M440 245 L440 267" />
+              <path class="map-edge" d="M410 245 L246 262" />
+
+              <!-- Nodes: web-frontend top -->
+              <g class="service-node healthy" id="node-web-frontend" transform="translate(440, 40)">
+                <circle class="node-bg" r="28" cx="0" cy="0" />
+                <text class="label" y="5">web-frontend</text>
+              </g>
+              <!-- api-gateway -->
+              <g class="service-node healthy" id="node-api-gateway" transform="translate(440, 125)">
+                <circle class="node-bg" r="30" cx="0" cy="0" />
+                <text class="label" y="5">api-gateway</text>
+              </g>
+              <!-- inventory left -->
+              <g class="service-node healthy" id="node-inventory-service" transform="translate(220, 195)">
+                <circle class="node-bg" r="28" cx="0" cy="0" />
+                <text class="label" y="5">inventory-service</text>
+              </g>
+              <!-- order center -->
+              <g class="service-node healthy" id="node-order-service" transform="translate(440, 215)">
+                <circle class="node-bg" r="30" cx="0" cy="0" />
+                <text class="label" y="5">order-service</text>
+              </g>
+              <!-- auth right -->
+              <g class="service-node healthy" id="node-auth-service" transform="translate(660, 195)">
+                <circle class="node-bg" r="28" cx="0" cy="0" />
+                <text class="label" y="5">auth-service</text>
+              </g>
+              <!-- notification left bottom -->
+              <g class="service-node healthy" id="node-notification-service" transform="translate(220, 288)">
+                <circle class="node-bg" r="26" cx="0" cy="0" />
+                <text class="label" y="4" style="font-size:10px">notification-service</text>
+              </g>
+              <!-- payment bottom center -->
+              <g class="service-node healthy" id="node-payment-service" transform="translate(440, 295)">
+                <circle class="node-bg" r="28" cx="0" cy="0" />
+                <text class="label" y="5">payment-service</text>
+              </g>
+            </svg>
+          </div>
+        </section>
+
+        <div class="metrics-row">
+          <div class="card metric-card" id="metric-rps">
+            <div class="metric-label">Requests/sec</div>
+            <div class="metric-value" id="val-rps">2,847</div>
+          </div>
+          <div class="card metric-card" id="metric-err">
+            <div class="metric-label">Error Rate</div>
+            <div class="metric-value" id="val-err">0.3%</div>
+          </div>
+          <div class="card metric-card" id="metric-lat">
+            <div class="metric-label">Mean Latency</div>
+            <div class="metric-value" id="val-lat">45ms</div>
+          </div>
+          <div class="card metric-card" id="metric-health">
+            <div class="metric-label">Active Services</div>
+            <div class="metric-value" id="val-health">7/7 Healthy</div>
+          </div>
+        </div>
+
+        <section class="card events-card">
+          <div class="events-header">Recent Events</div>
+          <div id="events-list">
+            <div class="event-row">
+              <span class="event-icon info" aria-hidden="true"></span>
+              <div>
+                <div>Deployment completed: <strong>auth-service</strong> v1.2.0 rolled out to production</div>
+                <div class="event-meta">28 min ago · Info</div>
+              </div>
+            </div>
+            <div class="event-row">
+              <span class="event-icon info" aria-hidden="true"></span>
+              <div>
+                <div>Synthetic check passed: checkout flow (us-east)</div>
+                <div class="event-meta">41 min ago · Info</div>
+              </div>
+            </div>
+            <div class="event-row">
+              <span class="event-icon info" aria-hidden="true"></span>
+              <div>
+                <div>Auto-scaling: <strong>api-gateway</strong> +2 replicas (CPU 72%)</div>
+                <div class="event-meta">52 min ago · Info</div>
+              </div>
+            </div>
+            <div class="event-row">
+              <span class="event-icon info" aria-hidden="true"></span>
+              <div>
+                <div>Maintenance window acknowledged for inventory DB backup</div>
+                <div class="event-meta">1h 05m ago · Info</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="smart-alert" role="alert" aria-live="polite">
+    <h3>CRITICAL ALERT</h3>
+    <p><strong>order-service</strong> error rate &gt; 25% for 5 minutes</p>
+    <p>Cascade impact detected: 3 downstream services affected</p>
+    <div class="toast-ts" id="toast-ts"></div>
+  </div>
+
+  <div class="overlay-backdrop" id="overlay-backdrop" aria-hidden="true"></div>
+  <div class="overlay-panel" id="overlay-panel" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+    <div class="overlay-header">
+      <div style="flex:1">
+        <h1 id="overlay-title">Smart Alert: order-service Error Rate Critical</h1>
+        <div class="overlay-ts" id="overlay-header-ts"></div>
+      </div>
+      <span class="severity-badge">CRITICAL</span>
+      <button type="button" class="btn-close" id="overlay-close-x" aria-label="Close">Close</button>
+    </div>
+    <div class="overlay-body">
+      <div class="section">
+        <h2>Impact analysis</h2>
+        <div class="impact-chain">
+          <span class="impact-node">web-frontend</span>
+          <span class="impact-arrow">→</span>
+          <span class="impact-node">api-gateway</span>
+          <span class="impact-arrow">→</span>
+          <span class="impact-node critical">order-service</span>
+          <span class="impact-arrow">→</span>
+          <span class="impact-node warning">payment-service</span>
+          <span class="impact-arrow">+</span>
+          <span class="impact-node warning">inventory-service</span>
+        </div>
+        <div class="impact-metrics">
+          <div class="impact-metric">
+            <div class="k">Error rate</div>
+            <div class="v" style="color:var(--status-critical)">42.1%</div>
+          </div>
+          <div class="impact-metric">
+            <div class="k">Latency (p95)</div>
+            <div class="v">1,247ms</div>
+          </div>
+          <div class="impact-metric">
+            <div class="k">Affected requests</div>
+            <div class="v">~1,200/min</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Timeline</h2>
+        <div class="timeline">
+          <div class="timeline-entry">
+            <strong>Alert triggered</strong>
+            Threshold breach on order-service error rate
+            <div class="ts" id="tl-1"></div>
+          </div>
+          <div class="timeline-entry">
+            <strong>Cascade detected</strong>
+            payment-service and inventory-service degraded
+            <div class="ts" id="tl-2"></div>
+          </div>
+          <div class="timeline-entry">
+            <strong>MCP: Connected to Ansible Automation Platform</strong>
+            Session established for automated diagnostics
+            <div class="ts" id="tl-3"></div>
+          </div>
+          <div class="timeline-entry">
+            <strong>AAP: Diagnostic playbook launched</strong>
+            Job ID AAP-847291
+            <div class="ts" id="tl-4"></div>
+          </div>
+          <div class="timeline-entry">
+            <strong>AAP: Root cause identified</strong>
+            Memory pressure and OOM correlation on v2.4.1
+            <div class="ts" id="tl-5"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>MCP + AAP integration</h2>
+        <div class="mcp-box">
+          <div class="mcp-box-header">Ansible Automation Platform — via MCP</div>
+          <div class="mcp-step">
+            <h4>Step 1: Diagnostic Collection <span class="status-pill">Complete ✓</span></h4>
+            <p>Gathered container logs, health checks, and deployment history from order-service</p>
+          </div>
+          <div class="mcp-step">
+            <h4>Step 2: Root Cause Analysis <span class="status-pill">Complete ✓</span></h4>
+            <p>Memory leak detected in order-service v2.4.1 — heap usage at 94%, OOM events logged</p>
+          </div>
+          <div class="mcp-step">
+            <h4>Step 3: Remediation Available <span class="status-pill ready">Ready</span></h4>
+            <p>Roll back order-service to v2.3.8 (last known stable)</p>
+            <button type="button" class="btn-rollback">Execute Rollback via AAP →</button>
+          </div>
+        </div>
+
+        <h2 style="margin-top:20px">Playbook output</h2>
+        <pre class="terminal" id="playbook-output"><span class="d">PLAY [Diagnostic Collection — order-service] ***********************</span>
+
+<span class="d">TASK [Gathering Facts] *********************************************</span>
+<span class="g">ok: [order-service-pod-7f8b9c]</span>
+
+<span class="d">TASK [Collect container logs] **************************************</span>
+<span class="g">ok: [order-service-pod-7f8b9c] => {"log_lines": 2847, "errors": 1194}</span>
+
+<span class="d">TASK [Check heap memory utilization] *******************************</span>
+<span class="y">changed: [order-service-pod-7f8b9c] => {"heap_used": "94%", "gc_pauses": 847}</span>
+
+<span class="d">TASK [Review deployment history] ***********************************</span>
+<span class="g">ok: [order-service-pod-7f8b9c] => {"current": "v2.4.1", "deployed": "2h ago", "previous": "v2.3.8"}</span>
+
+<span class="d">PLAY RECAP *********************************************************</span>
+<span class="g">order-service-pod-7f8b9c  : ok=4    changed=1    unreachable=0    failed=0</span></pre>
+      </div>
+    </div>
+    <div class="overlay-footer">
+      <button type="button" class="btn-back" id="overlay-back">← Back</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      function formatTs(d) {
+        return d.toLocaleString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      }
+
+      var now = new Date();
+      var toastTs = document.getElementById('toast-ts');
+      var overlayHeaderTs = document.getElementById('overlay-header-ts');
+
+      function setTimelineOffsets(base) {
+        function tsEl(id, minutesAgo) {
+          var t = new Date(base.getTime() - minutesAgo * 60000);
+          document.getElementById(id).textContent = formatTs(t);
+        }
+        tsEl('tl-1', 0.08);
+        tsEl('tl-2', 0.06);
+        tsEl('tl-3', 0.05);
+        tsEl('tl-4', 0.04);
+        tsEl('tl-5', 0.02);
+      }
+
+      var alertTime = new Date();
+      toastTs.textContent = formatTs(alertTime);
+      overlayHeaderTs.textContent = formatTs(alertTime);
+      setTimelineOffsets(alertTime);
+
+      var keyBuffer = '';
+      var issue1Triggered = false;
+
+      document.addEventListener('keydown', function (e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        keyBuffer += e.key.toLowerCase();
+        if (keyBuffer.length > 30) keyBuffer = keyBuffer.slice(-30);
+        if (!issue1Triggered && keyBuffer.includes('issue1')) {
+          issue1Triggered = true;
+          keyBuffer = '';
+          fireIssue();
+        }
+      });
+
+      function fireIssue() {
+        document.getElementById('node-order-service').classList.remove('healthy');
+        document.getElementById('node-order-service').classList.add('critical');
+
+        document.getElementById('node-payment-service').classList.remove('healthy');
+        document.getElementById('node-payment-service').classList.add('warning');
+
+        document.getElementById('node-inventory-service').classList.remove('healthy');
+        document.getElementById('node-inventory-service').classList.add('warning');
+
+        document.getElementById('val-err').textContent = '42.1%';
+        document.getElementById('val-lat').textContent = '1,247ms';
+        document.getElementById('val-health').textContent = '4/7 Healthy';
+        document.getElementById('val-health').classList.add('red');
+
+        document.getElementById('metric-err').classList.add('critical-state');
+        document.getElementById('metric-health').classList.add('critical-state');
+
+        var t = new Date();
+        toastTs.textContent = formatTs(t);
+        overlayHeaderTs.textContent = formatTs(t);
+        alertTime = t;
+        setTimelineOffsets(t);
+
+        var toast = document.getElementById('smart-alert');
+        requestAnimationFrame(function () {
+          toast.classList.add('visible');
+        });
+
+        var eventsList = document.getElementById('events-list');
+        var criticalRow = document.createElement('div');
+        criticalRow.className = 'event-row critical-row';
+        criticalRow.setAttribute('data-open-incident', '1');
+        criticalRow.innerHTML =
+          '<span class="event-icon critical" aria-hidden="true"></span>' +
+          '<div>' +
+          '<div><strong>CRITICAL:</strong> order-service error rate exceeded 25% — cascade risk</div>' +
+          '<div class="event-meta">Just now · Critical · Click for Smart Alert details</div>' +
+          '</div>';
+        eventsList.insertBefore(criticalRow, eventsList.firstChild);
+
+        criticalRow.addEventListener('click', openOverlay);
+      }
+
+      var backdrop = document.getElementById('overlay-backdrop');
+      var panel = document.getElementById('overlay-panel');
+
+      function openOverlay() {
+        backdrop.classList.add('open');
+        backdrop.setAttribute('aria-hidden', 'false');
+        panel.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeOverlay() {
+        backdrop.classList.remove('open');
+        backdrop.setAttribute('aria-hidden', 'true');
+        panel.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      document.getElementById('smart-alert').addEventListener('click', openOverlay);
+      document.getElementById('overlay-backdrop').addEventListener('click', closeOverlay);
+      document.getElementById('overlay-back').addEventListener('click', closeOverlay);
+      document.getElementById('overlay-close-x').addEventListener('click', closeOverlay);
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && backdrop.classList.contains('open')) {
+          closeOverlay();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

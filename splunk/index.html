@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log Observer — Splunk Observability Cloud</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0c1724;
+      --sidebar: #111d2e;
+      --panel: #182436;
+      --panel-border: #1e3048;
+      --text: #e0e6ed;
+      --text-dim: #7b8fa3;
+      --splunk-green: #65a637;
+      --critical: #dc3545;
+      --warning: #f0ab00;
+      --info: #3b82f6;
+      --link: #73bcf7;
+      --debug-gray: #8b9aab;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Top bar */
+    .topbar {
+      height: 48px;
+      background: var(--sidebar);
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 20px;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.02em;
+    }
+
+    .logo-splunk { color: var(--text); }
+    .logo-chevron { color: var(--splunk-green); font-weight: 700; }
+    .logo-cisco { color: var(--text-dim); font-weight: 500; font-size: 13px; }
+
+    .org-select {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 3px;
+      color: var(--text);
+      font-size: 13px;
+      cursor: default;
+    }
+
+    .org-select svg { opacity: 0.7; }
+
+    .topbar-spacer { flex: 1; }
+
+    .time-picker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 3px;
+      font-size: 13px;
+      color: var(--text);
+      cursor: default;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid var(--panel-border);
+      border-radius: 3px;
+      color: var(--text-dim);
+      cursor: pointer;
+    }
+
+    .icon-btn:hover { color: var(--link); border-color: #2a4060; }
+
+    .body {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 200px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--panel-border);
+      padding: 12px 0;
+      flex-shrink: 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--text-dim);
+      cursor: pointer;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+
+    .nav-item.active {
+      color: var(--text);
+      background: rgba(101, 166, 55, 0.08);
+      border-left-color: var(--splunk-green);
+    }
+
+    .nav-item svg { flex-shrink: 0; opacity: 0.85; }
+
+    /* Main */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .main-inner {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 20px 20px;
+      gap: 12px;
+      overflow: auto;
+    }
+
+    /* Detector alert */
+    .detector-alert {
+      display: none;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      margin: 0 20px;
+      margin-top: 16px;
+      background: rgba(220, 53, 69, 0.12);
+      border: 1px solid rgba(220, 53, 69, 0.45);
+      border-left: 4px solid var(--critical);
+      border-radius: 4px;
+      cursor: pointer;
+      animation: slideIn 0.45s ease-out;
+    }
+
+    .detector-alert.visible { display: flex; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .detector-alert .alert-icon {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(220, 53, 69, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ff6b7a;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .detector-alert .alert-title {
+      font-weight: 600;
+      color: #ffb3ba;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .detector-alert .alert-meta {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .detector-alert:hover {
+      background: rgba(220, 53, 69, 0.18);
+      border-color: rgba(220, 53, 69, 0.6);
+    }
+
+    /* Filter bar */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .search-wrap {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      padding: 8px 12px 8px 36px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 3px;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .search-wrap input::placeholder { color: var(--text-dim); }
+
+    .search-wrap .search-ico {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+
+    select.filter-select {
+      padding: 8px 32px 8px 10px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 3px;
+      color: var(--text);
+      font-size: 13px;
+      min-width: 130px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%237b8fa3'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+
+    /* Chart card */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .card-h {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--panel-border);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+    }
+
+    .chart-area {
+      padding: 12px 14px 8px;
+    }
+
+    #timeline-svg {
+      width: 100%;
+      height: 220px;
+      display: block;
+    }
+
+    /* Table */
+    .log-table-wrap {
+      flex: 1;
+      min-height: 280px;
+    }
+
+    .log-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .log-table thead th {
+      text-align: left;
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.25);
+      border-bottom: 1px solid var(--panel-border);
+      color: var(--text-dim);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .log-table tbody td {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(30, 48, 72, 0.6);
+      font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      vertical-align: top;
+    }
+
+    .log-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+
+    .log-table tbody tr.row-error {
+      background: rgba(220, 53, 69, 0.08);
+    }
+
+    .log-table tbody tr.row-error:hover {
+      background: rgba(220, 53, 69, 0.12);
+    }
+
+    .log-table tbody tr.row-new {
+      animation: rowFlash 0.6s ease;
+    }
+
+    @keyframes rowFlash {
+      0% { background: rgba(220, 53, 69, 0.35); }
+      100% { background: transparent; }
+    }
+
+    .log-table tbody tr.row-new.row-error {
+      animation: rowFlashError 0.6s ease;
+    }
+
+    @keyframes rowFlashError {
+      0% { background: rgba(220, 53, 69, 0.45); }
+      100% { background: rgba(220, 53, 69, 0.08); }
+    }
+
+    .ts { color: var(--text-dim); white-space: nowrap; }
+    .msg { color: var(--text); word-break: break-word; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      font-family: Roboto, sans-serif;
+    }
+
+    .badge-info { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.35); }
+    .badge-debug { background: rgba(139, 154, 171, 0.15); color: var(--debug-gray); border: 1px solid rgba(139, 154, 171, 0.35); }
+    .badge-warn { background: rgba(240, 171, 0, 0.15); color: #fcd34d; border: 1px solid rgba(240, 171, 0, 0.4); }
+    .badge-error { background: rgba(220, 53, 69, 0.25); color: #fca5a5; border: 1px solid rgba(220, 53, 69, 0.55); }
+
+    .source-cell { color: var(--link); font-size: 12px; }
+
+    /* Overlay */
+    .overlay-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 10, 18, 0.82);
+      z-index: 1000;
+      align-items: stretch;
+      justify-content: center;
+      padding: 24px;
+      overflow: auto;
+    }
+
+    .overlay-backdrop.open { display: flex; }
+
+    .overlay-panel {
+      width: 100%;
+      max-width: 1040px;
+      margin: auto;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.55);
+      max-height: calc(100vh - 48px);
+      display: flex;
+      flex-direction: column;
+      animation: overlayIn 0.25s ease;
+    }
+
+    @keyframes overlayIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .overlay-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--panel-border);
+      background: rgba(0,0,0,0.2);
+    }
+
+    .overlay-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .overlay-sub {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .badge-critical {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(220, 53, 69, 0.25);
+      color: #fca5a5;
+      border: 1px solid rgba(220, 53, 69, 0.5);
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    .btn-back {
+      padding: 8px 14px;
+      background: transparent;
+      border: 1px solid var(--panel-border);
+      border-radius: 3px;
+      color: var(--link);
+      font-size: 13px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .btn-back:hover { background: rgba(115, 188, 247, 0.08); }
+
+    .overlay-body {
+      padding: 20px;
+      overflow: auto;
+      flex: 1;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    .signals-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .signals-row { grid-template-columns: 1fr; }
+    }
+
+    .mini-chart {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 12px;
+    }
+
+    .mini-chart h4 {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .mini-chart .big {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .mini-chart .trend {
+      font-size: 12px;
+      color: var(--critical);
+      font-weight: 600;
+    }
+
+    .mini-chart svg { width: 100%; height: 64px; display: block; margin-top: 8px; }
+
+    .ai-panel {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(101, 166, 55, 0.08) 100%);
+      border: 1px solid rgba(115, 188, 247, 0.35);
+      border-radius: 6px;
+      padding: 16px 18px;
+      margin-bottom: 20px;
+    }
+
+    .ai-panel .ai-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--link);
+      margin-bottom: 12px;
+    }
+
+    .ai-panel p {
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .ai-panel p:last-child { margin-bottom: 0; }
+
+    .aap-section {
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      padding: 16px;
+      background: rgba(0,0,0,0.15);
+    }
+
+    .timeline-step {
+      position: relative;
+      padding-left: 28px;
+      padding-bottom: 16px;
+      border-left: 2px solid var(--panel-border);
+      margin-left: 8px;
+    }
+
+    .timeline-step:last-child { border-left-color: transparent; padding-bottom: 0; }
+
+    .timeline-step::before {
+      content: '';
+      position: absolute;
+      left: -7px;
+      top: 2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--panel);
+      border: 2px solid var(--text-dim);
+    }
+
+    .timeline-step.done::before {
+      border-color: var(--splunk-green);
+      background: var(--splunk-green);
+    }
+
+    .timeline-step.ready::before {
+      border-color: var(--warning);
+      background: var(--warning);
+      box-shadow: 0 0 0 3px rgba(240, 171, 0, 0.2);
+    }
+
+    .step-title { font-weight: 600; font-size: 13px; color: var(--text); margin-bottom: 4px; }
+    .step-desc { font-size: 12px; color: var(--text-dim); line-height: 1.45; }
+
+    .btn-aap {
+      margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      background: rgba(101, 166, 55, 0.2);
+      border: 1px solid var(--splunk-green);
+      border-radius: 4px;
+      color: #9fd86a;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-aap:hover { background: rgba(101, 166, 55, 0.3); }
+
+    .terminal {
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: #0a1018;
+      border: 1px solid #1e3048;
+      border-radius: 4px;
+      font-family: "Roboto Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      line-height: 1.55;
+      color: #c5d4e0;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .terminal .t-task { color: #73bcf7; }
+    .terminal .t-ok { color: var(--splunk-green); }
+    .terminal .t-changed { color: #f0ab00; }
+    .terminal .t-host { color: #a78bfa; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="logo">
+        <span class="logo-splunk">splunk<span class="logo-chevron">&gt;</span></span>
+        <span class="logo-cisco">Cisco</span>
+      </div>
+      <div class="org-select">
+        <span>Acme Corp</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L1 3h10z"/></svg>
+      </div>
+      <div class="topbar-spacer"></div>
+      <div class="time-picker">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        Last 15 minutes
+      </div>
+      <button type="button" class="icon-btn" aria-label="Search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      </button>
+    </header>
+
+    <div class="body">
+      <aside class="sidebar">
+        <div class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Dashboards
+        </div>
+        <div class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h4M6 12h8M6 16h5"/></svg>
+          Infrastructure
+        </div>
+        <div class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          APM
+        </div>
+        <div class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          Detectors &amp; SLOs
+        </div>
+        <div class="nav-item active">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5M8 9h2"/></svg>
+          Log Observer
+        </div>
+        <div class="nav-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          Settings
+        </div>
+      </aside>
+
+      <main class="main">
+        <div id="detectorAlert" class="detector-alert" role="button" tabindex="0" aria-label="Open investigation">
+          <div class="alert-icon">!</div>
+          <div>
+            <div class="alert-title">CRITICAL — Error rate anomaly detected on web-frontend-prod (15x baseline)</div>
+            <div class="alert-meta">Detector: Error Rate Threshold | Triggered: just now</div>
+          </div>
+        </div>
+
+        <div class="main-inner">
+          <div class="filter-bar">
+            <div class="search-wrap">
+              <svg class="search-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <input type="text" placeholder="Search logs..." />
+            </div>
+            <select class="filter-select" aria-label="Severity">
+              <option>All severities</option>
+              <option>INFO</option>
+              <option>DEBUG</option>
+              <option>WARN</option>
+              <option>ERROR</option>
+            </select>
+            <select class="filter-select" aria-label="Source">
+              <option>All sources</option>
+              <option>web-frontend-prod</option>
+              <option>api-gateway</option>
+              <option>auth-service</option>
+            </select>
+          </div>
+
+          <div class="card">
+            <div class="card-h">Log volume by severity</div>
+            <div class="chart-area">
+              <svg id="timeline-svg" viewBox="0 0 920 220" preserveAspectRatio="xMidYMid meet"></svg>
+            </div>
+          </div>
+
+          <div class="card log-table-wrap">
+            <div class="card-h">Live logs</div>
+            <div style="overflow-x: auto;">
+              <table class="log-table">
+                <thead>
+                  <tr>
+                    <th style="width: 100px;">Time</th>
+                    <th style="width: 88px;">Severity</th>
+                    <th style="width: 160px;">Source</th>
+                    <th>Message</th>
+                  </tr>
+                </thead>
+                <tbody id="logBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="overlayBackdrop" class="overlay-backdrop">
+    <div id="overlayPanel" class="overlay-panel" role="dialog" aria-modal="true" aria-labelledby="invTitle">
+      <div class="overlay-head">
+        <div>
+          <div class="overlay-title" id="invTitle">
+            <span class="badge-critical">Critical</span>
+            Investigation: Error Rate Anomaly — web-frontend-prod
+          </div>
+          <div class="overlay-sub">Started: 2026-04-21 14:59:07 UTC · Correlation window: Last 15 minutes</div>
+        </div>
+        <button type="button" class="btn-back" id="btnBack">← Back</button>
+      </div>
+      <div class="overlay-body">
+        <div class="section-title">Correlated signals</div>
+        <div class="signals-row">
+          <div class="mini-chart">
+            <h4>CPU Usage</h4>
+            <div class="big">94%</div>
+            <div class="trend">↑ from 30%</div>
+            <svg viewBox="0 0 200 64" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="gcpu" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#65a637" stop-opacity="0.35"/>
+                  <stop offset="100%" stop-color="#65a637" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,50 L25,48 L50,46 L75,44 L100,38 L125,22 L150,10 L175,6 L200,4" fill="none" stroke="#65a637" stroke-width="2"/>
+              <path d="M0,50 L25,48 L50,46 L75,44 L100,38 L125,22 L150,10 L175,6 L200,4 L200,64 L0,64 Z" fill="url(#gcpu)"/>
+            </svg>
+          </div>
+          <div class="mini-chart">
+            <h4>Error rate</h4>
+            <div class="big">42%</div>
+            <div class="trend">↑ from 0.3%</div>
+            <svg viewBox="0 0 200 64" preserveAspectRatio="none">
+              <path d="M0,58 L40,57 L80,56 L120,55 L140,52 L160,35 L180,12 L200,6" fill="none" stroke="#dc3545" stroke-width="2"/>
+              <path d="M0,58 L40,57 L80,56 L120,55 L140,52 L160,35 L180,12 L200,6 L200,64 L0,64 Z" fill="rgba(220,53,69,0.2)"/>
+            </svg>
+          </div>
+          <div class="mini-chart">
+            <h4>Request latency (p95)</h4>
+            <div class="big">2,400 ms</div>
+            <div class="trend">↑ from 45 ms</div>
+            <svg viewBox="0 0 200 64" preserveAspectRatio="none">
+              <path d="M0,55 L30,54 L60,53 L90,50 L120,45 L145,28 L170,10 L200,8" fill="none" stroke="#3b82f6" stroke-width="2"/>
+              <path d="M0,55 L30,54 L60,53 L90,50 L120,45 L145,28 L170,10 L200,8 L200,64 L0,64 Z" fill="rgba(59,130,246,0.15)"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="section-title">AI analysis</div>
+        <div class="ai-panel">
+          <div class="ai-head">
+            <span aria-hidden="true">✦</span>
+            Root Cause Correlation (94% confidence)
+          </div>
+          <p><strong>nginx configuration change</strong> deployed at <strong>14:32</strong> caused upstream connection pool exhaustion.</p>
+          <p><strong>Impact:</strong> web-frontend-prod, api-gateway, auth-service</p>
+          <p><strong>Pattern matches</strong> 2 previous incidents resolved via configuration rollback.</p>
+        </div>
+
+        <div class="section-title">Ansible Automation Platform integration (MCP)</div>
+        <div class="aap-section">
+          <div class="timeline-step done">
+            <div class="step-title">Step 1: Host Diagnostics Collection — ✓ Complete</div>
+            <div class="step-desc">Gathered nginx config, connection pool stats, and recent deployment history</div>
+          </div>
+          <div class="timeline-step done">
+            <div class="step-title">Step 2: Configuration Drift Analysis — ✓ Complete</div>
+            <div class="step-desc">Detected config change: worker_connections reduced from 4096 to 256 in nginx.conf at 14:32</div>
+          </div>
+          <div class="timeline-step ready">
+            <div class="step-title">Step 3: Remediation: Roll Back nginx Configuration — ● Ready</div>
+            <div class="step-desc">Restore nginx.conf to last known good state (commit a3f7c2d) and reload</div>
+            <button type="button" class="btn-aap">Execute Rollback via AAP →</button>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top: 16px;">Playbook output</div>
+        <div class="terminal"><span class="t-task">PLAY [Investigate web-frontend-prod] *******************************</span>
+
+<span class="t-task">TASK [Gather nginx configuration] **********************************</span>
+<span class="t-ok">ok:</span> <span class="t-host">[web-frontend-prod]</span> =&gt; {"worker_connections": 256, "expected": 4096}
+
+<span class="t-task">TASK [Check connection pool status] ********************************</span>
+<span class="t-ok">ok:</span> <span class="t-host">[web-frontend-prod]</span> =&gt; {"active": 256, "max": 256, "waiting": 2847}
+
+<span class="t-task">TASK [Review recent deployments] ***********************************</span>
+<span class="t-ok">ok:</span> <span class="t-host">[web-frontend-prod]</span> =&gt; {"last_change": "nginx.conf", "changed_at": "14:32", "by": "deploy-bot"}
+
+<span class="t-task">TASK [Compare with last known good config] *************************</span>
+<span class="t-changed">changed:</span> <span class="t-host">[web-frontend-prod]</span> =&gt; {"drift_detected": true, "field": "worker_connections", "was": 4096, "now": 256}
+
+<span class="t-task">PLAY RECAP *********************************************************</span>
+<span class="t-host">web-frontend-prod</span>   : <span class="t-ok">ok=4</span>    <span class="t-changed">changed=1</span>    unreachable=0    failed=0</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+(function () {
+  var BUCKETS = 20;
+  var labels = [];
+  for (var m = 20; m <= 58; m += 2) {
+    labels.push('14:' + (m < 10 ? '0' : '') + m);
+  }
+
+  function rand(seed) {
+    var x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  }
+
+  function drawTimeline(issueMode) {
+    var svg = document.getElementById('timeline-svg');
+    if (!svg) return;
+    var w = 920;
+    var h = 220;
+    var padL = 44;
+    var padR = 16;
+    var padT = 16;
+    var padB = 36;
+    var chartW = w - padL - padR;
+    var chartH = h - padT - padB;
+    var bw = chartW / BUCKETS * 0.72;
+    var gap = chartW / BUCKETS;
+
+    var maxStack = issueMode ? 520 : 120;
+
+    var parts = [];
+    parts.push('<rect width="' + w + '" height="' + h + '" fill="transparent"/>');
+
+    // Y-axis labels
+    var yTicks = [0, Math.round(maxStack * 0.33), Math.round(maxStack * 0.66), maxStack];
+    for (var yi = 0; yi < yTicks.length; yi++) {
+      var yv = yTicks[yi];
+      var py = padT + chartH - (yv / maxStack) * chartH;
+      parts.push('<text x="' + (padL - 8) + '" y="' + (py + 4) + '" fill="#7b8fa3" font-size="10" text-anchor="end" font-family="Roboto,sans-serif">' + yv + '</text>');
+      parts.push('<line x1="' + padL + '" y1="' + py + '" x2="' + (w - padR) + '" y2="' + py + '" stroke="#1e3048" stroke-width="1" opacity="0.6"/>');
+    }
+
+    parts.push('<line x1="' + padL + '" y1="' + (padT + chartH) + '" x2="' + (w - padR) + '" y2="' + (padT + chartH) + '" stroke="#1e3048" stroke-width="1"/>');
+    parts.push('<line x1="' + padL + '" y1="' + padT + '" x2="' + padL + '" y2="' + (padT + chartH) + '" stroke="#1e3048" stroke-width="1"/>');
+
+    for (var i = 0; i < BUCKETS; i++) {
+      var x = padL + i * gap + (gap - bw) / 2;
+      var baseY = padT + chartH;
+
+      var isSpike = issueMode && i >= BUCKETS - 4;
+
+      var r1 = rand(i * 3.1);
+      var r2 = rand(i * 5.7);
+      var r3 = rand(i * 7.2);
+
+      var hInfo = isSpike ? 8 + r1 * 12 : 55 + r1 * 35;
+      var hDebug = isSpike ? 3 + r2 * 5 : 8 + r2 * 12;
+      var hWarn = isSpike ? 2 : 3 + r3 * 6;
+      var hErr = 0;
+
+      if (isSpike) {
+        hErr = 380 + rand(i * 11) * 100;
+        hInfo = Math.min(hInfo, 15);
+        hDebug = Math.min(hDebug, 8);
+        hWarn = Math.min(hWarn, 6);
+      }
+
+      var scale = chartH / maxStack;
+      var total = hErr + hInfo + hDebug + hWarn;
+      if (total * scale > chartH) {
+        var f = (chartH * 0.98) / (total * scale);
+        hErr *= f; hInfo *= f; hDebug *= f; hWarn *= f;
+      }
+
+      var y = baseY;
+      if (hErr > 0) {
+        y -= hErr * scale;
+        parts.push('<rect x="' + x + '" y="' + y + '" width="' + bw + '" height="' + (hErr * scale) + '" fill="#dc3545" rx="1"/>');
+      }
+      y -= hInfo * scale;
+      parts.push('<rect x="' + x + '" y="' + y + '" width="' + bw + '" height="' + (hInfo * scale) + '" fill="#65a637" rx="1"/>');
+      y -= hDebug * scale;
+      parts.push('<rect x="' + x + '" y="' + y + '" width="' + bw + '" height="' + (hDebug * scale) + '" fill="#3b82f6" rx="1"/>');
+      y -= hWarn * scale;
+      parts.push('<rect x="' + x + '" y="' + y + '" width="' + bw + '" height="' + (hWarn * scale) + '" fill="#f0ab00" rx="1"/>');
+
+      var lx = x + bw / 2;
+      parts.push('<text x="' + lx + '" y="' + (h - 8) + '" fill="#7b8fa3" font-size="8" text-anchor="middle" font-family="Roboto,sans-serif">' + labels[i] + '</text>');
+    }
+
+    // Legend
+    var legY = 8;
+    var lx0 = padL + chartW - 280;
+    [
+      ['#65a637', 'INFO'],
+      ['#3b82f6', 'DEBUG'],
+      ['#f0ab00', 'WARN'],
+      ['#dc3545', 'ERROR']
+    ].forEach(function (item, li) {
+      parts.push('<rect x="' + (lx0 + li * 68) + '" y="' + legY + '" width="10" height="10" fill="' + item[0] + '"/>');
+      parts.push('<text x="' + (lx0 + li * 68 + 14) + '" y="' + (legY + 9) + '" fill="#7b8fa3" font-size="10" font-family="Roboto,sans-serif">' + item[1] + '</text>');
+    });
+
+    svg.innerHTML = parts.join('');
+  }
+
+  var initialRows = [
+    { t: '14:56:32', sev: 'INFO', src: 'web-frontend-prod', msg: 'GET /api/products 200 — 42ms' },
+    { t: '14:56:28', sev: 'DEBUG', src: 'auth-service', msg: 'Token refresh for session abc123' },
+    { t: '14:56:15', sev: 'INFO', src: 'api-gateway', msg: 'Upstream health check passed — all backends healthy' },
+    { t: '14:55:58', sev: 'WARN', src: 'web-frontend-prod', msg: 'Slow response detected: /api/search — 890ms (threshold: 500ms)' },
+    { t: '14:55:44', sev: 'INFO', src: 'order-service', msg: 'Order ORD-8847 processed successfully' },
+    { t: '14:55:31', sev: 'DEBUG', src: 'payment-service', msg: 'Payment webhook acknowledged — txn_id: pay_7f8a9b' },
+    { t: '14:55:12', sev: 'INFO', src: 'inventory-service', msg: 'Stock sync completed — 847 SKUs updated' },
+    { t: '14:54:58', sev: 'INFO', src: 'web-frontend-prod', msg: 'GET /api/dashboard 200 — 38ms' },
+    { t: '14:54:41', sev: 'DEBUG', src: 'api-gateway', msg: 'Rate limiter: 2847/5000 requests in current window' },
+    { t: '14:54:22', sev: 'INFO', src: 'auth-service', msg: 'User login successful — user: admin@acme.com' }
+  ];
+
+  var errorRows = [
+    { t: '14:59:01', sev: 'ERROR', src: 'web-frontend-prod', msg: 'Connection refused: upstream api-gateway:8080 — connection pool exhausted' },
+    { t: '14:59:02', sev: 'ERROR', src: 'api-gateway', msg: '502 Bad Gateway — upstream order-service unreachable' },
+    { t: '14:59:03', sev: 'ERROR', src: 'web-frontend-prod', msg: 'NGINX worker process terminated unexpectedly — signal 11 (SIGSEGV)' },
+    { t: '14:59:04', sev: 'ERROR', src: 'web-frontend-prod', msg: 'Failed to establish connection: api-gateway — max retries exceeded (5/5)' },
+    { t: '14:59:05', sev: 'ERROR', src: 'auth-service', msg: 'Circuit breaker OPEN for web-frontend-prod — 50 failures in 60s' },
+    { t: '14:59:06', sev: 'ERROR', src: 'api-gateway', msg: 'Request queue overflow — 2,847 pending, max 1,000' }
+  ];
+
+  function badgeClass(sev) {
+    if (sev === 'INFO') return 'badge-info';
+    if (sev === 'DEBUG') return 'badge-debug';
+    if (sev === 'WARN') return 'badge-warn';
+    return 'badge-error';
+  }
+
+  function rowHtml(row, extraClass) {
+    var cls = extraClass || '';
+    var err = row.sev === 'ERROR' ? ' row-error' : '';
+    return '<tr class="' + cls + err + '"><td class="ts">' + row.t + '</td><td><span class="badge ' + badgeClass(row.sev) + '">' + row.sev + '</span></td><td class="source-cell">' + row.src + '</td><td class="msg">' + escapeHtml(row.msg) + '</td></tr>';
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function renderTable(rows) {
+    var body = document.getElementById('logBody');
+    body.innerHTML = rows.map(function (r) { return rowHtml(r, ''); }).join('');
+  }
+
+  renderTable(initialRows);
+  drawTimeline(false);
+
+  function fireIssue() {
+    drawTimeline(true);
+    var alertEl = document.getElementById('detectorAlert');
+    alertEl.classList.add('visible');
+
+    var tbody = document.getElementById('logBody');
+    var current = initialRows.slice();
+
+    var idx = 0;
+    function addNext() {
+      if (idx >= errorRows.length) return;
+      var row = errorRows[idx];
+      var wrapper = document.createElement('table');
+      wrapper.innerHTML = '<tbody>' + rowHtml(row, 'row-new') + '</tbody>';
+      var newRow = wrapper.querySelector('tr');
+      tbody.insertBefore(newRow, tbody.firstChild);
+      current.unshift(row);
+      idx++;
+      setTimeout(addNext, 420);
+    }
+    addNext();
+  }
+
+  var keyBuffer = '';
+  var issue1Triggered = false;
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    keyBuffer += e.key.toLowerCase();
+    if (keyBuffer.length > 30) keyBuffer = keyBuffer.slice(-30);
+    if (!issue1Triggered && keyBuffer.includes('issue1')) {
+      issue1Triggered = true;
+      keyBuffer = '';
+      fireIssue();
+    }
+  });
+
+  var backdrop = document.getElementById('overlayBackdrop');
+  var panel = document.getElementById('overlayPanel');
+  var btnBack = document.getElementById('btnBack');
+
+  function openOverlay() {
+    backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeOverlay() {
+    backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('detectorAlert').addEventListener('click', function () {
+    if (!document.getElementById('detectorAlert').classList.contains('visible')) return;
+    openOverlay();
+  });
+
+  backdrop.addEventListener('click', function (e) {
+    if (e.target === backdrop) closeOverlay();
+  });
+
+  btnBack.addEventListener('click', closeOverlay);
+
+  panel.addEventListener('click', function (e) {
+    e.stopPropagation();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && backdrop.classList.contains('open')) closeOverlay();
+  });
+})();
+  </script>
+</body>
+</html>
