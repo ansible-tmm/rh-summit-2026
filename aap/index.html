@@ -350,17 +350,17 @@
   }
 
   /* ── AAP DASHBOARD ── */
-  .aap-dash { background: #1a1f25; min-height: calc(100vh - 76px); }
+  .aap-dash { background: var(--content-bg); min-height: calc(100vh - 76px); }
   .aap-dash-header { padding: 32px 36px 24px; }
-  .aap-dash-header h1 { font-size: 30px; font-weight: 700; color: #e0e0e0; margin-bottom: 4px; }
-  .aap-dash-header p { font-size: 16px; color: #8a8d90; }
+  .aap-dash-header h1 { font-size: 30px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+  .aap-dash-header p { font-size: 16px; color: var(--text-secondary); }
 
   .aap-dash-section {
-    background: #21272d; border: 1px solid #383d44; border-radius: 8px;
+    background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px;
     margin: 0 36px 24px; overflow: hidden;
   }
   .aap-dash-section-title {
-    font-size: 20px; font-weight: 700; color: #e0e0e0;
+    font-size: 20px; font-weight: 700; color: var(--text-primary);
     padding: 20px 24px 16px;
   }
 
@@ -376,15 +376,15 @@
     position: relative; flex-shrink: 0;
   }
   .resource-donut-inner {
-    position: absolute; inset: 8px; border-radius: 50%; background: #21272d;
+    position: absolute; inset: 8px; border-radius: 50%; background: var(--card-bg);
   }
   .resource-link {
-    font-size: 20px; font-weight: 700; color: #73bcf7; cursor: pointer;
+    font-size: 20px; font-weight: 700; color: var(--text-link); cursor: pointer;
     text-decoration: none;
   }
   .resource-link:hover { text-decoration: underline; }
   .resource-legend {
-    display: flex; align-items: center; gap: 6px; font-size: 14px; color: #c7c7c7;
+    display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-secondary);
     margin-left: 4px;
   }
   .resource-legend-dot {
@@ -395,31 +395,31 @@
     display: flex; align-items: center; justify-content: space-between;
     padding: 20px 24px 12px;
   }
-  .job-activity-header h2 { font-size: 20px; font-weight: 700; color: #e0e0e0; }
+  .job-activity-header h2 { font-size: 20px; font-weight: 700; color: var(--text-primary); }
   .job-activity-controls { display: flex; align-items: center; gap: 12px; }
   .ja-btn {
-    background: #2c3139; border: 1px solid #383d44; color: #c7c7c7;
+    background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-primary);
     padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: 600;
     cursor: pointer; font-family: var(--font-body);
   }
-  .ja-btn:hover { background: #383d44; }
-  .ja-link { font-size: 14px; color: #73bcf7; text-decoration: none; font-weight: 600; }
+  .ja-btn:hover { background: #e7e7e7; }
+  .ja-link { font-size: 14px; color: var(--text-link); text-decoration: none; font-weight: 600; }
   .ja-link:hover { text-decoration: underline; }
 
   .chart-area {
     padding: 0 24px 8px; position: relative; height: 220px;
   }
   .chart-svg { width: 100%; height: 100%; }
-  .chart-grid-line { stroke: #2c3139; stroke-width: 1; }
-  .chart-axis-label { fill: #8a8d90; font-size: 11px; font-family: var(--font-mono); }
+  .chart-grid-line { stroke: #e2e6ec; stroke-width: 1; }
+  .chart-axis-label { fill: var(--text-secondary); font-size: 11px; font-family: var(--font-mono); }
   .chart-bar-success { fill: #92d68a; }
   .chart-bar-failed { fill: #c9190b; }
-  .chart-line { fill: none; stroke: #92d68a; stroke-width: 2.5; }
-  .chart-line-dot { fill: #92d68a; }
+  .chart-line { fill: none; stroke: #3e8635; stroke-width: 2.5; }
+  .chart-line-dot { fill: #3e8635; }
 
   .chart-legend {
     display: flex; align-items: center; gap: 20px; justify-content: center;
-    padding: 4px 24px 20px; font-size: 13px; color: #c7c7c7;
+    padding: 4px 24px 20px; font-size: 13px; color: var(--text-secondary);
   }
   .chart-legend-item { display: flex; align-items: center; gap: 6px; }
   .chart-legend-dot { width: 12px; height: 12px; border-radius: 2px; }
@@ -427,24 +427,24 @@
   .dash-jobs-table { width: 100%; border-collapse: collapse; }
   .dash-jobs-table th {
     text-align: left; padding: 12px 24px; font-size: 15px; font-weight: 700;
-    color: #c7c7c7; border-bottom: 1px solid #383d44; background: #262c33;
+    color: var(--text-primary); border-bottom: 1px solid var(--card-border); background: #f5f5f5;
   }
   .dash-jobs-table td {
-    padding: 11px 24px; font-size: 16px; color: #e0e0e0;
-    border-bottom: 1px solid #2c3139;
+    padding: 11px 24px; font-size: 16px; color: var(--text-primary);
+    border-bottom: 1px solid #ececec;
   }
   .dash-jobs-table tr:last-child td { border-bottom: none; }
-  .dash-jobs-table .job-link { color: #73bcf7; text-decoration: none; font-weight: 500; }
+  .dash-jobs-table .job-link { color: var(--text-link); text-decoration: none; font-weight: 500; }
   .dash-jobs-table .job-link:hover { text-decoration: underline; }
   .dash-jobs-table .status-icon { display: inline-flex; align-items: center; gap: 6px; }
-  .dash-jobs-table .status-icon.success { color: #92d68a; }
-  .dash-jobs-table .status-icon.failed { color: #c9190b; }
+  .dash-jobs-table .status-icon.success { color: var(--pf-green); }
+  .dash-jobs-table .status-icon.failed { color: var(--pf-red); }
   .dash-jobs-section-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 18px 24px 14px;
   }
-  .dash-jobs-section-header h2 { font-size: 20px; font-weight: 700; color: #e0e0e0; }
-  .dash-jobs-section-header p { font-size: 14px; color: #8a8d90; }
+  .dash-jobs-section-header h2 { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+  .dash-jobs-section-header p { font-size: 14px; color: var(--text-secondary); }
 
   /* ── PROGRESS BAR ── */
   .job-progress {
