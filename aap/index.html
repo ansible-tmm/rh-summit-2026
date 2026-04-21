@@ -1603,13 +1603,13 @@ document.addEventListener('keydown', function(e) {
 });
 
 var edaAlerts = [
-  { service: 'payment-service-prod', desc: 'HighLatency \u2014 payment-service-prod (latency > 500ms for 5m)' },
-  { service: 'db-primary-us-east-1', desc: 'ConnectionPoolExhausted \u2014 db-primary-us-east-1 (0 available)' },
-  { service: 'rabbitmq-cluster-01', desc: 'QueueBacklog \u2014 rabbitmq-cluster-01 (50k+ messages pending)' },
-  { service: 'api-gateway-prod', desc: 'High5xxRate \u2014 api-gateway-prod (error rate > 25%)' },
-  { service: 'k8s-worker-node-03', desc: 'MemoryPressure \u2014 k8s-worker-node-03 (OOMKill events)' },
-  { service: 'redis-cluster-prod', desc: 'LowCacheHitRate \u2014 redis-cluster-prod (hit rate < 40%)' },
-  { service: 'cdn-origin-us-east', desc: 'OriginHealthCheck \u2014 cdn-origin-us-east (failures detected)' }
+  { service: 'payment-service-prod', job: 'Flush Stale Connections \u2014 payment-service-prod', desc: 'HighLatency \u2014 payment-service-prod (latency > 500ms for 5m)', completeDelay: 4000 },
+  { service: 'db-primary-us-east-1', job: 'Recover Connection Pool \u2014 db-primary-us-east-1', desc: 'ConnectionPoolExhausted \u2014 db-primary-us-east-1 (0 available)', completeDelay: 5000 },
+  { service: 'rabbitmq-cluster-01', job: 'Drain Message Queue \u2014 rabbitmq-cluster-01', desc: 'QueueBacklog \u2014 rabbitmq-cluster-01 (50k+ messages pending)', completeDelay: 6500 },
+  { service: 'api-gateway-prod', job: 'Restart API Gateway Workers \u2014 api-gateway-prod', desc: 'High5xxRate \u2014 api-gateway-prod (error rate > 25%)', completeDelay: 8000 },
+  { service: 'k8s-worker-node-03', job: 'Reclaim Container Memory \u2014 k8s-worker-node-03', desc: 'MemoryPressure \u2014 k8s-worker-node-03 (OOMKill events)', completeDelay: 10000 },
+  { service: 'redis-cluster-prod', job: 'Rebuild Redis Cache \u2014 redis-cluster-prod', desc: 'LowCacheHitRate \u2014 redis-cluster-prod (hit rate < 40%)', completeDelay: 12000 },
+  { service: 'cdn-origin-us-east', job: 'Failover CDN Origin \u2014 cdn-origin-us-east', desc: 'OriginHealthCheck \u2014 cdn-origin-us-east (failures detected)', completeDelay: 14000 }
 ];
 
 function fireEdaSequence() {
@@ -1646,7 +1646,7 @@ function fireEdaSequence() {
         '<span class="eda-event-time">' + timeStr + '</span>' +
         '<span class="eda-event-type alert">Alert</span>' +
         '<span class="eda-event-desc">' + alert.desc + '</span>' +
-        '<span class="eda-event-action">&#10003; Launched: Auto-Remediation</span>';
+        '<span class="eda-event-action">&#10003; Launched: ' + alert.job.split(' \u2014')[0] + '</span>';
       if (eventsContainer) eventsContainer.insertBefore(eventRow, eventsContainer.firstChild);
 
       jobCounter++;
@@ -1656,7 +1656,7 @@ function fireEdaSequence() {
       jobRow.id = 'eda-job-' + i;
       jobRow.innerHTML =
         '<td class="table-mono">' + jobCounter + '</td>' +
-        '<td><span class="table-name">Auto-Remediation \u2014 ' + alert.service + '</span></td>' +
+        '<td><span class="table-name">' + alert.job + '</span></td>' +
         '<td><span class="status-badge status-running"><span class="spinner"></span>Running</span></td>' +
         '<td class="table-secondary">Playbook run</td>' +
         '<td class="table-secondary">Just now</td>' +
@@ -1664,19 +1664,21 @@ function fireEdaSequence() {
       if (jobsBody) jobsBody.insertBefore(jobRow, jobsBody.firstChild);
       if (jobsCountEl) jobsCountEl.textContent = jobsItemCount + ' items';
 
-      setTimeout(function() {
-        var statusCell = jobRow.querySelector('td:nth-child(3)');
-        if (statusCell) {
-          statusCell.innerHTML = '<span class="status-badge status-successful"><span class="status-dot"></span>Successful</span>';
-        }
-        var finishedCell = jobRow.querySelector('td:nth-child(6)');
-        if (finishedCell) finishedCell.textContent = 'Just now';
+      (function(row, delay) {
+        setTimeout(function() {
+          var statusCell = row.querySelector('td:nth-child(3)');
+          if (statusCell) {
+            statusCell.innerHTML = '<span class="status-badge status-successful"><span class="status-dot"></span>Successful</span>';
+          }
+          var finishedCell = row.querySelector('td:nth-child(6)');
+          if (finishedCell) finishedCell.textContent = 'Just now';
 
-        if (dashJobCount) {
-          var dc = parseInt(dashJobCount.textContent) || 0;
-          dashJobCount.textContent = dc + 1;
-        }
-      }, 3000 + i * 500);
+          if (dashJobCount) {
+            var dc = parseInt(dashJobCount.textContent) || 0;
+            dashJobCount.textContent = dc + 1;
+          }
+        }, delay);
+      })(jobRow, alert.completeDelay);
 
     }, i * 800);
   });
