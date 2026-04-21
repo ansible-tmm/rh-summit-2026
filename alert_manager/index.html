@@ -277,6 +277,135 @@
     0%, 100% { box-shadow: 0 28px 84px rgba(0,0,0,0.4), 0 0 42px var(--critical-glow); }
     50% { box-shadow: 0 28px 84px rgba(0,0,0,0.4), 0 0 84px var(--critical-glow); }
   }
+  @keyframes spinResolve {
+    to { transform: rotate(360deg); }
+  }
+  .status-remediating {
+    color: var(--acknowledged);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .status-remediating .mini-spinner {
+    display: inline-block; width: 14px; height: 14px;
+    border: 2.5px solid rgba(37,99,235,0.25);
+    border-top-color: var(--acknowledged); border-radius: 50%;
+    animation: spinResolve 0.7s linear infinite;
+  }
+
+  /* ── INCIDENT DETAIL OVERLAY ── */
+  .incident-overlay {
+    display: none; position: fixed; inset: 0; z-index: 300;
+    background: rgba(15,25,35,0.6); backdrop-filter: blur(4px);
+    overflow-y: auto; padding: 40px;
+  }
+  .incident-overlay.show { display: flex; justify-content: center; align-items: flex-start; }
+  .incident-detail {
+    background: var(--bg-card); border-radius: 16px; width: 100%; max-width: 1100px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.3); overflow: hidden; margin-top: 20px;
+  }
+  .inc-detail-header {
+    padding: 32px 40px 24px; border-bottom: 1px solid var(--border);
+  }
+  .inc-detail-top {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;
+    margin-bottom: 16px;
+  }
+  .inc-detail-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 17px; font-weight: 600; color: var(--accent); cursor: pointer;
+    background: none; border: none; padding: 0; margin-bottom: 12px;
+    font-family: inherit;
+  }
+  .inc-detail-back:hover { text-decoration: underline; }
+  .inc-detail-id {
+    font-family: 'SF Mono', 'Fira Code', monospace; font-size: 18px;
+    color: var(--text-secondary); font-weight: 600; margin-bottom: 6px;
+  }
+  .inc-detail-title { font-size: 32px; font-weight: 700; line-height: 1.3; }
+  .inc-detail-badges { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+
+  .inc-detail-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .inc-detail-meta {
+    padding: 24px 40px; border-right: 1px solid var(--border);
+  }
+  .inc-detail-meta:nth-child(even) { border-right: none; }
+  .inc-meta-label {
+    font-size: 14px; font-weight: 700; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;
+  }
+  .inc-meta-value { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+  .inc-meta-value a { color: var(--accent); text-decoration: none; }
+  .inc-meta-value a:hover { text-decoration: underline; }
+
+  .inc-section { padding: 28px 40px; border-bottom: 1px solid var(--border); }
+  .inc-section:last-child { border-bottom: none; }
+  .inc-section-title {
+    font-size: 22px; font-weight: 700; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .inc-timeline { position: relative; padding-left: 28px; }
+  .inc-timeline::before {
+    content: ''; position: absolute; left: 8px; top: 6px; bottom: 6px;
+    width: 2px; background: var(--border);
+  }
+  .inc-tl-item { position: relative; margin-bottom: 20px; }
+  .inc-tl-item:last-child { margin-bottom: 0; }
+  .inc-tl-dot {
+    position: absolute; left: -24px; top: 6px;
+    width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid #fff;
+    box-shadow: 0 0 0 2px var(--border);
+  }
+  .inc-tl-dot.red { background: var(--critical); box-shadow: 0 0 0 2px var(--critical); }
+  .inc-tl-dot.blue { background: var(--acknowledged); box-shadow: 0 0 0 2px var(--acknowledged); }
+  .inc-tl-dot.green { background: var(--resolved); box-shadow: 0 0 0 2px var(--resolved); }
+  .inc-tl-time {
+    font-size: 14px; color: var(--text-secondary); font-weight: 600;
+    font-family: 'SF Mono', 'Fira Code', monospace; margin-bottom: 2px;
+  }
+  .inc-tl-text { font-size: 18px; color: var(--text-primary); }
+  .inc-tl-text strong { font-weight: 700; }
+
+  .inc-resolution-box {
+    background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px;
+    padding: 24px; margin-bottom: 20px;
+  }
+  .inc-resolution-box .res-title {
+    font-size: 20px; font-weight: 700; color: var(--resolved);
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  }
+  .inc-resolution-box .res-detail {
+    font-size: 17px; color: var(--text-secondary); line-height: 1.7;
+  }
+  .inc-resolution-box .res-detail strong { color: var(--text-primary); }
+
+  .inc-playbook-snippet {
+    background: #1e1e1e; border-radius: 8px; overflow: hidden;
+    border: 1px solid #383838;
+  }
+  .inc-playbook-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; background: #2d2d2d; border-bottom: 1px solid #383838;
+  }
+  .inc-playbook-header span {
+    font-size: 14px; font-weight: 600; color: #8a8d90;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .inc-playbook-header a {
+    font-size: 14px; font-weight: 600; color: #73bcf7; text-decoration: none;
+  }
+  .inc-playbook-header a:hover { text-decoration: underline; }
+  .inc-playbook-code {
+    padding: 16px; font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 14px; line-height: 1.7; color: #d4d4d4;
+    white-space: pre-wrap; max-height: 280px; overflow-y: auto;
+  }
+  .inc-playbook-code .ok { color: #3e8635; }
+  .inc-playbook-code .changed { color: #f0ab00; }
+  .inc-playbook-code .task { color: #dcdcaa; font-weight: 600; }
+  .inc-playbook-code .recap { color: #f0ab00; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -491,6 +620,117 @@
   </div>
 </div>
 
+<!-- ── INCIDENT DETAIL OVERLAY ── -->
+<div class="incident-overlay" id="incidentOverlay" onclick="if(event.target===this)closeIncidentDetail()">
+  <div class="incident-detail">
+    <div class="inc-detail-header">
+      <button class="inc-detail-back" onclick="closeIncidentDetail()">&larr; Back to Dashboard</button>
+      <div class="inc-detail-id">INC-2026-04821</div>
+      <div class="inc-detail-title">Production Web Server Capacity Critical &mdash; Primary Cluster Exhausted</div>
+      <div class="inc-detail-badges">
+        <span class="badge" style="display:inline-flex;align-items:center;gap:8px;padding:7px 20px;border-radius:28px;font-size:17px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;background:#dcfce7;color:#16a34a;">
+          <span class="badge-dot" style="background:#16a34a;"></span>Resolved
+        </span>
+        <span class="badge" style="display:inline-flex;align-items:center;gap:8px;padding:7px 20px;border-radius:28px;font-size:15px;font-weight:700;letter-spacing:0.4px;background:#eef1f5;color:#5a6678;">
+          P1 &middot; Critical
+        </span>
+      </div>
+    </div>
+
+    <div class="inc-detail-grid">
+      <div class="inc-detail-meta">
+        <div class="inc-meta-label">Service</div>
+        <div class="inc-meta-value">prod-cluster-us-east-1</div>
+      </div>
+      <div class="inc-detail-meta">
+        <div class="inc-meta-label">Escalation Policy</div>
+        <div class="inc-meta-value">Tier 1 &mdash; Platform Operations</div>
+      </div>
+      <div class="inc-detail-meta">
+        <div class="inc-meta-label">Resolved By</div>
+        <div class="inc-meta-value" style="color:var(--resolved);">Ansible Automation Platform</div>
+      </div>
+      <div class="inc-detail-meta">
+        <div class="inc-meta-label">Duration</div>
+        <div class="inc-meta-value" id="incDuration">2m 14s</div>
+      </div>
+    </div>
+
+    <div class="inc-section">
+      <div class="inc-section-title">&#128337; Activity Timeline</div>
+      <div class="inc-timeline">
+        <div class="inc-tl-item">
+          <div class="inc-tl-dot red"></div>
+          <div class="inc-tl-time" id="incTlTriggered">--</div>
+          <div class="inc-tl-text"><strong>Alert triggered</strong> &mdash; Capacity at 98%, primary cluster us-east-1 exhausted</div>
+        </div>
+        <div class="inc-tl-item">
+          <div class="inc-tl-dot red"></div>
+          <div class="inc-tl-time" id="incTlEscalated">--</div>
+          <div class="inc-tl-text"><strong>Escalated to Tier 1</strong> &mdash; Platform Operations on-call notified</div>
+        </div>
+        <div class="inc-tl-item">
+          <div class="inc-tl-dot blue"></div>
+          <div class="inc-tl-time" id="incTlAcknowledged">--</div>
+          <div class="inc-tl-text"><strong>Acknowledged by Roger Lopez</strong> &mdash; Opened Ansible Automation Platform</div>
+        </div>
+        <div class="inc-tl-item">
+          <div class="inc-tl-dot blue"></div>
+          <div class="inc-tl-time" id="incTlJobLaunched">--</div>
+          <div class="inc-tl-text"><strong>Job launched</strong> &mdash; <a href="#" style="color:var(--accent);">Increase Web Server Capacity</a> (Job #26)</div>
+        </div>
+        <div class="inc-tl-item">
+          <div class="inc-tl-dot green"></div>
+          <div class="inc-tl-time" id="incTlResolved">--</div>
+          <div class="inc-tl-text"><strong>Resolved by AAP</strong> &mdash; Capacity restored to healthy threshold (52%)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="inc-section">
+      <div class="inc-section-title">&#9989; Resolution</div>
+      <div class="inc-resolution-box">
+        <div class="res-title">&#10003; Resolved via Ansible Automation Platform</div>
+        <div class="res-detail">
+          Job template <strong>Increase Web Server Capacity</strong> executed successfully.<br>
+          Scaled web server pools from <strong>4 &rarr; 8 instances</strong> across 3 hosts.<br>
+          Load rebalanced. Capacity restored from <strong>98% &rarr; 52%</strong>.<br>
+          Incident auto-closed by AlertCommand webhook integration.
+        </div>
+      </div>
+
+      <div class="inc-playbook-snippet">
+        <div class="inc-playbook-header">
+          <span>Ansible Job Output &mdash; Job #26</span>
+          <a href="#">Open in AAP &rarr;</a>
+        </div>
+        <div class="inc-playbook-code"><span class="task">TASK [Assess current capacity utilization] **************************************</span>
+<span class="ok">ok: [web-prod-01.acme.com]</span> =&gt; {"capacity_pct": 98, "status": "critical"}
+<span class="ok">ok: [web-prod-02.acme.com]</span> =&gt; {"capacity_pct": 94, "status": "warning"}
+<span class="ok">ok: [web-prod-03.acme.com]</span> =&gt; {"capacity_pct": 91, "status": "warning"}
+
+<span class="task">TASK [Provision additional web server instances] ********************************</span>
+<span class="changed">changed: [web-prod-01.acme.com]</span> =&gt; {"msg": "Scaled pool from 4 to 8 instances"}
+<span class="changed">changed: [web-prod-02.acme.com]</span> =&gt; {"msg": "Scaled pool from 4 to 8 instances"}
+<span class="changed">changed: [web-prod-03.acme.com]</span> =&gt; {"msg": "Scaled pool from 3 to 6 instances"}
+
+<span class="task">TASK [Verify capacity restored to healthy threshold] ****************************</span>
+<span class="ok">ok: [web-prod-01.acme.com]</span> =&gt; {"capacity_pct": 52, "status": "healthy"}
+<span class="ok">ok: [web-prod-02.acme.com]</span> =&gt; {"capacity_pct": 48, "status": "healthy"}
+<span class="ok">ok: [web-prod-03.acme.com]</span> =&gt; {"capacity_pct": 45, "status": "healthy"}
+
+<span class="task">TASK [Update AlertCommand — resolve capacity incident] **************************</span>
+<span class="changed">changed: [web-prod-01.acme.com]</span> =&gt; {"incident": "INC-2026-04821", "status": "resolved"}
+
+<span class="recap">PLAY RECAP *********************************************************************</span>
+<span class="recap">web-prod-01.acme.com       : ok=6    changed=3    unreachable=0    failed=0</span>
+<span class="recap">web-prod-02.acme.com       : ok=6    changed=3    unreachable=0    failed=0</span>
+<span class="recap">web-prod-03.acme.com       : ok=6    changed=3    unreachable=0    failed=0</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   document.getElementById('refreshTime').textContent =
     new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -628,53 +868,131 @@
     startTitleFlash();
   }
 
+  var fix1Timestamp = null;
+
   function fixSev1Alert() {
     var row = document.querySelector('tr[data-sev1="true"]');
     if (!row) return;
 
-    row.classList.remove('critical-row');
-    row.style.animation = 'none';
-    row.style.background = '#f0fdf4';
-    row.style.borderLeft = '6px solid var(--resolved)';
+    fix1Timestamp = new Date();
 
-    var badge = row.querySelector('.badge');
-    if (badge) {
-      badge.className = 'badge';
-      badge.style.cssText = 'display:inline-flex;align-items:center;gap:8px;padding:7px 20px;border-radius:28px;font-size:17px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap;background:#dcfce7;color:#16a34a;animation:none;';
-      badge.innerHTML = '<span class="badge-dot" style="background:#16a34a;"></span>Resolved';
-    }
-
-    var title = row.querySelector('.incident-title');
-    if (title) {
-      title.style.color = '#16a34a';
-    }
-
-    var assignee = row.querySelector('.assignee');
-    if (assignee) {
-      assignee.style.color = '#16a34a';
-      assignee.style.fontWeight = '700';
-      assignee.textContent = 'AAP \u2014 Increase Web Server Capacity';
-    }
+    document.getElementById('toast').classList.remove('show');
 
     var status = row.querySelector('.status');
-    if (status) {
-      status.style.color = '#16a34a';
-      status.innerHTML = '&#10003; Resolved \u2014 Updated by AAP';
-    }
-
+    var assignee = row.querySelector('.assignee');
     var time = row.querySelector('.time-ago');
-    if (time) {
-      time.style.color = '#16a34a';
-      time.style.fontWeight = '600';
-      time.textContent = 'Just now';
+
+    // Step 1: Receiving update
+    row.style.animation = 'none';
+    row.style.background = '#eff6ff';
+    row.style.borderLeftColor = 'var(--acknowledged)';
+    if (status) {
+      status.className = 'status status-remediating';
+      status.innerHTML = '<span class="mini-spinner"></span> Receiving update...';
+    }
+    if (assignee) {
+      assignee.style.color = 'var(--acknowledged)';
+      assignee.textContent = 'Ansible Automation Platform';
     }
 
-    criticalCount = Math.max(0, criticalCount - 1);
-    updateStats();
-    if (criticalCount === 0) {
-      stopTitleFlash();
-      document.getElementById('toast').classList.remove('show');
+    // Step 2: Remediation in progress
+    setTimeout(function() {
+      row.style.background = '#f5f3ff';
+      row.style.borderLeftColor = 'var(--investigating)';
+      if (status) {
+        status.style.color = 'var(--investigating)';
+        status.innerHTML = '<span class="mini-spinner" style="border-top-color:var(--investigating);border-color:rgba(124,58,237,0.25);border-top-color:var(--investigating);"></span> Remediation in progress';
+      }
+      if (time) {
+        time.style.color = 'var(--investigating)';
+        time.textContent = 'Updating...';
+      }
+    }, 1500);
+
+    // Step 3: Capacity restored
+    setTimeout(function() {
+      row.style.background = '#f0fdf4';
+      row.style.borderLeftColor = 'var(--resolved)';
+      if (status) {
+        status.style.color = 'var(--resolved)';
+        status.innerHTML = '<span class="mini-spinner" style="border-color:rgba(22,163,106,0.25);border-top-color:var(--resolved);"></span> Capacity restored \u2014 verifying...';
+      }
+      if (assignee) {
+        assignee.style.color = 'var(--resolved)';
+      }
+    }, 3500);
+
+    // Step 4: Fully resolved
+    setTimeout(function() {
+      row.classList.remove('critical-row');
+      row.style.background = '#f0fdf4';
+      row.style.borderLeft = '6px solid var(--resolved)';
+      row.style.cursor = 'pointer';
+      row.onclick = function() { openIncidentDetail(); };
+
+      var badge = row.querySelector('.badge');
+      if (badge) {
+        badge.className = 'badge';
+        badge.style.cssText = 'display:inline-flex;align-items:center;gap:8px;padding:7px 20px;border-radius:28px;font-size:17px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap;background:#dcfce7;color:#16a34a;animation:none;';
+        badge.innerHTML = '<span class="badge-dot" style="background:#16a34a;"></span>Resolved';
+      }
+
+      var title = row.querySelector('.incident-title');
+      if (title) {
+        title.style.color = '#16a34a';
+      }
+
+      if (assignee) {
+        assignee.style.color = '#16a34a';
+        assignee.style.fontWeight = '700';
+        assignee.textContent = 'AAP \u2014 Increase Web Server Capacity';
+      }
+
+      if (status) {
+        status.className = 'status';
+        status.style.color = '#16a34a';
+        status.innerHTML = '&#10003; Resolved \u2014 Updated by AAP';
+      }
+
+      if (time) {
+        time.style.color = '#16a34a';
+        time.style.fontWeight = '600';
+        time.textContent = 'Just now';
+      }
+
+      var idCell = row.querySelector('.incident-id');
+      if (idCell) {
+        idCell.style.color = 'var(--accent)';
+        idCell.style.cursor = 'pointer';
+      }
+
+      criticalCount = Math.max(0, criticalCount - 1);
+      updateStats();
+      if (criticalCount === 0) stopTitleFlash();
+    }, 5000);
+  }
+
+  function openIncidentDetail() {
+    var overlay = document.getElementById('incidentOverlay');
+    if (!overlay) return;
+
+    if (fix1Timestamp) {
+      var fmt = function(d, off) {
+        var t = new Date(d.getTime() + (off || 0));
+        return t.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      };
+      document.getElementById('incTlTriggered').textContent = fmt(fix1Timestamp, -130000);
+      document.getElementById('incTlEscalated').textContent = fmt(fix1Timestamp, -125000);
+      document.getElementById('incTlAcknowledged').textContent = fmt(fix1Timestamp, -60000);
+      document.getElementById('incTlJobLaunched').textContent = fmt(fix1Timestamp, -20000);
+      document.getElementById('incTlResolved').textContent = fmt(fix1Timestamp);
     }
+
+    overlay.classList.add('show');
+  }
+
+  function closeIncidentDetail() {
+    document.getElementById('incidentOverlay').classList.remove('show');
   }
 
   function fixAllAlerts() {
