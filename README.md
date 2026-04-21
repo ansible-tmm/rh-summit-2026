@@ -23,9 +23,10 @@ Type these keywords anywhere on the page (no input field needed). Each trigger f
 
 | Keyword | What it does |
 |---|---|
-| `sev1` | Single P1 critical alert appears with toast notification and alarm sound |
-| `shit` | 7 different P1 critical alerts cascade in one by one (~750ms apart) |
-| `fix` | All critical alerts resolve to green "Resolved" one after another (~500ms apart) |
+| `issue1` | Single P1 critical alert appears with toast notification and alarm sound |
+| `fix1` | The single capacity alert resolves to green "Resolved — Updated by AAP" (manual remediation) |
+| `issue2` | 7 different P1 critical alerts cascade in one by one (~750ms apart) |
+| `fix2` | All critical alerts resolve to green "Resolved by EDA" one after another (~500ms apart) |
 
 ### Ansible Automation Platform (`/aap/`)
 
@@ -39,9 +40,9 @@ Additionally, clicking **Launch** on any job template in the Templates page play
 
 ## Cold Open Demo Flow
 
-**Segment 1 — 2019 (Task-based):** Type `sev1` on AlertCommand → single alert fires → manually navigate to AAP → click Launch on a template → watch playbook run
+**Segment 1 — 2019 (Task-based):** Type `issue1` on AlertCommand → single alert fires → manually navigate to AAP → click Launch on "Increase Web Server Capacity" → watch playbook run → type `fix1` on AlertCommand → capacity alert resolves (Updated by AAP)
 
-**Segment 2 — 2023 (Event-driven):** Type `shit` on AlertCommand → 7 alerts cascade in → switch to AAP Rulebook Activations → type `eda` → fire count climbs, 7 jobs auto-run → switch to Jobs page to see them complete → type `fix` on AlertCommand → all alerts resolve
+**Segment 2 — 2023 (Event-driven):** Type `issue2` on AlertCommand → 7 alerts cascade in → switch to AAP Rulebook Activations → type `eda` → fire count climbs, 7 jobs auto-run → switch to Jobs page to see them complete → type `fix2` on AlertCommand → all alerts resolve
 
 ---
 

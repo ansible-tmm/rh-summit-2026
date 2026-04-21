@@ -349,6 +349,103 @@
     font-size: 22px; font-weight: 700;
   }
 
+  /* ── AAP DASHBOARD ── */
+  .aap-dash { background: #1a1f25; min-height: calc(100vh - 76px); }
+  .aap-dash-header { padding: 32px 36px 24px; }
+  .aap-dash-header h1 { font-size: 30px; font-weight: 700; color: #e0e0e0; margin-bottom: 4px; }
+  .aap-dash-header p { font-size: 16px; color: #8a8d90; }
+
+  .aap-dash-section {
+    background: #21272d; border: 1px solid #383d44; border-radius: 8px;
+    margin: 0 36px 24px; overflow: hidden;
+  }
+  .aap-dash-section-title {
+    font-size: 20px; font-weight: 700; color: #e0e0e0;
+    padding: 20px 24px 16px;
+  }
+
+  .resource-counts {
+    display: flex; align-items: center; gap: 64px;
+    padding: 0 24px 28px; flex-wrap: wrap;
+  }
+  .resource-item {
+    display: flex; align-items: center; gap: 16px;
+  }
+  .resource-donut {
+    width: 56px; height: 56px; border-radius: 50%;
+    position: relative; flex-shrink: 0;
+  }
+  .resource-donut-inner {
+    position: absolute; inset: 8px; border-radius: 50%; background: #21272d;
+  }
+  .resource-link {
+    font-size: 20px; font-weight: 700; color: #73bcf7; cursor: pointer;
+    text-decoration: none;
+  }
+  .resource-link:hover { text-decoration: underline; }
+  .resource-legend {
+    display: flex; align-items: center; gap: 6px; font-size: 14px; color: #c7c7c7;
+    margin-left: 4px;
+  }
+  .resource-legend-dot {
+    width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+  }
+
+  .job-activity-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px 12px;
+  }
+  .job-activity-header h2 { font-size: 20px; font-weight: 700; color: #e0e0e0; }
+  .job-activity-controls { display: flex; align-items: center; gap: 12px; }
+  .ja-btn {
+    background: #2c3139; border: 1px solid #383d44; color: #c7c7c7;
+    padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: var(--font-body);
+  }
+  .ja-btn:hover { background: #383d44; }
+  .ja-link { font-size: 14px; color: #73bcf7; text-decoration: none; font-weight: 600; }
+  .ja-link:hover { text-decoration: underline; }
+
+  .chart-area {
+    padding: 0 24px 8px; position: relative; height: 220px;
+  }
+  .chart-svg { width: 100%; height: 100%; }
+  .chart-grid-line { stroke: #2c3139; stroke-width: 1; }
+  .chart-axis-label { fill: #8a8d90; font-size: 11px; font-family: var(--font-mono); }
+  .chart-bar-success { fill: #92d68a; }
+  .chart-bar-failed { fill: #c9190b; }
+  .chart-line { fill: none; stroke: #92d68a; stroke-width: 2.5; }
+  .chart-line-dot { fill: #92d68a; }
+
+  .chart-legend {
+    display: flex; align-items: center; gap: 20px; justify-content: center;
+    padding: 4px 24px 20px; font-size: 13px; color: #c7c7c7;
+  }
+  .chart-legend-item { display: flex; align-items: center; gap: 6px; }
+  .chart-legend-dot { width: 12px; height: 12px; border-radius: 2px; }
+
+  .dash-jobs-table { width: 100%; border-collapse: collapse; }
+  .dash-jobs-table th {
+    text-align: left; padding: 12px 24px; font-size: 15px; font-weight: 700;
+    color: #c7c7c7; border-bottom: 1px solid #383d44; background: #262c33;
+  }
+  .dash-jobs-table td {
+    padding: 11px 24px; font-size: 16px; color: #e0e0e0;
+    border-bottom: 1px solid #2c3139;
+  }
+  .dash-jobs-table tr:last-child td { border-bottom: none; }
+  .dash-jobs-table .job-link { color: #73bcf7; text-decoration: none; font-weight: 500; }
+  .dash-jobs-table .job-link:hover { text-decoration: underline; }
+  .dash-jobs-table .status-icon { display: inline-flex; align-items: center; gap: 6px; }
+  .dash-jobs-table .status-icon.success { color: #92d68a; }
+  .dash-jobs-table .status-icon.failed { color: #c9190b; }
+  .dash-jobs-section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px 14px;
+  }
+  .dash-jobs-section-header h2 { font-size: 20px; font-weight: 700; color: #e0e0e0; }
+  .dash-jobs-section-header p { font-size: 14px; color: #8a8d90; }
+
   /* ── PROGRESS BAR ── */
   .job-progress {
     height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden;
@@ -439,7 +536,6 @@
   <!-- ── SIDEBAR ── -->
   <nav class="sidebar">
     <div class="sidebar-section">
-      <div class="sidebar-section-title">Overview</div>
       <a class="sidebar-item active" data-page="dashboard" onclick="showPage('dashboard')">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
         Overview
@@ -506,65 +602,143 @@
 
     <!-- ══ OVERVIEW PAGE ══ -->
     <div class="content-page active" id="page-dashboard">
-      <div class="page-header">
-        <h1>Overview</h1>
-        <div class="page-header-sub">Overview of automation activity</div>
-      </div>
-      <div class="dashboard-grid">
-        <div class="dash-card">
-          <div class="dash-card-label">Job Templates</div>
-          <div class="dash-card-value">6</div>
-          <div class="dash-card-sub">Across 2 projects</div>
+      <div class="aap-dash">
+        <div class="aap-dash-header">
+          <h1>Welcome to the Ansible Automation Platform</h1>
+          <p>Empower, automate, connect: Unleash possibilities with the Ansible Automation Platform.</p>
         </div>
-        <div class="dash-card">
-          <div class="dash-card-label">Recent Jobs (24h)</div>
-          <div class="dash-card-value green" id="dashJobCount">0</div>
-          <div class="dash-card-sub">All successful</div>
+
+        <!-- Resource Counts -->
+        <div class="aap-dash-section">
+          <div class="aap-dash-section-title">Resource Counts</div>
+          <div class="resource-counts">
+            <div class="resource-item">
+              <span class="resource-link">4,096 Hosts</span>
+              <div class="resource-donut" style="background: conic-gradient(#92d68a 0deg 360deg, #383d44 360deg);">
+                <div class="resource-donut-inner"></div>
+              </div>
+              <div class="resource-legend"><div class="resource-legend-dot" style="background:#92d68a;"></div>4,096 Ready</div>
+            </div>
+            <div class="resource-item">
+              <span class="resource-link">38 Projects</span>
+              <div class="resource-donut" style="background: conic-gradient(#92d68a 0deg 360deg, #383d44 360deg);">
+                <div class="resource-donut-inner"></div>
+              </div>
+              <div class="resource-legend"><div class="resource-legend-dot" style="background:#92d68a;"></div>38 Ready</div>
+            </div>
+            <div class="resource-item">
+              <span class="resource-link">24 Inventories</span>
+              <div class="resource-donut" style="background: conic-gradient(#92d68a 0deg 360deg, #383d44 360deg);">
+                <div class="resource-donut-inner"></div>
+              </div>
+              <div class="resource-legend"><div class="resource-legend-dot" style="background:#92d68a;"></div>24 Synced</div>
+            </div>
+          </div>
         </div>
-        <div class="dash-card">
-          <div class="dash-card-label">Managed Hosts</div>
-          <div class="dash-card-value blue">12</div>
-          <div class="dash-card-sub">Across 3 inventories</div>
+
+        <!-- Job Activity -->
+        <div class="aap-dash-section">
+          <div class="job-activity-header">
+            <h2>Job Activity</h2>
+            <div class="job-activity-controls">
+              <button class="ja-btn">Past month &#9662;</button>
+              <button class="ja-btn">All job types &#9662;</button>
+              <a class="ja-link" href="#" onclick="showPage('jobs'); return false;">View all Jobs</a>
+            </div>
+          </div>
+          <div class="chart-area">
+            <svg class="chart-svg" viewBox="0 0 900 200" preserveAspectRatio="none">
+              <line x1="50" y1="10" x2="880" y2="10" class="chart-grid-line"/>
+              <line x1="50" y1="50" x2="880" y2="50" class="chart-grid-line"/>
+              <line x1="50" y1="90" x2="880" y2="90" class="chart-grid-line"/>
+              <line x1="50" y1="130" x2="880" y2="130" class="chart-grid-line"/>
+              <line x1="50" y1="170" x2="880" y2="170" class="chart-grid-line"/>
+              <text x="10" y="14" class="chart-axis-label">6000</text>
+              <text x="10" y="54" class="chart-axis-label">4500</text>
+              <text x="10" y="94" class="chart-axis-label">3000</text>
+              <text x="10" y="134" class="chart-axis-label">1500</text>
+              <text x="10" y="174" class="chart-axis-label">0</text>
+              <text x="75" y="195" class="chart-axis-label">3/20</text>
+              <text x="155" y="195" class="chart-axis-label">3/22</text>
+              <text x="235" y="195" class="chart-axis-label">3/24</text>
+              <text x="315" y="195" class="chart-axis-label">3/26</text>
+              <text x="395" y="195" class="chart-axis-label">3/28</text>
+              <text x="475" y="195" class="chart-axis-label">4/1</text>
+              <text x="540" y="195" class="chart-axis-label">4/5</text>
+              <text x="605" y="195" class="chart-axis-label">4/9</text>
+              <text x="670" y="195" class="chart-axis-label">4/12</text>
+              <text x="735" y="195" class="chart-axis-label">4/15</text>
+              <text x="800" y="195" class="chart-axis-label">4/17</text>
+              <text x="860" y="195" class="chart-axis-label">4/19</text>
+              <!-- success bars (stacked activity) -->
+              <rect x="75"  y="160" width="16" height="10" rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="100" y="158" width="16" height="12" rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="130" y="162" width="16" height="8"  rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="155" y="155" width="16" height="15" rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="185" y="160" width="16" height="10" rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="210" y="163" width="16" height="7"  rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="240" y="158" width="16" height="12" rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="265" y="161" width="16" height="9"  rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="295" y="156" width="16" height="14" rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="320" y="160" width="16" height="10" rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="350" y="158" width="16" height="12" rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="395" y="145" width="16" height="25" rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="420" y="155" width="16" height="15" rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="445" y="158" width="16" height="12" rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="475" y="155" width="16" height="15" rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="505" y="160" width="16" height="10" rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="540" y="155" width="16" height="15" rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="570" y="150" width="16" height="20" rx="1" class="chart-bar-success" opacity="0.5"/>
+              <rect x="605" y="120" width="16" height="50" rx="1" class="chart-bar-success" opacity="0.6"/>
+              <rect x="630" y="115" width="16" height="55" rx="1" class="chart-bar-success" opacity="0.6"/>
+              <rect x="660" y="125" width="16" height="45" rx="1" class="chart-bar-success" opacity="0.6"/>
+              <rect x="690" y="130" width="16" height="40" rx="1" class="chart-bar-success" opacity="0.6"/>
+              <rect x="735" y="110" width="16" height="60" rx="1" class="chart-bar-success" opacity="0.6"/>
+              <rect x="760" y="100" width="16" height="70" rx="1" class="chart-bar-success" opacity="0.7"/>
+              <rect x="790" y="55"  width="16" height="115" rx="1" class="chart-bar-success" opacity="0.7"/>
+              <rect x="815" y="40"  width="16" height="130" rx="1" class="chart-bar-success" opacity="0.7"/>
+              <rect x="845" y="28"  width="16" height="142" rx="1" class="chart-bar-success" opacity="0.8"/>
+              <rect x="868" y="15"  width="16" height="155" rx="1" class="chart-bar-success" opacity="0.8"/>
+              <!-- failed bars (tiny, few) -->
+              <rect x="395" y="170" width="16" height="3" rx="1" class="chart-bar-failed"/>
+              <rect x="605" y="170" width="16" height="2" rx="1" class="chart-bar-failed"/>
+              <rect x="760" y="170" width="16" height="2" rx="1" class="chart-bar-failed"/>
+              <rect x="845" y="170" width="16" height="3" rx="1" class="chart-bar-failed"/>
+              <!-- trend line -->
+              <polyline class="chart-line" points="83,162 108,160 138,164 163,157 193,162 218,165 248,160 273,163 303,158 328,162 358,160 403,148 428,157 453,160 483,157 513,162 548,157 578,152 613,125 638,120 668,128 698,133 743,115 768,105 798,58 823,44 853,32 876,18"/>
+            </svg>
+          </div>
+          <div class="chart-legend">
+            <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#92d68a;"></div>18,347 Success</div>
+            <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#c9190b;"></div>6 Failed</div>
+          </div>
         </div>
-        <div class="dash-card">
-          <div class="dash-card-label">EDA Activations</div>
-          <div class="dash-card-value" style="color:var(--pf-green);">2</div>
-          <div class="dash-card-sub">2 running</div>
+
+        <!-- Jobs -->
+        <div class="aap-dash-section">
+          <div class="dash-jobs-section-header">
+            <div>
+              <h2>Jobs</h2>
+              <p>Recently finished jobs</p>
+            </div>
+            <a class="ja-link" href="#" onclick="showPage('jobs'); return false;">View all Jobs</a>
+          </div>
+          <table class="dash-jobs-table">
+            <thead><tr><th>Name</th><th>Status</th></tr></thead>
+            <tbody id="dashRecentJobs">
+              <tr><td><a class="job-link" href="#">Patch RHEL Servers</a></td><td><span class="status-icon success">&#10004; Success</span></td></tr>
+              <tr><td><a class="job-link" href="#">Patch RHEL Servers</a></td><td><span class="status-icon success">&#10004; Success</span></td></tr>
+              <tr><td><a class="job-link" href="#">Network Backup Configuration</a></td><td><span class="status-icon success">&#10004; Success</span></td></tr>
+              <tr><td><a class="job-link" href="#">Deploy Web Application</a></td><td><span class="status-icon success">&#10004; Success</span></td></tr>
+              <tr><td><a class="job-link" href="#">Compliance Audit Scan</a></td><td><span class="status-icon success">&#10004; Success</span></td></tr>
+              <tr><td><a class="job-link" href="#">Certificate Rotation</a></td><td><span class="status-icon success">&#10004; Success</span></td></tr>
+              <tr><td><a class="job-link" href="#">Patch RHEL Servers</a></td><td><span class="status-icon success">&#10004; Success</span></td></tr>
+              <tr><td><a class="job-link" href="#">Increase Web Server Capacity</a></td><td><span class="status-icon success">&#10004; Success</span></td></tr>
+              <tr><td><a class="job-link" href="#">Network Backup Configuration</a></td><td><span class="status-icon success">&#10004; Success</span></td></tr>
+              <tr><td><a class="job-link" href="#">Deploy Web Application</a></td><td><span class="status-icon success">&#10004; Success</span></td></tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-      <div class="recent-jobs-section">
-        <div class="recent-jobs-header">Recent Job Runs</div>
-        <table class="pf-table">
-          <thead>
-            <tr><th>ID</th><th>Name</th><th>Status</th><th>Type</th><th>Started</th><th>Finished</th></tr>
-          </thead>
-          <tbody id="dashRecentJobs">
-            <tr>
-              <td class="table-mono">24</td>
-              <td><span class="table-name">Patch RHEL Servers</span></td>
-              <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
-              <td class="table-secondary">Playbook run</td>
-              <td class="table-secondary">Today 09:15 AM</td>
-              <td class="table-secondary">Today 09:17 AM</td>
-            </tr>
-            <tr>
-              <td class="table-mono">23</td>
-              <td><span class="table-name">Network Backup Configuration</span></td>
-              <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
-              <td class="table-secondary">Playbook run</td>
-              <td class="table-secondary">Today 08:00 AM</td>
-              <td class="table-secondary">Today 08:02 AM</td>
-            </tr>
-            <tr>
-              <td class="table-mono">22</td>
-              <td><span class="table-name">Deploy Web Application</span></td>
-              <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
-              <td class="table-secondary">Playbook run</td>
-              <td class="table-secondary">Yesterday 4:30 PM</td>
-              <td class="table-secondary">Yesterday 4:33 PM</td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </div>
 
@@ -576,7 +750,7 @@
       <div class="toolbar">
         <div class="toolbar-left">
           <input type="text" class="toolbar-search" placeholder="Filter by name">
-          <span class="toolbar-count">6 items</span>
+          <span class="toolbar-count">7 items</span>
         </div>
         <div>
           <button class="toolbar-btn toolbar-btn-primary">+ Add template</button>
@@ -641,6 +815,17 @@
             <td class="table-secondary">Default</td>
             <td class="table-secondary">Apr 14 11:00 AM</td>
             <td><button class="btn-launch" onclick="launchJob('compliance')">&#9654; Launch</button></td>
+          </tr>
+          <tr>
+            <td>
+              <span class="table-name">Increase Web Server Capacity</span><br>
+              <span class="table-secondary">Scale up web server pool and verify capacity</span>
+            </td>
+            <td class="table-secondary">Job template</td>
+            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
+            <td class="table-secondary">Default</td>
+            <td class="table-secondary">Apr 13 3:20 PM</td>
+            <td><button class="btn-launch" onclick="launchJob('webscale')">&#9654; Launch</button></td>
           </tr>
           <tr>
             <td>
@@ -1236,6 +1421,49 @@ var jobScripts = {
       { text: '', delay: 300 },
       { text: 'PLAY RECAP *********************************************************************', cls: 'play-header', delay: 400 },
       { text: 'rhel-app-01.prod.acme.com  : ok=5    changed=1    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+    ]
+  },
+  webscale: {
+    title: 'Increase Web Server Capacity',
+    id: null,
+    inventory: 'Web Servers',
+    project: 'Linux Automation',
+    lines: [
+      { text: '', delay: 200 },
+      { text: 'PLAY [Increase Web Server Capacity] *********************************************', cls: 'play-header', delay: 400 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Gathering Facts] *********************************************************', cls: 'task-header', delay: 600 },
+      { text: 'ok: [web-prod-01.acme.com]', cls: 'ok', delay: 300 },
+      { text: 'ok: [web-prod-02.acme.com]', cls: 'ok', delay: 250 },
+      { text: 'ok: [web-prod-03.acme.com]', cls: 'ok', delay: 200 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Assess current capacity utilization] **************************************', cls: 'task-header', delay: 500 },
+      { text: 'ok: [web-prod-01.acme.com] => {"capacity_pct": 98, "status": "critical"}', cls: 'ok', delay: 400 },
+      { text: 'ok: [web-prod-02.acme.com] => {"capacity_pct": 94, "status": "warning"}', cls: 'ok', delay: 350 },
+      { text: 'ok: [web-prod-03.acme.com] => {"capacity_pct": 91, "status": "warning"}', cls: 'ok', delay: 300 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Provision additional web server instances] ********************************', cls: 'task-header', delay: 800 },
+      { text: 'changed: [web-prod-01.acme.com] => {"msg": "Scaled pool from 4 to 8 instances"}', cls: 'changed', delay: 1500 },
+      { text: 'changed: [web-prod-02.acme.com] => {"msg": "Scaled pool from 4 to 8 instances"}', cls: 'changed', delay: 1200 },
+      { text: 'changed: [web-prod-03.acme.com] => {"msg": "Scaled pool from 3 to 6 instances"}', cls: 'changed', delay: 1000 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Rebalance load across web server pool] ************************************', cls: 'task-header', delay: 500 },
+      { text: 'changed: [web-prod-01.acme.com]', cls: 'changed', delay: 800 },
+      { text: 'changed: [web-prod-02.acme.com]', cls: 'changed', delay: 700 },
+      { text: 'changed: [web-prod-03.acme.com]', cls: 'changed', delay: 600 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Verify capacity restored to healthy threshold] ****************************', cls: 'task-header', delay: 600 },
+      { text: 'ok: [web-prod-01.acme.com] => {"capacity_pct": 52, "status": "healthy"}', cls: 'ok', delay: 600 },
+      { text: 'ok: [web-prod-02.acme.com] => {"capacity_pct": 48, "status": "healthy"}', cls: 'ok', delay: 500 },
+      { text: 'ok: [web-prod-03.acme.com] => {"capacity_pct": 45, "status": "healthy"}', cls: 'ok', delay: 400 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Update AlertCommand \u2014 resolve capacity incident] **************************', cls: 'task-header', delay: 500 },
+      { text: 'changed: [web-prod-01.acme.com] => {"incident": "INC-2026-04821", "status": "resolved"}', cls: 'changed', delay: 800 },
+      { text: '', delay: 300 },
+      { text: 'PLAY RECAP *********************************************************************', cls: 'play-header', delay: 400 },
+      { text: 'web-prod-01.acme.com       : ok=6    changed=3    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+      { text: 'web-prod-02.acme.com       : ok=6    changed=3    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+      { text: 'web-prod-03.acme.com       : ok=6    changed=3    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
     ]
   }
 };
