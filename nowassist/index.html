@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Now Assist — ServiceNow</title>
+  <style>
+    :root {
+      --sn-dark: #1b2a3d;
+      --sn-green: #62d84e;
+      --purple: #7b3fe4;
+      --purple-light: #a78bfa;
+      --bg-sidebar: #293749;
+      --bg-chat: #ffffff;
+      --border: #e4e7eb;
+      --text: #1a1a1a;
+      --text-muted: #6b7280;
+      --msg-bg: #f3f4f6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Top nav */
+    .top-nav {
+      background: var(--sn-dark);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 20px;
+      height: 52px;
+      flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+      z-index: 100;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .sn-logo {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, var(--sn-green), #4bc43a);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 14px; color: #1b2a3d;
+    }
+
+    .nav-icon-btn {
+      background: transparent; border: none;
+      color: rgba(255,255,255,0.85);
+      padding: 8px; cursor: pointer; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .nav-icon-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+    .nav-spacer { flex: 1; }
+
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, #4a90d9, #2d6a9e);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: #fff; cursor: pointer;
+    }
+
+    /* Layout */
+    .app-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Left sidebar icons */
+    .sidebar {
+      width: 48px;
+      background: var(--bg-sidebar);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-btn {
+      width: 36px; height: 36px;
+      border-radius: 8px; border: none;
+      background: transparent; color: rgba(255,255,255,0.5);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .sidebar-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .sidebar-btn.active { background: rgba(123,63,228,0.25); color: var(--purple-light); }
+
+    /* Chat panel */
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 700px;
+      margin: 0 auto;
+      background: var(--bg-chat);
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+    }
+
+    .chat-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      background: #fff;
+    }
+
+    .chat-header-sparkle {
+      color: var(--purple);
+    }
+
+    .chat-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .chat-header-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-header-actions button {
+      background: none; border: none; color: var(--text-muted);
+      cursor: pointer; padding: 4px;
+    }
+
+    .chat-header-actions button:hover { color: var(--text); }
+
+    /* Messages area */
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .msg {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      animation: msgFadeIn 0.35s ease-out;
+    }
+
+    @keyframes msgFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-icon {
+      flex-shrink: 0;
+      width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 2px;
+    }
+
+    .msg-icon.bot {
+      color: var(--purple);
+    }
+
+    .msg-icon.user {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--sn-green), #4bc43a);
+      color: #1b2a3d; font-size: 10px; font-weight: 700;
+    }
+
+    .msg-body {
+      flex: 1;
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--text);
+    }
+
+    .msg-body p { margin-bottom: 8px; }
+    .msg-body p:last-child { margin-bottom: 0; }
+
+    .msg-body code {
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+      font-size: 12.5px;
+      color: #d6336c;
+    }
+
+    .msg-body .terminal {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      padding: 12px 14px;
+      border-radius: 6px;
+      margin: 8px 0;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .terminal .ok { color: #6a9955; }
+    .terminal .changed { color: #ce9178; }
+    .terminal .play { color: #569cd6; }
+    .terminal .fail { color: #f44747; }
+
+    .msg-body .chip {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .chip-success { background: #d1fae5; color: #065f46; }
+    .chip-running { background: #dbeafe; color: #1e40af; }
+    .chip-error { background: #fee2e2; color: #991b1b; }
+
+    .msg-body .action-btn {
+      display: inline-block;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      cursor: default;
+      margin-top: 6px;
+      background: #fff;
+    }
+
+    /* Typing indicator */
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 4px 0;
+    }
+
+    .typing-indicator span {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--purple-light);
+      animation: typingBounce 1.2s ease-in-out infinite;
+    }
+
+    .typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-5px); opacity: 1; }
+    }
+
+    /* Input area */
+    .chat-input-area {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      background: #fff;
+      flex-shrink: 0;
+    }
+
+    .chat-input-wrap {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      gap: 10px;
+      background: #fff;
+      transition: border-color 0.15s;
+    }
+
+    .chat-input-wrap:focus-within {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 2px rgba(123,63,228,0.12);
+    }
+
+    .chat-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      background: transparent;
+    }
+
+    .chat-input::placeholder { color: #aaa; }
+
+    .input-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-actions button {
+      background: none; border: none;
+      color: var(--text-muted); cursor: pointer;
+      padding: 4px; display: flex; align-items: center;
+    }
+
+    .input-actions button:hover { color: var(--purple); }
+
+    .send-btn {
+      background: var(--purple) !important;
+      color: #fff !important;
+      width: 32px; height: 32px;
+      border-radius: 6px !important;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .send-btn:hover { filter: brightness(1.1); }
+
+    .chat-footer {
+      text-align: center;
+      padding: 8px;
+      font-size: 11px;
+      color: #aaa;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Top nav -->
+  <header class="top-nav">
+    <button class="nav-icon-btn" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+    </button>
+    <div class="nav-brand">
+      <span class="sn-logo">S</span>
+      <span>ServiceNow</span>
+    </div>
+    <div class="nav-spacer"></div>
+    <button class="nav-icon-btn" aria-label="Notifications">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+    </button>
+    <span class="avatar">SM</span>
+  </header>
+
+  <div class="app-body">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <button class="sidebar-btn" title="Home">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
+      </button>
+      <button class="sidebar-btn active" title="Now Assist">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+      </button>
+      <button class="sidebar-btn" title="Incidents">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+      </button>
+      <button class="sidebar-btn" title="Tasks">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h5v7h7v9H6z"/></svg>
+      </button>
+      <button class="sidebar-btn" title="Knowledge">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+      </button>
+      <button class="sidebar-btn" title="People">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      </button>
+    </nav>
+
+    <!-- Chat panel -->
+    <div class="chat-container">
+      <div class="chat-header">
+        <span class="chat-header-sparkle">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6L12 2z"/></svg>
+        </span>
+        <h2>Now Assist</h2>
+        <div class="chat-header-actions">
+          <button title="Expand"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg></button>
+          <button title="Pin"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M14 4v5c0 1.12.37 2.16 1 3H9c.65-.86 1-1.9 1-3V4h4m3-2H7c-.55 0-1 .45-1 1s.45 1 1 1h1v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3V4h1c.55 0 1-.45 1-1s-.45-1-1-1z"/></svg></button>
+          <button title="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></button>
+        </div>
+      </div>
+
+      <div class="messages" id="messages">
+        <!-- Initial welcome -->
+        <div class="msg">
+          <div class="msg-icon bot">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6L12 2z"/></svg>
+          </div>
+          <div class="msg-body">
+            <p>Hi! How can I help with your work today?</p>
+          </div>
+        </div>
+        <div class="msg">
+          <div class="msg-icon bot">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6L12 2z"/></svg>
+          </div>
+          <div class="msg-body">
+            <p>To give you an idea of what I do really well, try asking me to:</p>
+            <p>• Get Help</p>
+            <div class="action-btn">Get Help</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <div class="chat-input-wrap">
+          <input type="text" class="chat-input" id="chatInput" placeholder="Reply to Now Assist..." autocomplete="off" />
+          <div class="input-actions">
+            <button title="Attach"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H9.5v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S6.5 2.79 6.5 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6H16.5z"/></svg></button>
+            <button class="send-btn" title="Send"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+          </div>
+        </div>
+        <div class="chat-footer">Some answers generated by AI. Be sure to check for accuracy.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var keyBuffer = '';
+    var fix1Triggered = false;
+
+    var sparkSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6L12 2z"/></svg>';
+
+    var scriptedMessages = [
+      {
+        delay: 800,
+        html: '<p>Understood — I\'m looking into <strong>INC0049127</strong>. Let me analyze the incident details and determine the best remediation path.</p>'
+      },
+      {
+        delay: 2500,
+        html: '<p>I\'ve reviewed the incident. The configuration item <code>web-prod-01</code> is reporting an application error. Diagnostics indicate the <code>httpd.conf</code> file has been modified and contains an invalid directive, which is preventing the Apache service from responding.</p>'
+      },
+      {
+        delay: 3800,
+        html: '<p>Connecting to Ansible Automation Platform via MCP…</p>' +
+              '<p><span class="chip chip-running">● Connecting to nostromo</span></p>'
+      },
+      {
+        delay: 2200,
+        html: '<p>Connected to <strong>nostromo</strong>. I\'ve located a job template that matches this scenario:</p>' +
+              '<p>📋 <strong>Restore Web Application</strong> — this template will restore the correct <code>httpd.conf</code> from a known-good baseline, validate the configuration syntax, and restart the Apache service.</p>'
+      },
+      {
+        delay: 3000,
+        html: '<p>Launching the job template now.</p>' +
+              '<p><span class="chip chip-running">● Job #4871 — Running</span></p>' +
+              '<div class="terminal"><span class="play">PLAY [Restore Web Application] *************************************</span>\n\n<span class="changed">TASK [Backup current httpd.conf] ***********************************</span>\nchanged: [web-prod-01] => {"backup": "/etc/httpd/conf/httpd.conf.bak.20260423"}\n\n<span class="changed">TASK [Restore httpd.conf from known-good baseline] ****************</span>\nchanged: [web-prod-01] => {"src": "baseline/httpd.conf", "dest": "/etc/httpd/conf/httpd.conf"}</div>'
+      },
+      {
+        delay: 4200,
+        html: '<div class="terminal"><span class="ok">TASK [Validate Apache configuration syntax] ************************</span>\nok: [web-prod-01] => {"stdout": "Syntax OK"}\n\n<span class="changed">TASK [Restart httpd service] ***************************************</span>\nchanged: [web-prod-01] => {"state": "started", "enabled": true}\n\n<span class="ok">TASK [Verify HTTP 200 response] ************************************</span>\nok: [web-prod-01] => {"status": 200, "url": "http://web-prod-01/healthz", "response_time": "0.043s"}\n\n<span class="play">PLAY RECAP *********************************************************</span>\nweb-prod-01  : <span class="ok">ok=4</span>    <span class="changed">changed=3</span>    unreachable=0    failed=0</div>'
+      },
+      {
+        delay: 3500,
+        html: '<p><span class="chip chip-success">✓ Job #4871 — Successful</span></p>' +
+              '<p>The job completed successfully. Here\'s what was done:</p>' +
+              '<p>1. Backed up the broken <code>httpd.conf</code> for audit purposes<br>' +
+              '2. Restored the validated baseline configuration<br>' +
+              '3. Apache syntax check passed — <strong>Syntax OK</strong><br>' +
+              '4. Service restarted and health endpoint is returning <strong>HTTP 200</strong> in 43ms</p>'
+      },
+      {
+        delay: 2800,
+        html: '<p>I\'ve confirmed the web application on <code>web-prod-01</code> is healthy and serving traffic normally. The root cause was an invalid directive in <code>httpd.conf</code> — likely introduced by a recent manual edit.</p>' +
+              '<p>Incident <strong>INC0049127</strong> has been updated to <strong>Resolved</strong> with full remediation notes attached.</p>' +
+              '<p><span class="chip chip-success">✓ Incident Resolved</span></p>'
+      }
+    ];
+
+    var messagesEl = document.getElementById('messages');
+
+    function scrollToBottom() {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function createBotMsg(innerHtml) {
+      var msg = document.createElement('div');
+      msg.className = 'msg';
+      msg.innerHTML =
+        '<div class="msg-icon bot">' + sparkSvg + '</div>' +
+        '<div class="msg-body">' + innerHtml + '</div>';
+      return msg;
+    }
+
+    function showTyping() {
+      var msg = document.createElement('div');
+      msg.className = 'msg';
+      msg.id = 'typingMsg';
+      msg.innerHTML =
+        '<div class="msg-icon bot">' + sparkSvg + '</div>' +
+        '<div class="msg-body"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+      messagesEl.appendChild(msg);
+      scrollToBottom();
+      return msg;
+    }
+
+    function removeTyping() {
+      var el = document.getElementById('typingMsg');
+      if (el) el.remove();
+    }
+
+    function runSequence() {
+      var idx = 0;
+      var typingDuration = 1200;
+
+      function next() {
+        if (idx >= scriptedMessages.length) return;
+        var step = scriptedMessages[idx];
+
+        showTyping();
+
+        setTimeout(function () {
+          removeTyping();
+          var msgEl = createBotMsg(step.html);
+          messagesEl.appendChild(msgEl);
+          scrollToBottom();
+          idx++;
+
+          if (idx < scriptedMessages.length) {
+            setTimeout(next, scriptedMessages[idx].delay);
+          }
+        }, typingDuration);
+      }
+
+      setTimeout(next, scriptedMessages[0].delay);
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      keyBuffer += e.key.toLowerCase();
+      if (keyBuffer.length > 30) keyBuffer = keyBuffer.slice(-30);
+      if (!fix1Triggered && keyBuffer.includes('fix1')) {
+        fix1Triggered = true;
+        keyBuffer = '';
+        runSequence();
+      }
+    });
+  </script>
+</body>
+</html>
