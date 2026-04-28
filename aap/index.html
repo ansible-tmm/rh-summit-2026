@@ -437,6 +437,54 @@
   }
   .btn-back:hover { background: #e7e7e7; }
 
+  /* ── JOB DETAILS ── */
+  .job-detail-header {
+    background: var(--card-bg); border-bottom: 1px solid var(--card-border);
+    padding: 16px 36px 0;
+  }
+  .job-detail-breadcrumb {
+    font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;
+  }
+  .job-detail-breadcrumb a {
+    color: var(--text-link); cursor: pointer; text-decoration: none;
+  }
+  .job-detail-breadcrumb a:hover { text-decoration: underline; }
+  .job-detail-title-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .job-detail-title-row h1 { font-size: 24px; font-weight: 700; margin: 0; }
+  .job-detail-title-actions { display: flex; gap: 8px; align-items: center; }
+  .job-detail-tabs {
+    display: flex; gap: 0; border-bottom: none;
+  }
+  .job-detail-tab {
+    padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+    color: var(--text-secondary); text-decoration: none; border-bottom: 3px solid transparent;
+  }
+  .job-detail-tab:hover { color: var(--text-primary); }
+  .job-detail-tab.active {
+    color: var(--pf-blue); border-bottom: 3px solid var(--pf-blue);
+  }
+  .job-detail-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 0; padding: 0 36px 36px; margin-top: 8px;
+  }
+  .job-detail-cell {
+    padding: 14px 0; border-bottom: 1px solid #ececec;
+  }
+  .job-detail-cell-label {
+    font-size: 12px; font-weight: 700; color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .job-detail-cell-value {
+    font-size: 14px; color: var(--text-primary);
+  }
+  .job-detail-cell-value a {
+    color: var(--text-link); text-decoration: none;
+  }
+  .job-detail-cell-value a:hover { text-decoration: underline; }
+
   /* ── EDA ── */
   .eda-events-container {
     margin: 24px 36px; background: var(--card-bg);
@@ -997,45 +1045,70 @@
     <!-- ══ JOBS PAGE ══ -->
     <div class="content-page" id="page-jobs">
       <div class="page-header">
-        <h1>Jobs</h1>
+        <h1>Jobs <span class="tpl-help-icon">&#9432;</span></h1>
+        <div class="page-header-sub">A job is an instance of Automation controller launching an Ansible playbook against an inventory of hosts.</div>
       </div>
       <div class="toolbar">
         <div class="toolbar-left">
-          <input type="text" class="toolbar-search" placeholder="Filter by name">
-          <span class="toolbar-count" id="jobsCount">3 items</span>
+          <div class="toolbar-search-group">
+            <button class="toolbar-search-dropdown"><svg><use href="#icon-search"/></svg> Search &#9662;</button>
+            <input type="text" class="toolbar-search-input" placeholder="Enter search">
+          </div>
+          <button class="toolbar-kebab-btn">&#8942;</button>
         </div>
       </div>
-      <table class="pf-table">
+      <table class="pf-table" id="jobsTable">
         <thead>
-          <tr><th>ID</th><th>Name</th><th>Status</th><th>Type</th><th>Started</th><th>Finished</th></tr>
+          <tr>
+            <th style="width:28px;padding:10px 4px;"></th>
+            <th style="width:28px;padding:10px 4px;"><input type="checkbox" style="width:14px;height:14px;cursor:pointer;accent-color:var(--pf-blue);"></th>
+            <th style="width:7%;">ID &nbsp;&#8597;</th>
+            <th style="width:22%;">Name &nbsp;&#8597;</th>
+            <th style="width:10%;">Status &nbsp;&#8597;</th>
+            <th style="width:12%;">Type &nbsp;&#8597;</th>
+            <th style="width:7%;">Duration</th>
+            <th style="width:18%;">Started &nbsp;&#8597;</th>
+            <th style="width:80px;"></th>
+          </tr>
         </thead>
-        <tbody id="jobsTableBody">
-          <tr>
-            <td class="table-mono">24</td>
-            <td><span class="table-name">Patch RHEL Servers</span></td>
-            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
-            <td class="table-secondary">Playbook run</td>
-            <td class="table-secondary">Today 09:15 AM</td>
-            <td class="table-secondary">Today 09:17 AM</td>
-          </tr>
-          <tr>
-            <td class="table-mono">23</td>
-            <td><span class="table-name">Network Backup Configuration</span></td>
-            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
-            <td class="table-secondary">Playbook run</td>
-            <td class="table-secondary">Today 08:00 AM</td>
-            <td class="table-secondary">Today 08:02 AM</td>
-          </tr>
-          <tr>
-            <td class="table-mono">22</td>
-            <td><span class="table-name">Deploy Web Application</span></td>
-            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
-            <td class="table-secondary">Playbook run</td>
-            <td class="table-secondary">Yesterday 4:30 PM</td>
-            <td class="table-secondary">Yesterday 4:33 PM</td>
-          </tr>
-        </tbody>
+        <tbody id="jobsTableBody"></tbody>
       </table>
+      <div class="tpl-pagination">
+        <span class="tpl-perpage">1 - 10 &nbsp;&#9662;</span>
+        <span class="tpl-page-label" id="jobsPaginationLabel">1 - 10 of 26</span>
+        <div class="tpl-pagination-controls">
+          <button class="tpl-page-btn disabled">&laquo;</button>
+          <button class="tpl-page-btn disabled">&lsaquo;</button>
+          <input type="text" class="tpl-page-input" value="1">
+          <span class="tpl-page-label">of 3</span>
+          <button class="tpl-page-btn">&rsaquo;</button>
+          <button class="tpl-page-btn">&raquo;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ JOB DETAILS PAGE ══ -->
+    <div class="content-page" id="page-job-details">
+      <div class="job-detail-header">
+        <div class="job-detail-breadcrumb">
+          <a onclick="showPage('jobs')">Jobs</a> &rsaquo; <span id="jobDetailBcName">Increase Web Server Capacity</span> &rsaquo; Details
+        </div>
+        <div class="job-detail-title-row">
+          <h1 id="jobDetailTitle">Increase Web Server Capacity</h1>
+          <div class="job-detail-title-actions">
+            <button class="btn-launch" style="gap:6px;display:inline-flex;align-items:center;"><svg style="width:14px;height:14px;fill:#fff;"><use href="#icon-rocket"/></svg> Relaunch job</button>
+            <button class="btn-back" style="gap:6px;display:inline-flex;align-items:center;">&#9940; Cancel job</button>
+            <button class="toolbar-kebab-btn">&#8942;</button>
+          </div>
+        </div>
+        <div class="job-detail-tabs">
+          <a class="job-detail-tab" onclick="showPage('jobs')">&#9664; Back to Jobs</a>
+          <a class="job-detail-tab">Output</a>
+          <a class="job-detail-tab active">Details</a>
+        </div>
+      </div>
+      <div class="job-detail-grid" id="jobDetailGrid">
+      </div>
     </div>
 
     <!-- ══ PROJECTS PAGE ══ -->
@@ -1359,6 +1432,93 @@ function renderTemplates() {
 
 renderTemplates();
 
+var jobsData = [
+  { id:26, n:'Increase Web Server Capacity', status:'successful', type:'Playbook run', dur:'47s', started:'4/28/2026, 2:45:12 PM', finished:'4/28/2026, 2:45:59 PM', by:'Roger Lopez' },
+  { id:25, n:'Patch RHEL Servers', status:'successful', type:'Playbook run', dur:'2m 5s', started:'4/28/2026, 9:15:00 AM', finished:'4/28/2026, 9:17:05 AM', by:'admin' },
+  { id:24, n:'Network Backup Configuration', status:'successful', type:'Playbook run', dur:'1m 58s', started:'4/28/2026, 8:00:00 AM', finished:'4/28/2026, 8:01:58 AM', by:'admin' },
+  { id:23, n:'Deploy Web Application', status:'successful', type:'Playbook run', dur:'3m 12s', started:'4/27/2026, 4:30:00 PM', finished:'4/27/2026, 4:33:12 PM', by:'admin' },
+  { id:22, n:'Compliance Audit Scan', status:'successful', type:'Playbook run', dur:'5m 30s', started:'4/27/2026, 11:00:00 AM', finished:'4/27/2026, 11:05:30 AM', by:'admin' },
+  { id:21, n:'Certificate Rotation', status:'successful', type:'Playbook run', dur:'1m 15s', started:'4/26/2026, 2:00:00 PM', finished:'4/26/2026, 2:01:15 PM', by:'admin' },
+  { id:20, n:'Patch RHEL Servers', status:'successful', type:'Playbook run', dur:'2m 10s', started:'4/25/2026, 9:15:00 AM', finished:'4/25/2026, 9:17:10 AM', by:'admin' },
+  { id:19, n:'Auto-Remediation \u2014 Service Recovery', status:'successful', type:'Workflow job', dur:'4m 22s', started:'4/24/2026, 9:45:00 AM', finished:'4/24/2026, 9:49:22 AM', by:'admin' },
+  { id:18, n:'Network Backup Configuration', status:'successful', type:'Playbook run', dur:'2m 1s', started:'4/24/2026, 8:00:00 AM', finished:'4/24/2026, 8:02:01 AM', by:'admin' },
+  { id:17, n:'Deploy Web Application', status:'successful', type:'Playbook run', dur:'3m 8s', started:'4/23/2026, 4:30:00 PM', finished:'4/23/2026, 4:33:08 PM', by:'admin' }
+];
+
+function renderJobs() {
+  var tbody = document.getElementById('jobsTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  jobsData.forEach(function(j) {
+    var tr = document.createElement('tr');
+    var statusClass = j.status === 'successful' ? 'status-successful' : (j.status === 'failed' ? 'status-failed' : 'status-running');
+    var statusLabel = j.status === 'successful' ? 'Success' : (j.status === 'failed' ? 'Failed' : 'Running');
+    var dotHtml = j.status === 'running' ? '<span class="spinner"></span>' : '<span class="status-dot"></span>';
+    tr.innerHTML =
+      '<td class="tpl-expand-cell">&gt;</td>' +
+      '<td class="tpl-check-cell"><input type="checkbox"></td>' +
+      '<td class="table-mono">' + j.id + '</td>' +
+      '<td><a class="table-name" onclick="showJobDetails(' + j.id + ')">' + j.n + '</a></td>' +
+      '<td><span class="status-badge ' + statusClass + '">' + dotHtml + statusLabel + '</span></td>' +
+      '<td class="table-secondary">' + j.type + '</td>' +
+      '<td class="table-secondary">' + j.dur + '</td>' +
+      '<td class="table-secondary">' + j.started + '</td>' +
+      '<td class="tpl-actions">' +
+        '<button class="tpl-action-btn" title="Relaunch job"><svg><use href="#icon-rocket"/></svg></button>' +
+        '<button class="tpl-action-btn tpl-kebab" title="More actions">&#8942;</button>' +
+      '</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function showJobDetails(jobId) {
+  var job = null;
+  for (var i = 0; i < jobsData.length; i++) {
+    if (jobsData[i].id === jobId) { job = jobsData[i]; break; }
+  }
+  if (!job) return;
+
+  document.getElementById('jobDetailBcName').textContent = job.n;
+  document.getElementById('jobDetailTitle').textContent = job.n;
+
+  var grid = document.getElementById('jobDetailGrid');
+  var cells = [
+    ['ID', job.id],
+    ['Name', '<a>' + job.n + '</a>'],
+    ['Status', '<span class="status-badge status-successful"><span class="status-dot"></span>Success</span>'],
+    ['Type', job.type],
+    ['Duration', job.dur],
+    ['Launched by', '<a>' + job.by + '</a>'],
+    ['Started', job.started],
+    ['Finished', job.finished || '\u2014'],
+    ['Schedule', '\u2014'],
+    ['Job template', '<a>' + job.n + '</a>'],
+    ['Inventory', '<a>Demo Inventory</a>'],
+    ['Credentials', '<span style="display:inline-block;padding:2px 10px;border-radius:4px;font-size:12px;background:#f0f0f0;border:1px solid #ddd;">Machine: Demo Credential</span>'],
+    ['Project', '<a>Linux Automation</a>'],
+    ['Execution environment', '<a>Default execution environment</a>'],
+    ['Playbook', job.n === 'Increase Web Server Capacity' ? 'scale_webservers.yml' : 'site.yml'],
+    ['Revision', 'a7c3f0e8b2d1...'],
+    ['Controller node', 'aap-nostromo.demoredhat.com'],
+    ['Execution node', 'aap-nostromo.demoredhat.com'],
+    ['Forks', '0'],
+    ['Timeout', 'No timeout specified'],
+    ['Verbosity', '0 (Normal)'],
+    ['Last modified', job.started]
+  ];
+  grid.innerHTML = '';
+  cells.forEach(function(c) {
+    var div = document.createElement('div');
+    div.className = 'job-detail-cell';
+    div.innerHTML = '<div class="job-detail-cell-label">' + c[0] + '</div><div class="job-detail-cell-value">' + c[1] + '</div>';
+    grid.appendChild(div);
+  });
+
+  showPage('job-details');
+}
+
+renderJobs();
+
 var jobCounter = 25;
 var currentJobTimer = null;
 
@@ -1622,7 +1782,9 @@ function showPage(pageId) {
   var page = document.getElementById('page-' + pageId);
   if (page) page.classList.add('active');
 
-  var navItem = document.querySelector('.sidebar-item[data-page="' + pageId + '"]');
+  if (pageId === 'jobs') renderJobs();
+  var sidebarPage = pageId === 'job-details' || pageId === 'job-output' ? 'jobs' : pageId;
+  var navItem = document.querySelector('.sidebar-item[data-page="' + sidebarPage + '"]');
   if (navItem) navItem.classList.add('active');
 
   if (currentJobTimer) {
