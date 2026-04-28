@@ -10,7 +10,7 @@ Static mock environments for the Ansible Automation Platform keynote demo. Zero 
 
 | Environment | URL | Description |
 |---|---|---|
-| **AlertCommand** | [/alert_manager/](https://ansible-tmm.github.io/rh-summit-2026/alert_manager/) | Infrastructure alert management dashboard |
+| **ACME Alert Center** | [/alert_manager/](https://ansible-tmm.github.io/rh-summit-2026/alert_manager/) | Mock alert management dashboard |
 | **Ansible Automation Platform** | [/aap/](https://ansible-tmm.github.io/rh-summit-2026/aap/) | Mock AAP UI — templates, jobs, EDA, rulebook activations |
 | **IBM Instana** | [/instana/](https://ansible-tmm.github.io/rh-summit-2026/instana/) | Application observability — microservice dependency mapping and Smart Alerts |
 | **ServiceNow** | [/servicenow/](https://ansible-tmm.github.io/rh-summit-2026/servicenow/) | IT Service Management — incident management with AI recommendations |
@@ -22,7 +22,7 @@ Static mock environments for the Ansible Automation Platform keynote demo. Zero 
 
 Type these keywords anywhere on the page (no input field needed). Each trigger fires once per page load — refresh to reset.
 
-### AlertCommand (`/alert_manager/`)
+### ACME Alert Center (`/alert_manager/`)
 
 | Keyword | What it does |
 |---|---|
@@ -59,9 +59,9 @@ After the alert fires, **click the alert** to open a detail view showing MCP-to-
 
 ## Cold Open Demo Flow
 
-**Segment 1 — 2019 (Task-based):** Type `issue1` on AlertCommand → single alert fires → manually navigate to AAP → click Launch on "Increase Web Server Capacity" → watch playbook run → type `fix1` on AlertCommand → capacity alert resolves (Updated by AAP)
+**Segment 1 — 2019 (Task-based):** Type `issue1` on ACME Alert Center → single alert fires → manually navigate to AAP → click Launch on "Increase Web Server Capacity" → watch playbook run → type `fix1` on ACME Alert Center → capacity alert resolves (Updated by AAP)
 
-**Segment 2 — 2023 (Event-driven):** Type `issue2` on AlertCommand → 7 alerts cascade in → switch to AAP Rulebook Activations → type `eda` → fire count climbs, 7 jobs auto-run → switch to Jobs page to see them complete → type `fix2` on AlertCommand → all alerts resolve
+**Segment 2 — 2023 (Event-driven):** Type `issue2` on ACME Alert Center → 7 alerts cascade in → switch to AAP Rulebook Activations → type `eda` → fire count climbs, 7 jobs auto-run → switch to Jobs page to see them complete → type `fix2` on ACME Alert Center → all alerts resolve
 
 **AIOps Tools — MCP + AAP:** Open any AIOps tool (Instana, ServiceNow, or Splunk) → type `issue1` → observe the alert/incident → click it → see the MCP + AAP diagnostic and remediation workflow
 
@@ -72,7 +72,7 @@ After the alert fires, **click the alert** to open a detail view showing MCP-to-
 ```
 index.html              Landing page linking to all 5 environments
 aap/index.html          Mock AAP (single self-contained HTML file)
-alert_manager/          Mock AlertCommand (single self-contained HTML file)
+alert_manager/          Mock ACME Alert Center (single self-contained HTML file)
 instana/index.html      Mock IBM Instana (single self-contained HTML file)
 servicenow/index.html   Mock ServiceNow ITSM (single self-contained HTML file)
 splunk/index.html       Mock Cisco Splunk Observability (single self-contained HTML file)

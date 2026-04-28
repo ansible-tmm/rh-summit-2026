@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AlertCommand - Infrastructure Alert Management</title>
+<title>ACME Alert Center</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -416,8 +416,8 @@
     <div class="logo">
       <div class="logo-icon">AC</div>
       <div>
-        <div>AlertCommand</div>
-        <div class="logo-sub">Infrastructure Alert Management</div>
+        <div>ACME Alert Center</div>
+        <div class="logo-sub">Incident Dashboard</div>
       </div>
     </div>
     <nav class="nav">
@@ -695,7 +695,7 @@
           Job template <strong>Increase Web Server Capacity</strong> executed successfully.<br>
           Scaled web server pools from <strong>4 &rarr; 8 instances</strong> across 3 hosts.<br>
           Load rebalanced. Capacity restored from <strong>98% &rarr; 52%</strong>.<br>
-          Incident auto-closed by AlertCommand webhook integration.
+          Incident auto-closed by ACME Alert Center webhook integration.
         </div>
       </div>
 
@@ -719,7 +719,7 @@
 <span class="ok">ok: [web-prod-02.acme.com]</span> =&gt; {"capacity_pct": 48, "status": "healthy"}
 <span class="ok">ok: [web-prod-03.acme.com]</span> =&gt; {"capacity_pct": 45, "status": "healthy"}
 
-<span class="task">TASK [Update AlertCommand — resolve capacity incident] **************************</span>
+<span class="task">TASK [Update ACME Alert Center — resolve capacity incident] **************************</span>
 <span class="changed">changed: [web-prod-01.acme.com]</span> =&gt; {"incident": "INC-2026-04821", "status": "resolved"}
 
 <span class="recap">PLAY RECAP *********************************************************************</span>
@@ -776,8 +776,8 @@
     var flashState = false;
     titleFlashInterval = setInterval(function() {
       document.title = flashState
-        ? 'AlertCommand - Infrastructure Alert Management'
-        : '\u26A0\uFE0F CRITICAL ALERT - AlertCommand';
+        ? 'ACME Alert Center'
+        : '\u26A0\uFE0F CRITICAL ALERT - ACME Alert Center';
       flashState = !flashState;
     }, 1000);
   }
@@ -786,7 +786,7 @@
     if (titleFlashInterval) {
       clearInterval(titleFlashInterval);
       titleFlashInterval = null;
-      document.title = 'AlertCommand - Infrastructure Alert Management';
+      document.title = 'ACME Alert Center';
     }
   }
 
