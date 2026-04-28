@@ -993,7 +993,10 @@
     <!-- ══ JOB OUTPUT PAGE ══ -->
     <div class="content-page" id="page-job-output">
       <div class="job-header">
-        <button class="btn-back" onclick="showPage('templates')">&#8592; Back to Templates</button>
+        <div class="job-detail-breadcrumb" id="jobOutputBreadcrumb" style="display:none;">
+          <a onclick="showPage('jobs')">Jobs</a> &rsaquo; <span id="jobOutputBcName"></span> &rsaquo; Output
+        </div>
+        <button class="btn-back" id="jobOutputBackBtn" onclick="showPage('templates')">&#8592; Back to Templates</button>
         <div class="job-header-top">
           <div>
             <h1 id="jobOutputTitle">Patch RHEL Servers</h1>
@@ -1018,8 +1021,13 @@
           </div>
           <div class="job-meta-item">
             <span class="job-meta-label">Launched by</span>
-            <span class="job-meta-value">admin</span>
+            <span class="job-meta-value" id="jobMetaLaunchedBy">admin</span>
           </div>
+        </div>
+        <div class="job-detail-tabs" id="jobOutputTabs" style="display:none;margin-top:12px;">
+          <a class="job-detail-tab" onclick="showPage('jobs')">&#9664; Back to Jobs</a>
+          <a class="job-detail-tab active" id="jobOutputTabOutput">Output</a>
+          <a class="job-detail-tab" id="jobOutputTabDetails">Details</a>
         </div>
         <div class="job-progress" id="jobProgress">
           <div class="job-progress-bar" id="jobProgressBar"></div>
@@ -1103,7 +1111,7 @@
         </div>
         <div class="job-detail-tabs">
           <a class="job-detail-tab" onclick="showPage('jobs')">&#9664; Back to Jobs</a>
-          <a class="job-detail-tab">Output</a>
+          <a class="job-detail-tab" onclick="if(currentViewedJob)showJobDetails(currentViewedJob.id)">Output</a>
           <a class="job-detail-tab active">Details</a>
         </div>
       </div>
@@ -1471,11 +1479,81 @@ function renderJobs() {
   });
 }
 
+var currentViewedJob = null;
+
 function showJobDetails(jobId) {
   var job = null;
   for (var i = 0; i < jobsData.length; i++) {
     if (jobsData[i].id === jobId) { job = jobsData[i]; break; }
   }
+  if (!job) return;
+  currentViewedJob = job;
+
+  var scriptKey = null;
+  for (var key in jobScripts) {
+    if (jobScripts[key].title === job.n) { scriptKey = key; break; }
+  }
+  var script = scriptKey ? jobScripts[scriptKey] : null;
+
+  document.getElementById('jobOutputBreadcrumb').style.display = 'block';
+  document.getElementById('jobOutputBackBtn').style.display = 'none';
+  document.getElementById('jobOutputBcName').textContent = job.n;
+  document.getElementById('jobOutputTitle').textContent = job.n;
+  document.getElementById('jobOutputId').innerHTML = 'Job #' + job.id + ' &mdash; ' + job.type;
+  document.getElementById('jobMetaInventory').innerHTML = '<a href="#">' + (script ? script.inventory : 'Demo Inventory') + '</a>';
+  document.getElementById('jobMetaProject').innerHTML = '<a href="#">' + (script ? script.project : 'Linux Automation') + '</a>';
+  document.getElementById('jobMetaLaunchedBy').textContent = job.by;
+  document.getElementById('jobOutputStatus').innerHTML =
+    '<span class="status-badge status-successful"><span class="status-dot"></span>Successful</span>';
+
+  document.getElementById('jobOutputTabs').style.display = 'flex';
+  document.getElementById('jobOutputTabOutput').className = 'job-detail-tab active';
+  document.getElementById('jobOutputTabDetails').className = 'job-detail-tab';
+  document.getElementById('jobOutputTabDetails').setAttribute('onclick', 'showJobDetailsTab()');
+
+  var progressBar = document.getElementById('jobProgressBar');
+  progressBar.style.width = '100%';
+  progressBar.classList.add('complete');
+
+  var output = document.getElementById('jobOutput');
+  output.innerHTML = '';
+
+  if (script) {
+    var lines = script.lines;
+    var plays = 0, tasks = 0, hosts = {};
+    lines.forEach(function(l) {
+      if (!l.text) { output.appendChild(document.createElement('br')); return; }
+      if (l.cls === 'play-header' && l.text.indexOf('PLAY RECAP') === -1) plays++;
+      if (l.cls === 'task-header') tasks++;
+      if (l.cls === 'ok' || l.cls === 'changed') {
+        var m = l.text.match(/\[([^\]]+)\]/);
+        if (m) hosts[m[1]] = true;
+      }
+      var div = document.createElement('div');
+      div.className = 'job-line' + (l.cls ? ' ' + l.cls : '');
+      div.textContent = l.text;
+      output.appendChild(div);
+    });
+    var hostCount = Object.keys(hosts).length;
+    document.getElementById('jobStatPlays').textContent = plays;
+    document.getElementById('jobStatTasks').textContent = tasks;
+    document.getElementById('jobStatHosts').textContent = hostCount;
+    document.getElementById('jobStatElapsed').textContent = job.dur;
+    document.getElementById('jobOutputLabel').textContent = job.n + ' \u2014 Output';
+  } else {
+    output.innerHTML = '<div class="job-line ok">Job completed successfully.</div>';
+    document.getElementById('jobStatPlays').textContent = '1';
+    document.getElementById('jobStatTasks').textContent = '4';
+    document.getElementById('jobStatHosts').textContent = '3';
+    document.getElementById('jobStatElapsed').textContent = job.dur;
+    document.getElementById('jobOutputLabel').textContent = job.n + ' \u2014 Output';
+  }
+
+  showPage('job-output');
+}
+
+function showJobDetailsTab() {
+  var job = currentViewedJob;
   if (!job) return;
 
   document.getElementById('jobDetailBcName').textContent = job.n;
@@ -1800,12 +1878,17 @@ function launchJob(scriptKey) {
   jobCounter++;
   script.id = jobCounter;
 
+  document.getElementById('jobOutputBreadcrumb').style.display = 'none';
+  document.getElementById('jobOutputBackBtn').style.display = '';
+  document.getElementById('jobOutputTabs').style.display = 'none';
+
   showPage('job-output');
 
   document.getElementById('jobOutputTitle').textContent = script.title;
   document.getElementById('jobOutputId').innerHTML = 'Job #' + script.id + ' &mdash; Playbook run';
   document.getElementById('jobMetaInventory').innerHTML = '<a href="#">' + script.inventory + '</a>';
   document.getElementById('jobMetaProject').innerHTML = '<a href="#">' + script.project + '</a>';
+  document.getElementById('jobMetaLaunchedBy').textContent = 'admin';
   document.getElementById('jobOutputStatus').innerHTML =
     '<span class="status-badge status-running"><span class="spinner"></span>Running</span>';
   document.getElementById('jobOutputLabel').textContent = script.title + ' \u2014 Output';
