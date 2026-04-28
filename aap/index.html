@@ -314,7 +314,7 @@
 
   .tpl-expand-cell {
     width: 28px; text-align: center; color: var(--text-secondary);
-    font-size: 11px; cursor: pointer; padding: 8px 4px !important;
+    font-size: 14px; font-weight: 700; cursor: pointer; padding: 8px 4px !important;
   }
   .tpl-check-cell { width: 28px; text-align: center; padding: 8px 4px !important; }
   .tpl-check-cell input[type="checkbox"] {
@@ -631,7 +631,7 @@
   <symbol id="icon-pencil" viewBox="0 0 512 512"><path d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7.8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/></symbol>
   <symbol id="icon-copy" viewBox="0 0 512 512"><path d="M272 0H396.1c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9V336c0 26.5-21.5 48-48 48H272c-26.5 0-48-21.5-48-48V48c0-26.5 21.5-48 48-48zM48 128H192v64H64V448H256V416h64v48c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V176c0-26.5 21.5-48 48-48z"/></symbol>
   <symbol id="icon-search" viewBox="0 0 512 512"><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></symbol>
-  <symbol id="icon-workflow" viewBox="0 0 24 24"><rect x="1" y="10" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><rect x="9" y="16" width="6" height="6" rx="1"/><rect x="17" y="10" width="6" height="6" rx="1"/><line x1="7" y1="13" x2="17" y2="13" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="12" y1="8" x2="12" y2="16" stroke="currentColor" stroke-width="1.5" fill="none"/></symbol>
+  <symbol id="icon-workflow" viewBox="0 0 24 24"><rect x="2" y="2" width="7" height="7" rx="1"/><rect x="15" y="2" width="7" height="7" rx="1"/><rect x="8.5" y="15" width="7" height="7" rx="1"/><line x1="5.5" y1="9" x2="5.5" y2="13" stroke="currentColor" stroke-width="1.8" fill="none"/><line x1="18.5" y1="9" x2="18.5" y2="13" stroke="currentColor" stroke-width="1.8" fill="none"/><line x1="5.5" y1="13" x2="18.5" y2="13" stroke="currentColor" stroke-width="1.8" fill="none"/><line x1="12" y1="13" x2="12" y2="15" stroke="currentColor" stroke-width="1.8" fill="none"/></symbol>
 </svg>
 
 <!-- ── MASTHEAD ── -->
@@ -1331,23 +1331,25 @@ function renderTemplates() {
   var tbody = document.getElementById('templatesBody');
   if (!tbody) return;
   tbody.innerHTML = '';
-  var actionIcons =
-    '<button class="tpl-action-btn tpl-rocket" title="Launch template"><svg><use href="#icon-rocket"/></svg></button>' +
-    '<button class="tpl-action-btn" title="Edit template"><svg><use href="#icon-pencil"/></svg></button>' +
-    '<button class="tpl-action-btn tpl-kebab" title="More actions">&#8942;</button>';
   templateData.forEach(function(t) {
     var tr = document.createElement('tr');
+    var isWorkflow = t.t.indexOf('Workflow') !== -1;
+    var actions =
+      (isWorkflow ? '<button class="tpl-action-btn" title="Visualizer"><svg><use href="#icon-workflow"/></svg></button>' : '') +
+      '<button class="tpl-action-btn tpl-rocket" title="Launch template"><svg><use href="#icon-rocket"/></svg></button>' +
+      '<button class="tpl-action-btn" title="Edit template"><svg><use href="#icon-pencil"/></svg></button>' +
+      '<button class="tpl-action-btn tpl-kebab" title="More actions">&#8942;</button>';
     var labelHtml = t.labels ? '<span style="display:inline-block;padding:2px 10px;border-radius:10px;font-size:13px;font-weight:600;background:#e7f1fa;color:#0066cc;">' + t.labels + '</span>' : '';
     var orgLink = t.o ? '<a class="table-name" style="font-weight:500;">' + t.o + '</a>' : '';
     tr.innerHTML =
-      '<td class="tpl-expand-cell">&#9656;</td>' +
+      '<td class="tpl-expand-cell">&gt;</td>' +
       '<td class="tpl-check-cell"><input type="checkbox"></td>' +
-      '<td>' + (t.t.indexOf('Workflow') !== -1 ? '<svg style="width:16px;height:16px;fill:currentColor;vertical-align:middle;margin-right:6px;"><use href="#icon-workflow"/></svg>' : '') + '<span class="table-name">' + t.n + '</span></td>' +
+      '<td><span class="table-name">' + t.n + '</span></td>' +
       '<td class="table-secondary">' + t.t + '</td>' +
       '<td>' + labelHtml + '</td>' +
       '<td>' + orgLink + '</td>' +
       '<td class="table-secondary">' + (t.d || '') + '</td>' +
-      '<td class="tpl-actions">' + actionIcons + '</td>';
+      '<td class="tpl-actions">' + actions + '</td>';
     if (t.launch) {
       tr.querySelector('.tpl-rocket').setAttribute('onclick', "launchJob('" + t.launch + "')");
     }
