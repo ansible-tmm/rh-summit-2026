@@ -1333,7 +1333,6 @@ function renderTemplates() {
   var actionIcons =
     '<button class="tpl-action-btn tpl-rocket" title="Launch template"><svg><use href="#icon-rocket"/></svg></button>' +
     '<button class="tpl-action-btn" title="Edit template"><svg><use href="#icon-pencil"/></svg></button>' +
-    '<button class="tpl-action-btn" title="Copy template"><svg><use href="#icon-copy"/></svg></button>' +
     '<button class="tpl-action-btn tpl-kebab" title="More actions">&#8942;</button>';
   templateData.forEach(function(t) {
     var tr = document.createElement('tr');
@@ -1350,7 +1349,6 @@ function renderTemplates() {
       '<td class="tpl-actions">' + actionIcons + '</td>';
     if (t.launch) {
       tr.querySelector('.tpl-rocket').setAttribute('onclick', "launchJob('" + t.launch + "')");
-      tr.querySelector('.tpl-rocket').style.color = 'var(--pf-blue)';
     }
     tbody.appendChild(tr);
   });
