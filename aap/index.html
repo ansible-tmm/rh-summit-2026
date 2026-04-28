@@ -132,7 +132,7 @@
   .sidebar-divider { height: 1px; background: #383838; margin: 8px 16px; }
 
   /* ── CONTENT ── */
-  .content { flex: 1; overflow-y: auto; min-height: 0; }
+  .content { flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0; }
   .content-page { display: none; }
   .content-page.active { display: block; }
 
@@ -179,16 +179,17 @@
   .pf-table {
     width: 100%; border-collapse: collapse;
     background: var(--card-bg);
+    table-layout: fixed;
   }
   .pf-table thead th {
-    text-align: left; padding: 14px 24px; font-size: 16px;
+    text-align: left; padding: 10px 12px; font-size: 13px;
     font-weight: 700; color: var(--text-primary);
     background: #f5f5f5; border-bottom: 1px solid var(--card-border);
     white-space: nowrap;
   }
   .pf-table tbody td {
-    padding: 16px 24px; font-size: 18px; border-bottom: 1px solid #ececec;
-    vertical-align: middle;
+    padding: 10px 12px; font-size: 14px; border-bottom: 1px solid #ececec;
+    vertical-align: middle; overflow: hidden; text-overflow: ellipsis;
   }
   .pf-table tbody tr { transition: background 0.1s; cursor: default; }
   .pf-table tbody tr:hover { background: #f9f9f9; }
@@ -199,8 +200,8 @@
     text-decoration: none;
   }
   .table-name:hover { text-decoration: underline; }
-  .table-secondary { color: var(--text-secondary); font-size: 16px; }
-  .table-mono { font-family: var(--font-mono); font-size: 16px; color: var(--text-secondary); }
+  .table-secondary { color: var(--text-secondary); font-size: 13px; }
+  .table-mono { font-family: var(--font-mono); font-size: 13px; color: var(--text-secondary); }
 
   /* ── STATUS BADGES ── */
   .status-badge {
@@ -312,20 +313,20 @@
   .view-toggle-btn svg { width: 16px; height: 16px; fill: currentColor; }
 
   .tpl-expand-cell {
-    width: 36px; text-align: center; color: var(--text-secondary);
-    font-size: 12px; cursor: pointer; padding: 16px 8px !important;
+    width: 28px; text-align: center; color: var(--text-secondary);
+    font-size: 11px; cursor: pointer; padding: 8px 4px !important;
   }
-  .tpl-check-cell { width: 36px; text-align: center; padding: 16px 8px !important; }
+  .tpl-check-cell { width: 28px; text-align: center; padding: 8px 4px !important; }
   .tpl-check-cell input[type="checkbox"] {
     width: 16px; height: 16px; cursor: pointer; accent-color: var(--pf-blue);
   }
 
   .tpl-actions {
-    display: flex; align-items: center; gap: 2px; justify-content: flex-end;
-    padding-right: 16px !important;
+    display: flex; align-items: center; gap: 1px; justify-content: flex-end;
+    padding-right: 8px !important; white-space: nowrap;
   }
   .tpl-action-btn {
-    width: 36px; height: 36px; display: inline-flex; align-items: center;
+    width: 30px; height: 30px; display: inline-flex; align-items: center;
     justify-content: center; border: none; background: transparent;
     cursor: pointer; color: var(--text-secondary); border-radius: 4px;
     transition: all 0.12s;
@@ -914,14 +915,14 @@
       <table class="pf-table" id="templatesTable">
         <thead>
           <tr>
-            <th style="width:36px;padding:14px 8px;"></th>
-            <th style="width:36px;padding:14px 8px;"><input type="checkbox" style="width:16px;height:16px;cursor:pointer;accent-color:var(--pf-blue);"></th>
-            <th>Name &nbsp;&#9650;</th>
-            <th>Type</th>
-            <th>Labels</th>
-            <th>Organization</th>
-            <th>Last ran &nbsp;&#8597;</th>
-            <th style="width:170px;"></th>
+            <th style="width:28px;padding:10px 4px;"></th>
+            <th style="width:28px;padding:10px 4px;"><input type="checkbox" style="width:14px;height:14px;cursor:pointer;accent-color:var(--pf-blue);"></th>
+            <th style="width:28%;">Name &nbsp;&#9650;</th>
+            <th style="width:10%;">Type</th>
+            <th style="width:8%;">Labels</th>
+            <th style="width:14%;">Organization</th>
+            <th style="width:16%;">Last ran &nbsp;&#8597;</th>
+            <th style="width:130px;"></th>
           </tr>
         </thead>
         <tbody id="templatesBody"></tbody>
