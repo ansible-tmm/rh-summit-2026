@@ -1249,10 +1249,10 @@
           <tr style="cursor:pointer;" onclick="showPage('eda-detail-alertmanager')">
             <td>
               <span class="table-name">Infrastructure Auto-Remediation</span><br>
-              <span class="table-secondary">Monitors Alertmanager for critical alerts</span>
+              <span class="table-secondary">Triggers on critical alerts from <strong>ACME Alert Center</strong> (your operator UI)</span>
             </td>
             <td><span class="status-badge status-enabled"><span class="status-dot"></span>Running</span></td>
-            <td class="table-secondary">alertmanager-remediation.yml</td>
+            <td class="table-secondary">alertmanager-remediation.yml<br><span style="font-size:13px;opacity:0.9;">Alerts originate in ACME Alert Center</span></td>
             <td class="table-secondary">Default decision environment</td>
             <td id="edaFireCount2">0</td>
             <td>0</td>
@@ -1312,6 +1312,11 @@
         <div class="job-meta-item">
           <span class="job-meta-label">Rulebook</span>
           <span class="job-meta-value">alertmanager-remediation.yml</span>
+          <span class="table-secondary" style="display:block;margin-top:8px;font-size:14px;max-width:520px;line-height:1.45;">EDA listens for the same critical alerts operators see in <strong>ACME Alert Center</strong>. The legacy filename <code style="font-size:13px;">alertmanager-remediation.yml</code> indicates the playbook is wired for Alertmanager-style payloads&mdash;not the old product name.</span>
+        </div>
+        <div class="job-meta-item">
+          <span class="job-meta-label">Alert source</span>
+          <span class="job-meta-value">ACME Alert Center</span>
         </div>
         <div class="job-meta-item">
           <span class="job-meta-label">Decision Environment</span>
@@ -1340,53 +1345,45 @@
     <div class="content-page" id="page-eda-ruleaudit">
       <div class="page-header">
         <h1>Rule Audit</h1>
-        <div class="page-header-sub">Event-Driven Ansible &mdash; History of rule matches and actions</div>
+        <div class="page-header-sub">Event-Driven Ansible &mdash; Each rule match shows the <strong>job template</strong> that ran. After you type <kbd style="font-size:14px;padding:2px 8px;">eda</kbd>, seven new rows appear here (one per alert from <strong>ACME Alert Center</strong>).</div>
       </div>
       <div class="toolbar">
         <div class="toolbar-left">
           <input type="text" class="toolbar-search" placeholder="Filter by name">
-          <span class="toolbar-count" id="ruleAuditCount">21 items</span>
+          <span class="toolbar-count" id="ruleAuditCount">4 items</span>
         </div>
       </div>
       <table class="pf-table">
         <thead>
-          <tr><th>Name</th><th>Status</th><th>Rulebook Activation</th><th>Fired At</th></tr>
+          <tr><th>Name</th><th>Status</th><th>Rulebook activation</th><th>Job template</th><th>Last fired</th></tr>
         </thead>
         <tbody id="ruleAuditBody">
           <tr>
             <td><span class="table-name">Respond to ServiceNow incident</span></td>
             <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
             <td class="table-secondary">ServiceNow Incident Handler</td>
+            <td class="table-secondary">Auto-Remediation</td>
             <td class="table-secondary">Today 10:42 AM</td>
           </tr>
           <tr>
             <td><span class="table-name">Respond to ServiceNow incident</span></td>
             <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
             <td class="table-secondary">ServiceNow Incident Handler</td>
+            <td class="table-secondary">Certificate Rotation</td>
             <td class="table-secondary">Today 10:15 AM</td>
           </tr>
           <tr>
-            <td><span class="table-name">Remediate critical alert</span></td>
-            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
-            <td class="table-secondary">Infrastructure Auto-Remediation</td>
-            <td class="table-secondary">Today 09:22 AM</td>
-          </tr>
-          <tr>
             <td><span class="table-name">Respond to ServiceNow incident</span></td>
             <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
             <td class="table-secondary">ServiceNow Incident Handler</td>
+            <td class="table-secondary">Auto-Remediation</td>
             <td class="table-secondary">Today 09:58 AM</td>
           </tr>
           <tr>
-            <td><span class="table-name">Remediate critical alert</span></td>
-            <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
-            <td class="table-secondary">Infrastructure Auto-Remediation</td>
-            <td class="table-secondary">Today 08:47 AM</td>
-          </tr>
-          <tr>
             <td><span class="table-name">Respond to ServiceNow incident</span></td>
             <td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>
             <td class="table-secondary">ServiceNow Incident Handler</td>
+            <td class="table-secondary">Network Backup Configuration</td>
             <td class="table-secondary">Today 08:45 AM</td>
           </tr>
         </tbody>
@@ -1984,14 +1981,42 @@ document.addEventListener('keydown', function(e) {
 });
 
 var edaAlerts = [
-  { service: 'payment-service-prod', job: 'Flush Stale Connections \u2014 payment-service-prod', desc: 'HighLatency \u2014 payment-service-prod (latency > 500ms for 5m)', completeDelay: 4000 },
-  { service: 'db-primary-us-east-1', job: 'Recover Connection Pool \u2014 db-primary-us-east-1', desc: 'ConnectionPoolExhausted \u2014 db-primary-us-east-1 (0 available)', completeDelay: 5000 },
-  { service: 'rabbitmq-cluster-01', job: 'Drain Message Queue \u2014 rabbitmq-cluster-01', desc: 'QueueBacklog \u2014 rabbitmq-cluster-01 (50k+ messages pending)', completeDelay: 6500 },
-  { service: 'api-gateway-prod', job: 'Restart API Gateway Workers \u2014 api-gateway-prod', desc: 'High5xxRate \u2014 api-gateway-prod (error rate > 25%)', completeDelay: 8000 },
-  { service: 'k8s-worker-node-03', job: 'Reclaim Container Memory \u2014 k8s-worker-node-03', desc: 'MemoryPressure \u2014 k8s-worker-node-03 (OOMKill events)', completeDelay: 10000 },
-  { service: 'redis-cluster-prod', job: 'Rebuild Redis Cache \u2014 redis-cluster-prod', desc: 'LowCacheHitRate \u2014 redis-cluster-prod (hit rate < 40%)', completeDelay: 12000 },
-  { service: 'cdn-origin-us-east', job: 'Failover CDN Origin \u2014 cdn-origin-us-east', desc: 'OriginHealthCheck \u2014 cdn-origin-us-east (failures detected)', completeDelay: 14000 }
+  { ruleName: 'On critical latency', service: 'payment-service-prod', job: 'Flush Stale Connections \u2014 payment-service-prod', desc: 'HighLatency \u2014 payment-service-prod (latency > 500ms for 5m)', completeDelay: 4000 },
+  { ruleName: 'On connection pool exhausted', service: 'db-primary-us-east-1', job: 'Recover Connection Pool \u2014 db-primary-us-east-1', desc: 'ConnectionPoolExhausted \u2014 db-primary-us-east-1 (0 available)', completeDelay: 5000 },
+  { ruleName: 'On queue backlog', service: 'rabbitmq-cluster-01', job: 'Drain Message Queue \u2014 rabbitmq-cluster-01', desc: 'QueueBacklog \u2014 rabbitmq-cluster-01 (50k+ messages pending)', completeDelay: 6500 },
+  { ruleName: 'On high 5xx error rate', service: 'api-gateway-prod', job: 'Restart API Gateway Workers \u2014 api-gateway-prod', desc: 'High5xxRate \u2014 api-gateway-prod (error rate > 25%)', completeDelay: 8000 },
+  { ruleName: 'On memory pressure', service: 'k8s-worker-node-03', job: 'Reclaim Container Memory \u2014 k8s-worker-node-03', desc: 'MemoryPressure \u2014 k8s-worker-node-03 (OOMKill events)', completeDelay: 10000 },
+  { ruleName: 'On low cache hit rate', service: 'redis-cluster-prod', job: 'Rebuild Redis Cache \u2014 redis-cluster-prod', desc: 'LowCacheHitRate \u2014 redis-cluster-prod (hit rate < 40%)', completeDelay: 12000 },
+  { ruleName: 'On origin health check failed', service: 'cdn-origin-us-east', job: 'Failover CDN Origin \u2014 cdn-origin-us-east', desc: 'OriginHealthCheck \u2014 cdn-origin-us-east (failures detected)', completeDelay: 14000 }
 ];
+
+function formatRuleAuditFiredAt() {
+  return new Date().toLocaleString('en-US', {
+    month: 'numeric',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
+}
+
+function prependRuleAuditEdaRow(ruleName, jobTemplateShort) {
+  var tbody = document.getElementById('ruleAuditBody');
+  var countEl = document.getElementById('ruleAuditCount');
+  if (!tbody) return;
+  var tr = document.createElement('tr');
+  tr.className = 'eda-new-row';
+  tr.innerHTML =
+    '<td><span class="table-name">' + ruleName + '</span></td>' +
+    '<td><span class="status-badge status-successful"><span class="status-dot"></span>Successful</span></td>' +
+    '<td class="table-secondary">Infrastructure Auto-Remediation</td>' +
+    '<td class="table-secondary">' + jobTemplateShort + '</td>' +
+    '<td class="table-secondary">' + formatRuleAuditFiredAt() + '</td>';
+  tbody.insertBefore(tr, tbody.firstChild);
+  if (countEl) countEl.textContent = tbody.children.length + ' items';
+}
 
 function fireEdaSequence() {
   var fireCountEl = document.getElementById('edaFireCount2');
@@ -2029,6 +2054,9 @@ function fireEdaSequence() {
         '<span class="eda-event-desc">' + alert.desc + '</span>' +
         '<span class="eda-event-action">&#10003; Launched: ' + alert.job.split(' \u2014')[0] + '</span>';
       if (eventsContainer) eventsContainer.insertBefore(eventRow, eventsContainer.firstChild);
+
+      var jobShort = alert.job.split(' \u2014')[0];
+      if (alert.ruleName) prependRuleAuditEdaRow(alert.ruleName, jobShort);
 
       jobCounter++;
       jobsItemCount++;
