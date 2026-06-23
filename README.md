@@ -6,6 +6,20 @@ Static mock environments for the Ansible Automation Platform keynote demo. Zero 
 
 ---
 
+## Access (team only)
+
+All demo pages show a sign-in screen before content loads. This is a lightweight gate for the public GitHub Pages site — not enterprise authentication.
+
+| | |
+|---|---|
+| **Password** | `ansible123!` |
+| **Session** | Stays signed in until you close the browser tab |
+| **Scope** | Landing page and every demo subdirectory |
+
+The password is verified client-side against a SHA-256 hash in `auth.js` (plaintext is not stored in the repo). Share this password with presenters and booth staff only.
+
+---
+
 ## Demo Environments
 
 | Environment | URL | Description |
@@ -15,6 +29,7 @@ Static mock environments for the Ansible Automation Platform keynote demo. Zero 
 | **IBM Instana** | [/instana/](https://ansible-tmm.github.io/rh-summit-2026/instana/) | Application observability — microservice dependency mapping and Smart Alerts |
 | **ServiceNow** | [/servicenow/](https://ansible-tmm.github.io/rh-summit-2026/servicenow/) | IT Service Management — incident management with AI recommendations |
 | **Cisco Splunk** | [/splunk/](https://ansible-tmm.github.io/rh-summit-2026/splunk/) | Log observability — detector alerts and AI-powered root cause correlation |
+| **Now Assist Chat** | [/nowassist/](https://ansible-tmm.github.io/rh-summit-2026/nowassist/) | ServiceNow AI chatroom — MCP-driven incident remediation |
 
 ---
 
@@ -70,10 +85,12 @@ After the alert fires, **click the alert** to open a detail view showing MCP-to-
 ## Structure
 
 ```
-index.html              Landing page linking to all 5 environments
+auth.js                 Client-side login gate (SHA-256 hash check, sessionStorage)
+index.html              Landing page linking to all demo environments
 aap/index.html          Mock AAP (single self-contained HTML file)
 alert_manager/          Mock ACME Alert Center (single self-contained HTML file)
 instana/index.html      Mock IBM Instana (single self-contained HTML file)
 servicenow/index.html   Mock ServiceNow ITSM (single self-contained HTML file)
 splunk/index.html       Mock Cisco Splunk Observability (single self-contained HTML file)
+nowassist/index.html    Mock ServiceNow Now Assist chat (single self-contained HTML file)
 ```
