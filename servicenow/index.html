@@ -481,6 +481,11 @@
       color: var(--state-new);
     }
 
+    .badge-state.resolved {
+      background: #e3f7ea;
+      color: #0b6e4f;
+    }
+
     .badge-p1-large {
       padding: 4px 12px;
       border-radius: 4px;
@@ -855,7 +860,7 @@
         <div class="detail-inc-num">INC0049127</div>
         <h2 id="detailTitle" class="detail-title">Production database cluster unreachable — primary failover required</h2>
         <div class="detail-badges">
-          <span class="badge-state">New</span>
+          <span class="badge-state" id="detailStateBadge">New</span>
           <span class="badge-p1-large">P1 Critical</span>
         </div>
       </div>
@@ -946,14 +951,15 @@
               </div>
             </div>
             <div class="timeline-step">
-              <div class="step-marker">●</div>
+              <div class="step-marker" id="step3Marker">●</div>
               <div class="step-body">
                 <div class="step-title">
                   Step 3: Database Failover
-                  <span class="step-status status-ready">Ready</span>
+                  <span class="step-status status-ready" id="step3Status">Ready</span>
                 </div>
-                <div class="step-desc">Promote replica db-replica-02 to primary, reconfigure connection strings, verify data integrity</div>
-                <button type="button" class="btn-aap">Execute Failover via AAP →</button>
+                <div class="step-desc" id="step3Desc">Promote replica db-replica-02 to primary, reconfigure connection strings, verify data integrity</div>
+                <button type="button" class="btn-aap" id="execFailoverBtn" onclick="solveIncident()">Execute Failover via AAP →</button>
+                <div class="step-time" id="step3Time"></div>
               </div>
             </div>
           </div>
@@ -980,7 +986,7 @@ db-replica-02           : ok=2    changed=0    unreachable=0    failed=0</div>
           </div>
         </div>
 
-        <div class="form-section">
+        <div class="form-section" id="workNotesSection">
           <h3>Activity — Work notes</h3>
           <div class="journal-entry">
             <div class="journal-meta" id="jn1"></div>
@@ -1065,8 +1071,63 @@ db-replica-02           : ok=2    changed=0    unreachable=0    failed=0</div>
       });
     }
 
+    var incidentSolved = false;
+
+    function solveIncident() {
+      var p1Row = document.getElementById('p1Row');
+      if (!p1Row || incidentSolved) return;
+      incidentSolved = true;
+
+      var rowState = p1Row.querySelector('.state-text');
+      if (rowState) {
+        rowState.textContent = 'Resolved';
+        rowState.className = 'state-text state-resolved';
+      }
+      var priorityBadge = p1Row.querySelector('.priority-badge');
+      if (priorityBadge) priorityBadge.classList.remove('pulse');
+      var rowAssigned = p1Row.children[4];
+      if (rowAssigned) rowAssigned.textContent = 'AAP Automation';
+
+      var stateBadge = document.getElementById('detailStateBadge');
+      if (stateBadge) {
+        stateBadge.textContent = 'Resolved';
+        stateBadge.classList.add('resolved');
+      }
+      var assignedField = document.getElementById('f-assigned');
+      if (assignedField) assignedField.textContent = 'AAP Automation (auto-resolved)';
+
+      var marker = document.getElementById('step3Marker');
+      if (marker) marker.textContent = '✓';
+      var status = document.getElementById('step3Status');
+      if (status) {
+        status.textContent = 'Complete';
+        status.className = 'step-status status-complete';
+      }
+      var btn = document.getElementById('execFailoverBtn');
+      if (btn) {
+        btn.outerHTML = '<span class="step-status status-complete" style="margin-left:0;">&#10003; Failover executed successfully</span>';
+      }
+      var step3Time = document.getElementById('step3Time');
+      if (step3Time) step3Time.textContent = formatTs(new Date());
+
+      var terminal = document.getElementById('playbookTerminal');
+      if (terminal) {
+        terminal.textContent += '\n\nTASK [Promote db-replica-02 to primary] ****************************\nchanged: [db-replica-02] => {"role": "primary", "promoted": true}\n\nTASK [Reconfigure application connection strings] ******************\nchanged: [app-prod-01] => {"endpoint": "db-replica-02"}\nchanged: [app-prod-02] => {"endpoint": "db-replica-02"}\n\nTASK [Verify data integrity post-failover] **************************\nok: [db-replica-02] => {"integrity_check": "passed", "data_loss": "none"}\n\nPLAY RECAP *********************************************************\ndb-replica-02   : ok=3    changed=2    unreachable=0    failed=0';
+        terminal.scrollTop = terminal.scrollHeight;
+      }
+
+      var workNotes = document.getElementById('workNotesSection');
+      if (workNotes) {
+        var jn5 = document.createElement('div');
+        jn5.className = 'journal-entry';
+        jn5.innerHTML = '<div class="journal-meta">AAP Integration · ' + formatTs(new Date()) + '</div><div class="journal-text">Failover executed successfully — db-replica-02 promoted to primary. Incident resolved.</div>';
+        workNotes.appendChild(jn5);
+      }
+    }
+
     var demoTriggered = false;
     var demoKeyBuffer = '';
+    var solveKeyBuffer = '';
 
     document.addEventListener('keydown', function (e) {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -1076,6 +1137,13 @@ db-replica-02           : ok=2    changed=0    unreachable=0    failed=0</div>
         demoTriggered = true;
         demoKeyBuffer = '';
         fireIssue();
+      }
+
+      solveKeyBuffer += e.key.toLowerCase();
+      if (solveKeyBuffer.length > 20) solveKeyBuffer = solveKeyBuffer.slice(-20);
+      if (!incidentSolved && solveKeyBuffer.includes('solve')) {
+        solveKeyBuffer = '';
+        solveIncident();
       }
     });
 

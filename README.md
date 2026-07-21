@@ -67,6 +67,8 @@ All three AIOps mock sites use a keyword trigger to fire their issue, then you c
 | **ServiceNow** | Production database outage | `demo` | P1 incident INC0049127, database cluster unreachable, failover required |
 | **Cisco Splunk** | Anomalous error log spike | `issue1` | 15x baseline error rate detected, ERROR logs flood the log observer |
 
+On ServiceNow, after `demo` has fired the incident, type `solve` to execute the failover: the incident's state badge and list row flip to "Resolved", Step 3 of the automation timeline completes, the playbook terminal appends the promote/reconfigure/verify tasks, and a new work note is added. You can also click **Execute Failover via AAP →** in the detail view to trigger the same resolution.
+
 ### Now Assist Chat (`/nowassist/`)
 
 The chat input is pre-filled with `can you help me with INC0049127?`. Just press **Send** to play the scripted 8-message remediation sequence (analyzing incident → connect to AAP via MCP → launch job template on `nostromo` → playbook output → incident resolved). No keyword needed.
@@ -79,7 +81,7 @@ The chat input is pre-filled with `can you help me with INC0049127?`. Just press
 
 **Segment 2 — 2023 (Event-driven):** Type `issue2` on ACME Alert Center → 7 alerts cascade in → switch to AAP Rulebook Activations → type `eda` → fire count climbs, 7 jobs auto-run → switch to Jobs page to see them complete → type `fix2` on ACME Alert Center → all alerts resolve
 
-**AIOps Tools — MCP + AAP:** Open ServiceNow and type `demo` (or open Instana/Splunk and type `issue1`) → click the incident/alert that appears → see the MCP + AAP diagnostic and remediation workflow
+**AIOps Tools — MCP + AAP:** Open ServiceNow and type `demo` (or open Instana/Splunk and type `issue1`) → click the incident/alert that appears → see the MCP + AAP diagnostic and remediation workflow → on ServiceNow, type `solve` to execute the failover and resolve the incident
 
 **Now Assist Chat:** Open Now Assist Chat → press Send on the pre-filled message → watch the scripted MCP + AAP remediation flow
 
