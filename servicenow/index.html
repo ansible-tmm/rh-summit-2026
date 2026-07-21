@@ -152,8 +152,10 @@
 
     /* Critical banner */
     .issue-banner {
-      position: sticky;
+      position: fixed;
       top: 52px;
+      left: 0;
+      right: 0;
       z-index: 150;
       background: linear-gradient(90deg, #8b1a1a 0%, #c62828 50%, #8b1a1a 100%);
       color: #fff;
@@ -742,7 +744,7 @@
     </div>
   </header>
 
-  <div id="issueBanner" class="issue-banner visible" role="alert" aria-live="polite">
+  <div id="issueBanner" class="issue-banner" role="alert" aria-live="polite">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
     <span>New P1 Incident: Production database cluster unreachable</span>
   </div>
@@ -750,7 +752,7 @@
   <main class="main-wrap">
     <div class="page-header">
       <h1>Incidents</h1>
-      <span id="recordCount" class="count-badge">9 records</span>
+      <span id="recordCount" class="count-badge">8 records</span>
     </div>
 
     <div class="toolbar">
@@ -775,14 +777,6 @@
           </tr>
         </thead>
         <tbody id="incidentBody">
-          <tr id="p1Row" class="critical-row">
-            <td><a href="#" class="num-link" onclick="return false;">INC0049127</a></td>
-            <td>Production database cluster unreachable — primary failover required</td>
-            <td><span class="priority-badge priority-p1 pulse">P1</span></td>
-            <td><span class="state-text state-new">New</span></td>
-            <td>Unassigned</td>
-            <td>Just now</td>
-          </tr>
           <tr>
             <td><a href="#" class="num-link" onclick="return false;">INC0049120</a></td>
             <td>Email notification delays for APAC region</td>
@@ -1046,10 +1040,43 @@ db-replica-02           : ok=2    changed=0    unreachable=0    failed=0</div>
       document.body.style.overflow = '';
     }
 
-    var p1Row = document.getElementById('p1Row');
-    p1Row.addEventListener('click', function (e) {
-      if (e.target.tagName === 'A') e.preventDefault();
-      openP1Detail();
+    function fireIssue() {
+      var banner = document.getElementById('issueBanner');
+      banner.classList.add('visible');
+
+      var tbody = document.getElementById('incidentBody');
+      var tr = document.createElement('tr');
+      tr.id = 'p1Row';
+      tr.className = 'critical-row';
+      tr.innerHTML =
+        '<td><a href="#" class="num-link" onclick="return false;">INC0049127</a></td>' +
+        '<td>Production database cluster unreachable &mdash; primary failover required</td>' +
+        '<td><span class="priority-badge priority-p1 pulse">P1</span></td>' +
+        '<td><span class="state-text state-new">New</span></td>' +
+        '<td>Unassigned</td>' +
+        '<td>Just now</td>';
+      tbody.insertBefore(tr, tbody.firstChild);
+
+      document.getElementById('recordCount').textContent = '9 records';
+
+      tr.addEventListener('click', function (e) {
+        if (e.target.tagName === 'A') e.preventDefault();
+        openP1Detail();
+      });
+    }
+
+    var demoTriggered = false;
+    var demoKeyBuffer = '';
+
+    document.addEventListener('keydown', function (e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      demoKeyBuffer += e.key.toLowerCase();
+      if (demoKeyBuffer.length > 20) demoKeyBuffer = demoKeyBuffer.slice(-20);
+      if (!demoTriggered && demoKeyBuffer.includes('demo')) {
+        demoTriggered = true;
+        demoKeyBuffer = '';
+        fireIssue();
+      }
     });
 
     document.getElementById('overlayBackdrop').addEventListener('click', closeP1Detail);

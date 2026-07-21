@@ -59,19 +59,13 @@ Additionally, clicking **Launch** on any job template in the Templates page play
 
 ### AIOps Tools (`/instana/`, `/servicenow/`, `/splunk/`)
 
-`/servicenow/` shows its P1 incident (**INC0049127**) by default on page load — no keyword needed, just click it. `/instana/` and `/splunk/` still use the keyword trigger:
+All three AIOps mock sites use a keyword trigger to fire their issue, then you click it to open the detail view showing MCP-to-AAP integration with diagnostic playbook output and remediation options.
 
-| Keyword | What it does |
-|---|---|
-| `issue1` | Fires a critical alert/incident specific to the tool (see below) |
-
-After the alert/incident is showing, **click it** to open a detail view showing MCP-to-AAP integration with diagnostic playbook output and remediation options.
-
-| Tool | Use Case | Issue |
-|---|---|---|
-| **IBM Instana** | Microservice cascade failure | Type `issue1` — `order-service` error rate spikes, downstream services degrade, Smart Alert fires |
-| **ServiceNow** | Production database outage | Shown by default — P1 incident INC0049127, database cluster unreachable, failover required |
-| **Cisco Splunk** | Anomalous error log spike | Type `issue1` — 15x baseline error rate detected, ERROR logs flood the log observer |
+| Tool | Use Case | Keyword | Issue |
+|---|---|---|---|
+| **IBM Instana** | Microservice cascade failure | `issue1` | `order-service` error rate spikes, downstream services degrade, Smart Alert fires |
+| **ServiceNow** | Production database outage | `demo` | P1 incident INC0049127, database cluster unreachable, failover required |
+| **Cisco Splunk** | Anomalous error log spike | `issue1` | 15x baseline error rate detected, ERROR logs flood the log observer |
 
 ### Now Assist Chat (`/nowassist/`)
 
@@ -85,9 +79,11 @@ The chat input is pre-filled with `can you help me with INC0049127?`. Just press
 
 **Segment 2 — 2023 (Event-driven):** Type `issue2` on ACME Alert Center → 7 alerts cascade in → switch to AAP Rulebook Activations → type `eda` → fire count climbs, 7 jobs auto-run → switch to Jobs page to see them complete → type `fix2` on ACME Alert Center → all alerts resolve
 
-**AIOps Tools — MCP + AAP:** Open ServiceNow (INC0049127 already showing) and click it, or open Instana/Splunk and type `issue1` first → see the MCP + AAP diagnostic and remediation workflow
+**AIOps Tools — MCP + AAP:** Open ServiceNow and type `demo` (or open Instana/Splunk and type `issue1`) → click the incident/alert that appears → see the MCP + AAP diagnostic and remediation workflow
 
 **Now Assist Chat:** Open Now Assist Chat → press Send on the pre-filled message → watch the scripted MCP + AAP remediation flow
+
+**AAP Job:** Type `demo` on the AAP Jobs page → Job #4871 appears as Running → click it to watch the live playbook run
 
 ---
 
