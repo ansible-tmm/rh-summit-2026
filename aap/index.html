@@ -1864,6 +1864,7 @@ var jobScripts = {
     id: null,
     inventory: 'Web Servers',
     project: 'Linux Automation',
+    liveResumeBeforeTask: 'TASK [Validate Apache configuration syntax]',
     lines: [
       { text: '', delay: 200 },
       { text: 'PLAY [Restore Web Application] *****************************************', cls: 'play-header', delay: 400 },
@@ -1928,7 +1929,9 @@ function formatJobDuration(totalSeconds) {
   return mm > 0 ? (mm + 'm ' + ss + 's') : (ss + 's');
 }
 
-function animatePlaybookOutput(script, onComplete) {
+function animatePlaybookOutput(script, onComplete, startIndex) {
+  startIndex = startIndex || 0;
+
   var oldChanged = document.querySelector('#jobOutputStats .stat-changed');
   if (oldChanged) oldChanged.remove();
 
@@ -1946,17 +1949,32 @@ function animatePlaybookOutput(script, onComplete) {
   document.getElementById('jobStatPlays').textContent = plays;
   document.getElementById('jobStatTasks').textContent = tasks;
   document.getElementById('jobStatHosts').textContent = hostCount;
-  document.getElementById('jobStatElapsed').textContent = '00:00:00';
 
   var progressBar = document.getElementById('jobProgressBar');
-  progressBar.style.width = '0%';
   progressBar.classList.remove('complete');
 
   var output = document.getElementById('jobOutput');
   output.innerHTML = '';
 
   var totalLines = lines.length;
-  var startTime = Date.now();
+  var elapsedBaseline = 0;
+
+  if (startIndex > 0) {
+    for (var i = 0; i < startIndex && i < totalLines; i++) {
+      var preLine = lines[i];
+      var preSpan = document.createElement('span');
+      if (preLine.cls) preSpan.className = preLine.cls;
+      preSpan.textContent = preLine.text;
+      output.appendChild(preSpan);
+      output.appendChild(document.createTextNode('\n'));
+      elapsedBaseline += preLine.delay || 0;
+    }
+    output.scrollTop = output.scrollHeight;
+  }
+
+  progressBar.style.width = Math.round((startIndex / totalLines) * 95) + '%';
+
+  var startTime = Date.now() - elapsedBaseline;
 
   function updateElapsed() {
     var sec = Math.floor((Date.now() - startTime) / 1000);
@@ -1965,6 +1983,7 @@ function animatePlaybookOutput(script, onComplete) {
     document.getElementById('jobStatElapsed').textContent =
       '00:' + (mm < 10 ? '0' : '') + mm + ':' + (ss < 10 ? '0' : '') + ss;
   }
+  updateElapsed();
   var elapsedTimer = setInterval(updateElapsed, 1000);
 
   function renderLine(index) {
@@ -2004,7 +2023,7 @@ function animatePlaybookOutput(script, onComplete) {
     }, line.delay);
   }
 
-  renderLine(0);
+  renderLine(startIndex);
 }
 
 function launchJob(scriptKey) {
@@ -2037,11 +2056,21 @@ function playJobLive(job, script) {
     '<span class="status-badge status-running"><span class="spinner"></span>Running</span>';
   document.getElementById('jobOutputLabel').textContent = job.n + ' \u2014 Output';
 
+  var startIndex = 0;
+  if (script.liveResumeBeforeTask) {
+    for (var i = 0; i < script.lines.length; i++) {
+      if (script.lines[i].text.indexOf(script.liveResumeBeforeTask) === 0) {
+        startIndex = Math.max(0, i - 1);
+        break;
+      }
+    }
+  }
+
   animatePlaybookOutput(script, function(elapsedSeconds) {
     job.status = 'successful';
     job.dur = formatJobDuration(elapsedSeconds);
     job.finished = formatJobTimestamp(new Date());
-  });
+  }, startIndex);
 }
 
 function addDemoJobToList() {
