@@ -1001,7 +1001,7 @@
         <div class="job-header-top">
           <div>
             <h1 id="jobOutputTitle">Patch RHEL Servers</h1>
-            <span class="job-header-id" id="jobOutputId">Job #25 &mdash; Playbook run</span>
+            <span class="job-header-id" id="jobOutputId">Job #4870 &mdash; Playbook run</span>
           </div>
           <div id="jobOutputStatus">
             <span class="status-badge status-running"><span class="spinner"></span>Running</span>
@@ -1439,16 +1439,16 @@ function renderTemplates() {
 renderTemplates();
 
 var jobsData = [
-  { id:26, n:'Increase Web Server Capacity', status:'successful', type:'Playbook run', dur:'47s', started:'4/28/2026, 2:45:12 PM', finished:'4/28/2026, 2:45:59 PM', by:'Roger Lopez' },
-  { id:25, n:'Patch RHEL Servers', status:'successful', type:'Playbook run', dur:'2m 5s', started:'4/28/2026, 9:15:00 AM', finished:'4/28/2026, 9:17:05 AM', by:'admin' },
-  { id:24, n:'Network Backup Configuration', status:'successful', type:'Playbook run', dur:'1m 58s', started:'4/28/2026, 8:00:00 AM', finished:'4/28/2026, 8:01:58 AM', by:'admin' },
-  { id:23, n:'Deploy Web Application', status:'successful', type:'Playbook run', dur:'3m 12s', started:'4/27/2026, 4:30:00 PM', finished:'4/27/2026, 4:33:12 PM', by:'admin' },
-  { id:22, n:'Compliance Audit Scan', status:'successful', type:'Playbook run', dur:'5m 30s', started:'4/27/2026, 11:00:00 AM', finished:'4/27/2026, 11:05:30 AM', by:'admin' },
-  { id:21, n:'Certificate Rotation', status:'successful', type:'Playbook run', dur:'1m 15s', started:'4/26/2026, 2:00:00 PM', finished:'4/26/2026, 2:01:15 PM', by:'admin' },
-  { id:20, n:'Patch RHEL Servers', status:'successful', type:'Playbook run', dur:'2m 10s', started:'4/25/2026, 9:15:00 AM', finished:'4/25/2026, 9:17:10 AM', by:'admin' },
-  { id:19, n:'Auto-Remediation \u2014 Service Recovery', status:'successful', type:'Workflow job', dur:'4m 22s', started:'4/24/2026, 9:45:00 AM', finished:'4/24/2026, 9:49:22 AM', by:'admin' },
-  { id:18, n:'Network Backup Configuration', status:'successful', type:'Playbook run', dur:'2m 1s', started:'4/24/2026, 8:00:00 AM', finished:'4/24/2026, 8:02:01 AM', by:'admin' },
-  { id:17, n:'Deploy Web Application', status:'successful', type:'Playbook run', dur:'3m 8s', started:'4/23/2026, 4:30:00 PM', finished:'4/23/2026, 4:33:08 PM', by:'admin' }
+  { id:4870, n:'Increase Web Server Capacity', status:'successful', type:'Playbook run', dur:'47s', started:'4/28/2026, 2:45:12 PM', finished:'4/28/2026, 2:45:59 PM', by:'Roger Lopez' },
+  { id:4869, n:'Patch RHEL Servers', status:'successful', type:'Playbook run', dur:'2m 5s', started:'4/28/2026, 9:15:00 AM', finished:'4/28/2026, 9:17:05 AM', by:'admin' },
+  { id:4868, n:'Network Backup Configuration', status:'successful', type:'Playbook run', dur:'1m 58s', started:'4/28/2026, 8:00:00 AM', finished:'4/28/2026, 8:01:58 AM', by:'admin' },
+  { id:4867, n:'Deploy Web Application', status:'successful', type:'Playbook run', dur:'3m 12s', started:'4/27/2026, 4:30:00 PM', finished:'4/27/2026, 4:33:12 PM', by:'admin' },
+  { id:4866, n:'Compliance Audit Scan', status:'successful', type:'Playbook run', dur:'5m 30s', started:'4/27/2026, 11:00:00 AM', finished:'4/27/2026, 11:05:30 AM', by:'admin' },
+  { id:4865, n:'Certificate Rotation', status:'successful', type:'Playbook run', dur:'1m 15s', started:'4/26/2026, 2:00:00 PM', finished:'4/26/2026, 2:01:15 PM', by:'admin' },
+  { id:4864, n:'Patch RHEL Servers', status:'successful', type:'Playbook run', dur:'2m 10s', started:'4/25/2026, 9:15:00 AM', finished:'4/25/2026, 9:17:10 AM', by:'admin' },
+  { id:4863, n:'Auto-Remediation \u2014 Service Recovery', status:'successful', type:'Workflow job', dur:'4m 22s', started:'4/24/2026, 9:45:00 AM', finished:'4/24/2026, 9:49:22 AM', by:'admin' },
+  { id:4862, n:'Network Backup Configuration', status:'successful', type:'Playbook run', dur:'2m 1s', started:'4/24/2026, 8:00:00 AM', finished:'4/24/2026, 8:02:01 AM', by:'admin' },
+  { id:4861, n:'Deploy Web Application', status:'successful', type:'Playbook run', dur:'3m 8s', started:'4/23/2026, 4:30:00 PM', finished:'4/23/2026, 4:33:08 PM', by:'admin' }
 ];
 
 function renderJobs() {
@@ -1595,7 +1595,7 @@ function showJobDetailsTab() {
 
 renderJobs();
 
-var jobCounter = 25;
+var jobCounter = 4870;
 var currentJobTimer = null;
 
 var jobScripts = {
@@ -1848,6 +1848,37 @@ var jobScripts = {
       { text: 'web-prod-02.acme.com       : ok=6    changed=3    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
       { text: 'web-prod-03.acme.com       : ok=6    changed=3    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
     ]
+  },
+  restoreweb: {
+    title: 'Restore Web Application',
+    id: null,
+    inventory: 'Web Servers',
+    project: 'Linux Automation',
+    lines: [
+      { text: '', delay: 200 },
+      { text: 'PLAY [Restore Web Application] *****************************************', cls: 'play-header', delay: 400 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Gathering Facts] *********************************************************', cls: 'task-header', delay: 500 },
+      { text: 'ok: [web-prod-01.acme.com]', cls: 'ok', delay: 300 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Backup current httpd.conf] ***********************************************', cls: 'task-header', delay: 500 },
+      { text: 'changed: [web-prod-01.acme.com] => {"backup": "/etc/httpd/conf/httpd.conf.bak.20260423"}', cls: 'changed', delay: 900 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Restore httpd.conf from known-good baseline] *****************************', cls: 'task-header', delay: 500 },
+      { text: 'changed: [web-prod-01.acme.com] => {"src": "baseline/httpd.conf", "dest": "/etc/httpd/conf/httpd.conf"}', cls: 'changed', delay: 1000 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Validate Apache configuration syntax] ************************************', cls: 'task-header', delay: 500 },
+      { text: 'ok: [web-prod-01.acme.com] => {"stdout": "Syntax OK"}', cls: 'ok', delay: 900 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Restart httpd service] *******************************************************', cls: 'task-header', delay: 500 },
+      { text: 'changed: [web-prod-01.acme.com] => {"state": "started", "enabled": true}', cls: 'changed', delay: 900 },
+      { text: '', delay: 200 },
+      { text: 'TASK [Verify HTTP 200 response] ****************************************************', cls: 'task-header', delay: 600 },
+      { text: 'ok: [web-prod-01.acme.com] => {"status": 200, "url": "http://web-prod-01/healthz", "response_time": "0.043s"}', cls: 'ok', delay: 700 },
+      { text: '', delay: 300 },
+      { text: 'PLAY RECAP *********************************************************************', cls: 'play-header', delay: 400 },
+      { text: 'web-prod-01.acme.com       : ok=4    changed=3    unreachable=0    failed=0    skipped=0', cls: 'recap-host', delay: 150 },
+    ]
   }
 };
 
@@ -1869,12 +1900,51 @@ function showPage(pageId) {
   }
 }
 
-function launchJob(scriptKey) {
+function formatJobTimestamp(d) {
+  return d.toLocaleString('en-US', {
+    month: 'numeric', day: 'numeric', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true
+  });
+}
+
+function formatJobDuration(totalSeconds) {
+  var mm = Math.floor(totalSeconds / 60);
+  var ss = totalSeconds % 60;
+  return mm > 0 ? (mm + 'm ' + ss + 's') : (ss + 's');
+}
+
+function launchJob(scriptKey, opts) {
+  opts = opts || {};
   var script = jobScripts[scriptKey];
   if (!script) return;
 
-  jobCounter++;
-  script.id = jobCounter;
+  if (opts.forcedId) {
+    script.id = opts.forcedId;
+    jobCounter = Math.max(jobCounter, opts.forcedId);
+  } else {
+    jobCounter++;
+    script.id = jobCounter;
+  }
+
+  var persistedJob = null;
+  if (opts.persist) {
+    persistedJob = {
+      id: script.id,
+      n: script.title,
+      status: 'running',
+      type: 'Playbook run',
+      dur: '\u2014',
+      started: formatJobTimestamp(new Date()),
+      finished: null,
+      by: 'admin'
+    };
+    jobsData.unshift(persistedJob);
+    var paginationLabel = document.getElementById('jobsPaginationLabel');
+    if (paginationLabel) {
+      var totalMatch = paginationLabel.textContent.match(/of (\d+)/);
+      if (totalMatch) paginationLabel.textContent = '1 - 10 of ' + (parseInt(totalMatch[1], 10) + 1);
+    }
+  }
 
   document.getElementById('jobOutputBreadcrumb').style.display = 'none';
   document.getElementById('jobOutputBackBtn').style.display = '';
@@ -1943,6 +2013,13 @@ function launchJob(scriptKey) {
         statsEl.appendChild(changedSpan);
         progressBar.style.width = '100%';
         progressBar.classList.add('complete');
+
+        if (persistedJob) {
+          var elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+          persistedJob.status = 'successful';
+          persistedJob.dur = formatJobDuration(elapsedSeconds);
+          persistedJob.finished = formatJobTimestamp(new Date());
+        }
       }, 500);
       return;
     }
@@ -1978,6 +2055,21 @@ document.addEventListener('keydown', function(e) {
     edaTriggered = true;
     edaKeyBuffer = '';
     fireEdaSequence();
+  }
+});
+
+var demoTriggered = false;
+var demoKeyBuffer = '';
+
+document.addEventListener('keydown', function(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  demoKeyBuffer += e.key.toLowerCase();
+  if (demoKeyBuffer.length > 20) demoKeyBuffer = demoKeyBuffer.slice(-20);
+
+  if (!demoTriggered && demoKeyBuffer.includes('demo')) {
+    demoTriggered = true;
+    demoKeyBuffer = '';
+    launchJob('restoreweb', { forcedId: 4871, persist: true });
   }
 });
 

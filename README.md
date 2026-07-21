@@ -48,9 +48,12 @@ Type these keywords anywhere on the page (no input field needed). Each trigger f
 
 ### Ansible Automation Platform (`/aap/`)
 
+Job IDs on the Jobs page run in the thousands, with the most recent existing job at **#4870**.
+
 | Keyword | What it does |
 |---|---|
 | `eda` | EDA fire count on "Infrastructure Auto-Remediation" climbs from 0→7, 7 alert events appear in the detail view, and 7 Auto-Remediation jobs appear on the Jobs page (Running → Successful) |
+| `demo` | Launches **Job #4871 — Restore Web Application** (live playbook output: backup `httpd.conf`, restore baseline, restart httpd, verify HTTP 200). This is the same job referenced by the Now Assist Chat script (`/nowassist/`) — it appears on the Jobs page and can be clicked afterward to review the completed run. |
 
 Additionally, clicking **Launch** on any job template in the Templates page plays a fake ansible-playbook output sequence.
 
