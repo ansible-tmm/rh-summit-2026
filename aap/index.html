@@ -1501,13 +1501,21 @@ function showJobDetails(jobId) {
   document.getElementById('jobMetaInventory').innerHTML = '<a href="#">' + (script ? script.inventory : 'Demo Inventory') + '</a>';
   document.getElementById('jobMetaProject').innerHTML = '<a href="#">' + (script ? script.project : 'Linux Automation') + '</a>';
   document.getElementById('jobMetaLaunchedBy').textContent = job.by;
-  document.getElementById('jobOutputStatus').innerHTML =
-    '<span class="status-badge status-successful"><span class="status-dot"></span>Successful</span>';
 
   document.getElementById('jobOutputTabs').style.display = 'flex';
   document.getElementById('jobOutputTabOutput').className = 'job-detail-tab active';
   document.getElementById('jobOutputTabDetails').className = 'job-detail-tab';
   document.getElementById('jobOutputTabDetails').setAttribute('onclick', 'showJobDetailsTab()');
+
+  showPage('job-output');
+
+  if (job.status === 'running' && script) {
+    playJobLive(job, script);
+    return;
+  }
+
+  document.getElementById('jobOutputStatus').innerHTML =
+    '<span class="status-badge status-successful"><span class="status-dot"></span>Successful</span>';
 
   var progressBar = document.getElementById('jobProgressBar');
   progressBar.style.width = '100%';
@@ -1546,8 +1554,6 @@ function showJobDetails(jobId) {
     document.getElementById('jobStatElapsed').textContent = job.dur;
     document.getElementById('jobOutputLabel').textContent = job.n + ' \u2014 Output';
   }
-
-  showPage('job-output');
 }
 
 function showJobDetailsTab() {
@@ -1913,54 +1919,7 @@ function formatJobDuration(totalSeconds) {
   return mm > 0 ? (mm + 'm ' + ss + 's') : (ss + 's');
 }
 
-function launchJob(scriptKey, opts) {
-  opts = opts || {};
-  var script = jobScripts[scriptKey];
-  if (!script) return;
-
-  if (opts.forcedId) {
-    script.id = opts.forcedId;
-    jobCounter = Math.max(jobCounter, opts.forcedId);
-  } else {
-    jobCounter++;
-    script.id = jobCounter;
-  }
-
-  var persistedJob = null;
-  if (opts.persist) {
-    persistedJob = {
-      id: script.id,
-      n: script.title,
-      status: 'running',
-      type: 'Playbook run',
-      dur: '\u2014',
-      started: formatJobTimestamp(new Date()),
-      finished: null,
-      by: 'admin'
-    };
-    jobsData.unshift(persistedJob);
-    var paginationLabel = document.getElementById('jobsPaginationLabel');
-    if (paginationLabel) {
-      var totalMatch = paginationLabel.textContent.match(/of (\d+)/);
-      if (totalMatch) paginationLabel.textContent = '1 - 10 of ' + (parseInt(totalMatch[1], 10) + 1);
-    }
-  }
-
-  document.getElementById('jobOutputBreadcrumb').style.display = 'none';
-  document.getElementById('jobOutputBackBtn').style.display = '';
-  document.getElementById('jobOutputTabs').style.display = 'none';
-
-  showPage('job-output');
-
-  document.getElementById('jobOutputTitle').textContent = script.title;
-  document.getElementById('jobOutputId').innerHTML = 'Job #' + script.id + ' &mdash; Playbook run';
-  document.getElementById('jobMetaInventory').innerHTML = '<a href="#">' + script.inventory + '</a>';
-  document.getElementById('jobMetaProject').innerHTML = '<a href="#">' + script.project + '</a>';
-  document.getElementById('jobMetaLaunchedBy').textContent = 'admin';
-  document.getElementById('jobOutputStatus').innerHTML =
-    '<span class="status-badge status-running"><span class="spinner"></span>Running</span>';
-  document.getElementById('jobOutputLabel').textContent = script.title + ' \u2014 Output';
-
+function animatePlaybookOutput(script, onComplete) {
   var oldChanged = document.querySelector('#jobOutputStats .stat-changed');
   if (oldChanged) oldChanged.remove();
 
@@ -2014,12 +1973,8 @@ function launchJob(scriptKey, opts) {
         progressBar.style.width = '100%';
         progressBar.classList.add('complete');
 
-        if (persistedJob) {
-          var elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-          persistedJob.status = 'successful';
-          persistedJob.dur = formatJobDuration(elapsedSeconds);
-          persistedJob.finished = formatJobTimestamp(new Date());
-        }
+        var elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+        if (onComplete) onComplete(elapsedSeconds);
       }, 500);
       return;
     }
@@ -2041,6 +1996,72 @@ function launchJob(scriptKey, opts) {
   }
 
   renderLine(0);
+}
+
+function launchJob(scriptKey) {
+  var script = jobScripts[scriptKey];
+  if (!script) return;
+
+  jobCounter++;
+  script.id = jobCounter;
+
+  document.getElementById('jobOutputBreadcrumb').style.display = 'none';
+  document.getElementById('jobOutputBackBtn').style.display = '';
+  document.getElementById('jobOutputTabs').style.display = 'none';
+
+  showPage('job-output');
+
+  document.getElementById('jobOutputTitle').textContent = script.title;
+  document.getElementById('jobOutputId').innerHTML = 'Job #' + script.id + ' &mdash; Playbook run';
+  document.getElementById('jobMetaInventory').innerHTML = '<a href="#">' + script.inventory + '</a>';
+  document.getElementById('jobMetaProject').innerHTML = '<a href="#">' + script.project + '</a>';
+  document.getElementById('jobMetaLaunchedBy').textContent = 'admin';
+  document.getElementById('jobOutputStatus').innerHTML =
+    '<span class="status-badge status-running"><span class="spinner"></span>Running</span>';
+  document.getElementById('jobOutputLabel').textContent = script.title + ' \u2014 Output';
+
+  animatePlaybookOutput(script);
+}
+
+function playJobLive(job, script) {
+  document.getElementById('jobOutputStatus').innerHTML =
+    '<span class="status-badge status-running"><span class="spinner"></span>Running</span>';
+  document.getElementById('jobOutputLabel').textContent = job.n + ' \u2014 Output';
+
+  animatePlaybookOutput(script, function(elapsedSeconds) {
+    job.status = 'successful';
+    job.dur = formatJobDuration(elapsedSeconds);
+    job.finished = formatJobTimestamp(new Date());
+  });
+}
+
+function addDemoJobToList() {
+  var script = jobScripts.restoreweb;
+  if (!script) return;
+
+  script.id = 4871;
+  jobCounter = Math.max(jobCounter, 4871);
+
+  var job = {
+    id: script.id,
+    n: script.title,
+    status: 'running',
+    type: 'Playbook run',
+    dur: '\u2014',
+    started: formatJobTimestamp(new Date()),
+    finished: null,
+    by: 'admin'
+  };
+  jobsData.unshift(job);
+
+  var paginationLabel = document.getElementById('jobsPaginationLabel');
+  if (paginationLabel) {
+    var totalMatch = paginationLabel.textContent.match(/of (\d+)/);
+    if (totalMatch) paginationLabel.textContent = '1 - 10 of ' + (parseInt(totalMatch[1], 10) + 1);
+  }
+
+  var jobsPage = document.getElementById('page-jobs');
+  if (jobsPage && jobsPage.classList.contains('active')) renderJobs();
 }
 
 var edaTriggered = false;
@@ -2069,7 +2090,7 @@ document.addEventListener('keydown', function(e) {
   if (!demoTriggered && demoKeyBuffer.includes('demo')) {
     demoTriggered = true;
     demoKeyBuffer = '';
-    launchJob('restoreweb', { forcedId: 4871, persist: true });
+    addDemoJobToList();
   }
 });
 
