@@ -109,6 +109,10 @@
     width: 280px; min-width: 280px; background: var(--sidebar-bg);
     color: var(--sidebar-text); overflow-y: auto; padding: 12px 0;
     border-right: 1px solid #383838;
+    transition: width 0.2s ease, min-width 0.2s ease, padding 0.2s ease, border-right-color 0.2s ease;
+  }
+  .app-layout.sidebar-collapsed .sidebar {
+    width: 0; min-width: 0; padding: 0; overflow: hidden; border-right-color: transparent;
   }
   .sidebar-section { margin-bottom: 4px; }
   .sidebar-section-title {
@@ -686,7 +690,7 @@
 <!-- ── MASTHEAD ── -->
 <header class="masthead">
   <div class="masthead-left">
-    <div class="masthead-hamburger" title="Global navigation">
+    <div class="masthead-hamburger" title="Global navigation" onclick="toggleSidebar()">
       <svg viewBox="0 0 448 512" fill="currentColor"><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg>
     </div>
     <a href="#" class="rh-logo" onclick="showPage('dashboard'); return false;">
@@ -722,7 +726,7 @@
   </div>
 </header>
 
-<div class="app-layout">
+<div class="app-layout" id="appLayout">
   <!-- ── SIDEBAR ── -->
   <nav class="sidebar">
     <div class="sidebar-section">
@@ -1887,6 +1891,11 @@ var jobScripts = {
     ]
   }
 };
+
+function toggleSidebar() {
+  var appLayout = document.getElementById('appLayout');
+  if (appLayout) appLayout.classList.toggle('sidebar-collapsed');
+}
 
 function showPage(pageId) {
   document.querySelectorAll('.content-page').forEach(function(p) { p.classList.remove('active'); });
