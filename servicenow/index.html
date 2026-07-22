@@ -1087,6 +1087,10 @@ db-replica-02           : ok=2    changed=0    unreachable=0    failed=0</div>
       if (priorityBadge) priorityBadge.classList.remove('pulse');
       var rowAssigned = p1Row.children[4];
       if (rowAssigned) rowAssigned.textContent = 'AAP Automation';
+      p1Row.classList.remove('critical-row');
+
+      var banner = document.getElementById('issueBanner');
+      if (banner) banner.classList.remove('visible');
 
       var stateBadge = document.getElementById('detailStateBadge');
       if (stateBadge) {
